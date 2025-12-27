@@ -403,13 +403,14 @@ feature -- Queries
 
 	preferred_width: INTEGER
 			-- Width needed for widest item.
+			-- Adds 4: 2 for borders (│) + 2 for left/right padding spaces.
 		local
 			i, max_w: INTEGER
 		do
-			max_w := title.count + 2
+			max_w := title.count + 4
 			from i := 1 until i > items.count loop
 				if not items.i_th (i).is_separator then
-					max_w := max_w.max (items.i_th (i).display_text.count + 2)
+					max_w := max_w.max (items.i_th (i).display_text.count + 4)
 				end
 				i := i + 1
 			end
