@@ -1,0 +1,474 @@
+note
+	description: "[
+		TUI_APPLICATION - Main TUI application controller
+
+		Manages:
+		- Terminal backend initialization/shutdown
+		- Event loop (keyboard, mouse, resize)
+		- Widget tree rendering
+		- Focus management
+		- Double buffering and efficient updates
+	]"
+	author: "Larry Rix"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	TUI_APPLICATION
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Create application.
+		do
+			is_running := False
+			target_fps := 30
+			create focusable_widgets.make (10)
+			focused_widget_index := 0
+		ensure
+			not_running: not is_running
+		end
+
+feature -- Access
+
+	backend: detachable TUI_BACKEND
+			-- Terminal backend.
+
+	buffer: detachable TUI_BUFFER
+			-- Double buffer.
+
+	root: detachable TUI_WIDGET
+			-- Root widget.
+
+	is_running: BOOLEAN
+			-- Is event loop running?
+
+	target_fps: INTEGER
+			-- Target frames per second.
+
+	focused_widget: detachable TUI_WIDGET
+			-- Currently focused widget.
+
+	on_tick: detachable PROCEDURE
+			-- Called each frame.
+
+	on_resize: detachable PROCEDURE [INTEGER, INTEGER]
+			-- Called on terminal resize.
+
+	on_quit: detachable PROCEDURE
+			-- Called before quit.
+
+feature -- Configuration
+
+	set_root (widget: TUI_WIDGET)
+			-- Set root widget.
+		require
+			widget_exists: widget /= Void
+		do
+			root := widget
+			collect_focusable_widgets
+		ensure
+			root_set: root = widget
+		end
+
+	set_target_fps (fps: INTEGER)
+			-- Set target frame rate.
+		require
+			valid_fps: fps > 0 and fps <= 120
+		do
+			target_fps := fps
+		ensure
+			fps_set: target_fps = fps
+		end
+
+	set_on_tick (handler: PROCEDURE)
+			-- Set tick handler.
+		do
+			on_tick := handler
+		ensure
+			handler_set: on_tick = handler
+		end
+
+	set_on_resize (handler: PROCEDURE [INTEGER, INTEGER])
+			-- Set resize handler.
+		do
+			on_resize := handler
+		ensure
+			handler_set: on_resize = handler
+		end
+
+	set_on_quit (handler: PROCEDURE)
+			-- Set quit handler.
+		do
+			on_quit := handler
+		ensure
+			handler_set: on_quit = handler
+		end
+
+feature -- Focus Management
+
+	focus_next
+			-- Move focus to next focusable widget.
+		do
+			if not focusable_widgets.is_empty then
+				if attached focused_widget as fw then
+					fw.unfocus
+				end
+				focused_widget_index := ((focused_widget_index) \\ focusable_widgets.count) + 1
+				focused_widget := focusable_widgets.i_th (focused_widget_index)
+				if attached focused_widget as fw then
+					fw.focus
+				end
+			end
+		end
+
+	focus_previous
+			-- Move focus to previous focusable widget.
+		do
+			if not focusable_widgets.is_empty then
+				if attached focused_widget as fw then
+					fw.unfocus
+				end
+				focused_widget_index := focused_widget_index - 1
+				if focused_widget_index < 1 then
+					focused_widget_index := focusable_widgets.count
+				end
+				focused_widget := focusable_widgets.i_th (focused_widget_index)
+				if attached focused_widget as fw then
+					fw.focus
+				end
+			end
+		end
+
+	set_focus (widget: TUI_WIDGET)
+			-- Set focus to specific widget.
+		require
+			widget_exists: widget /= Void
+			is_focusable: widget.is_focusable
+		local
+			i: INTEGER
+		do
+			if attached focused_widget as fw then
+				fw.unfocus
+			end
+
+			-- Find widget in focusable list
+			from i := 1 until i > focusable_widgets.count loop
+				if focusable_widgets.i_th (i) = widget then
+					focused_widget_index := i
+					i := focusable_widgets.count + 1  -- Exit loop
+				else
+					i := i + 1
+				end
+			end
+
+			focused_widget := widget
+			widget.focus
+		ensure
+			widget_focused: focused_widget = widget
+		end
+
+feature -- Lifecycle
+
+	initialize
+			-- Initialize terminal and prepare for running.
+		do
+			create {TUI_BACKEND_WINDOWS} backend.make
+			if attached backend as b then
+				b.initialize
+				create buffer.make (b.width, b.height)
+			end
+
+			-- Layout root widget
+			if attached root as r and attached backend as b then
+				r.set_bounds (1, 1, b.width, b.height)
+				r.layout
+			end
+
+			-- Focus first widget
+			if not focusable_widgets.is_empty then
+				focused_widget_index := 1
+				focused_widget := focusable_widgets.first
+				if attached focused_widget as fw then
+					fw.focus
+				end
+			end
+		ensure
+			backend_ready: backend /= Void
+			buffer_ready: buffer /= Void
+		end
+
+	run
+			-- Start the event loop.
+		require
+			initialized: backend /= Void and buffer /= Void
+			has_root: root /= Void
+		do
+			is_running := True
+			event_loop
+		ensure
+			stopped: not is_running
+		end
+
+	quit
+			-- Stop the event loop.
+		do
+			is_running := False
+		ensure
+			not_running: not is_running
+		end
+
+	shutdown
+			-- Clean up terminal.
+		do
+			if attached on_quit as handler then
+				handler.call (Void)
+			end
+			if attached backend as b then
+				b.shutdown
+			end
+		end
+
+feature {NONE} -- Event Loop
+
+	event_loop
+			-- Main event loop.
+		local
+			event: detachable TUI_EVENT
+			frame_time_ms: INTEGER
+		do
+			frame_time_ms := 1000 // target_fps
+
+			from until not is_running loop
+				-- Process events
+				if attached backend as b then
+					event := b.poll_event
+					if event /= Void then
+						handle_event (event)
+					end
+				end
+
+				-- Tick callback
+				if attached on_tick as handler then
+					handler.call (Void)
+				end
+
+				-- Render
+				render_frame
+			end
+		end
+
+	handle_event (event: TUI_EVENT)
+			-- Process input event.
+		require
+			event_exists: event /= Void
+		local
+			handled: BOOLEAN
+		do
+			if event.is_resize_event then
+				handle_resize (event)
+			elseif event.is_key_event or event.is_char_event then
+				log_key_event (event)
+				handled := handle_key (event)
+			elseif event.is_mouse_event then
+				log_mouse_event (event)
+				handled := handle_mouse (event)
+			end
+		end
+
+	log_key_event (event: TUI_EVENT)
+			-- Log key event details to file.
+		local
+			l_file: PLAIN_TEXT_FILE
+			msg: STRING
+		do
+			create msg.make (100)
+			msg.append ("KEY: type=")
+			if event.is_key_event then
+				msg.append ("key")
+			else
+				msg.append ("char")
+			end
+			msg.append (" key=")
+			msg.append (event.key.out)
+			msg.append (" char=")
+			msg.append (event.char.natural_32_code.out)
+			msg.append (" mods=")
+			msg.append (event.modifiers.out)
+			if event.has_shift then msg.append (" SHIFT") end
+			if event.has_ctrl then msg.append (" CTRL") end
+			if event.has_alt then msg.append (" ALT") end
+
+			create l_file.make_open_append ("tui_demo.log")
+			if l_file.is_open_write then
+				l_file.put_string (msg)
+				l_file.put_new_line
+				l_file.close
+			end
+		end
+
+	log_mouse_event (event: TUI_EVENT)
+			-- Log mouse event details to file.
+		local
+			l_file: PLAIN_TEXT_FILE
+			msg: STRING
+		do
+			create msg.make (100)
+			msg.append ("MOUSE: x=")
+			msg.append (event.mouse_x.out)
+			msg.append (" y=")
+			msg.append (event.mouse_y.out)
+			msg.append (" btn=")
+			msg.append (event.mouse_button.out)
+			if event.is_mouse_press then msg.append (" PRESS") end
+			if event.is_mouse_release then msg.append (" RELEASE") end
+
+			create l_file.make_open_append ("tui_demo.log")
+			if l_file.is_open_write then
+				l_file.put_string (msg)
+				l_file.put_new_line
+				l_file.close
+			end
+		end
+
+	handle_key (event: TUI_EVENT): BOOLEAN
+			-- Handle key event. Return True if handled.
+		do
+			-- Check for quit (Ctrl+Q or Ctrl+C)
+			if event.has_ctrl then
+				if event.char = 'q' or event.char = 'Q' or event.char = '%/3/' then
+					quit
+					Result := True
+				end
+			end
+
+			-- Check for Tab (focus cycling)
+			if not Result and event.is_tab then
+				if event.has_shift then
+					focus_previous
+				else
+					focus_next
+				end
+				Result := True
+			end
+
+			-- Dispatch to focused widget
+			if not Result and attached focused_widget as fw then
+				Result := fw.handle_key (event)
+			end
+		end
+
+	handle_mouse (event: TUI_EVENT): BOOLEAN
+			-- Handle mouse event. Return True if handled.
+		local
+			target: detachable TUI_WIDGET
+		do
+			-- Find widget under mouse
+			if attached root as r then
+				target := r.find_widget_at (event.mouse_x, event.mouse_y)
+				if attached target as t then
+					-- Focus clicked widget if focusable
+					if event.is_mouse_press and event.mouse_button = 1 then
+						if t.is_focusable and t /= focused_widget then
+							set_focus (t)
+						end
+					end
+					Result := t.handle_mouse (event)
+				end
+			end
+		end
+
+	handle_resize (event: TUI_EVENT)
+			-- Handle terminal resize.
+		do
+			if attached backend as b and attached buffer as buf then
+				buf.resize (event.resize_width, event.resize_height)
+
+				-- Resize root widget
+				if attached root as r then
+					r.set_size (event.resize_width, event.resize_height)
+					r.layout
+				end
+
+				-- Notify handler
+				if attached on_resize as handler then
+					handler.call ([event.resize_width, event.resize_height])
+				end
+			end
+		end
+
+	render_frame
+			-- Render one frame.
+		local
+			changed: LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]]
+			i: INTEGER
+			l_tuple: TUPLE [x, y: INTEGER; cell: TUI_CELL]
+		do
+			if attached buffer as buf and attached backend as b then
+				-- Clear next buffer
+				buf.clear
+
+				-- Render widget tree
+				if attached root as r then
+					if r.is_visible then
+						r.render (buf)
+					end
+				end
+
+				-- Get changed cells
+				changed := buf.changed_cells
+
+				-- Write changes to terminal
+				from i := 1 until i > changed.count loop
+					l_tuple := changed.i_th (i)
+					b.write_cell (l_tuple.x, l_tuple.y, l_tuple.cell)
+					i := i + 1
+				end
+
+				-- Sync buffers
+				buf.sync
+
+				-- Flush output
+				b.flush
+			end
+		end
+
+feature {NONE} -- Focus Collection
+
+	focusable_widgets: ARRAYED_LIST [TUI_WIDGET]
+			-- All focusable widgets in tree order.
+
+	focused_widget_index: INTEGER
+			-- Index of currently focused widget in focusable_widgets.
+
+	collect_focusable_widgets
+			-- Collect all focusable widgets from root.
+		do
+			focusable_widgets.wipe_out
+			if attached root as r then
+				collect_from_widget (r)
+			end
+		end
+
+	collect_from_widget (widget: TUI_WIDGET)
+			-- Recursively collect focusable widgets.
+		local
+			i: INTEGER
+		do
+			if widget.is_focusable then
+				focusable_widgets.extend (widget)
+			end
+			from i := 1 until i > widget.children.count loop
+				collect_from_widget (widget.children.i_th (i))
+				i := i + 1
+			end
+		end
+
+invariant
+	focusable_widgets_exist: focusable_widgets /= Void
+	valid_fps: target_fps > 0 and target_fps <= 120
+
+end

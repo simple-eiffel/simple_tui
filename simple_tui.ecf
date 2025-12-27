@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-22-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-22-0 http://www.eiffel.com/developers/xml/configuration-1-22-0.xsd" name="simple_tui" uuid="f8e7d6c5-b4a3-4291-8f0e-1a2b3c4d5e6f" library_target="simple_tui">
+	<description>Modern Text User Interface library for Eiffel - console-based widgets with double buffering</description>
+	<target name="simple_tui">
+		<root all_classes="true"/>
+		<option warning="warning" syntax="provisional" manifest_array_type="mismatch_warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="none"/>
+			<void_safety support="all"/>
+		</capability>
+		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
+		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
+		<library name="simple_console" location="$SIMPLE_EIFFEL/simple_console/simple_console.ecf"/>
+		<cluster name="src" location=".\src\" recursive="true"/>
+	</target>
+	<target name="simple_tui_tests" extends="simple_tui">
+		<root class="TEST_APP" feature="make"/>
+		<setting name="console_application" value="true"/>
+		<library name="testing" location="$ISE_LIBRARY/library/testing/testing.ecf"/>
+		<library name="simple_testing" location="$SIMPLE_EIFFEL/simple_testing/simple_testing.ecf"/>
+		<cluster name="tests" location=".\testing\"/>
+	</target>
+	<target name="simple_tui_demo" extends="simple_tui">
+		<root class="TUI_DEMO" feature="make"/>
+		<setting name="console_application" value="true"/>
+		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
+		<cluster name="demo" location=".\demo\"/>
+	</target>
+</system>
