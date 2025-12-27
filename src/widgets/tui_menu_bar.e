@@ -323,10 +323,8 @@ feature -- Rendering
 				i := i + 1
 			end
 
-			-- Render open menu
-			if is_menu_open and then attached current_menu as cur_menu then
-				cur_menu.render (buffer)
-			end
+			-- Note: Open menu dropdown is rendered by TUI_APPLICATION
+			-- after all other widgets (so it appears on top)
 		end
 
 feature -- Queries

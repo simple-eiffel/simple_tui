@@ -505,6 +505,13 @@ feature {NONE} -- Event Loop
 					end
 				end
 
+				-- Render open menu dropdown LAST (on top of everything)
+				if attached menu_bar as mb and then mb.is_menu_open then
+					if attached mb.current_menu as dropdown then
+						dropdown.render (buf)
+					end
+				end
+
 				-- Get changed cells
 				changed := buf.changed_cells
 
