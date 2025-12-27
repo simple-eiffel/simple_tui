@@ -47,6 +47,9 @@ feature -- Access
 	menu_bar: detachable TUI_MENU_BAR
 			-- Optional menu bar at top.
 
+	modal_widget: detachable TUI_WIDGET
+			-- Modal widget that captures all input when visible.
+
 	is_running: BOOLEAN
 			-- Is event loop running?
 
@@ -126,6 +129,22 @@ feature -- Configuration
 			handler_set: on_quit = handler
 		end
 
+	set_modal (widget: detachable TUI_WIDGET)
+			-- Set modal widget (captures all input when visible).
+		do
+			modal_widget := widget
+		ensure
+			modal_set: modal_widget = widget
+		end
+
+	clear_modal
+			-- Clear modal widget.
+		do
+			modal_widget := Void
+		ensure
+			modal_cleared: modal_widget = Void
+		end
+
 feature -- Keyboard Shortcuts
 
 	register_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN; handler: PROCEDURE)
@@ -168,7 +187,7 @@ feature -- Focus Management
 				focused_widget_index := ((focused_widget_index) \\ focusable_widgets.count) + 1
 				focused_widget := focusable_widgets.i_th (focused_widget_index)
 				if attached focused_widget as fw then
-					fw.focus
+					fw.focus_from_next
 				end
 			end
 		end
@@ -186,7 +205,7 @@ feature -- Focus Management
 				end
 				focused_widget := focusable_widgets.i_th (focused_widget_index)
 				if attached focused_widget as fw then
-					fw.focus
+					fw.focus_from_previous
 				end
 			end
 		end
@@ -395,7 +414,7 @@ feature {NONE} -- Event Loop
 	handle_key (event: TUI_EVENT): BOOLEAN
 			-- Handle key event. Return True if handled.
 		do
-			-- Check for quit (Ctrl+Q or Ctrl+C)
+			-- Check for quit (Ctrl+Q or Ctrl+C) - always available
 			if event.has_ctrl then
 				if event.char = 'q' or event.char = 'Q' or event.char = '%/3/' then
 					quit
@@ -403,36 +422,47 @@ feature {NONE} -- Event Loop
 				end
 			end
 
-			-- Check registered global shortcuts
-			if not Result then
-				Result := try_shortcut (event)
+			-- Modal widget captures all input when visible
+			if not Result and attached modal_widget as mw then
+				if mw.is_visible then
+					Result := mw.handle_key (event)
+					-- Modal consumes all key events
+					Result := True
+				end
 			end
 
-			-- Let menu bar handle if open
-			if not Result and attached menu_bar as mb then
-				if mb.is_menu_open then
+			if not Result then
+				-- Check registered global shortcuts
+				if not Result then
+					Result := try_shortcut (event)
+				end
+
+				-- Let menu bar handle if open
+				if not Result and attached menu_bar as mb then
+					if mb.is_menu_open then
+						Result := mb.handle_key (event)
+					end
+				end
+
+				-- Check Alt+key for menu shortcuts
+				if not Result and event.has_alt and attached menu_bar as mb then
 					Result := mb.handle_key (event)
 				end
-			end
 
-			-- Check for Tab (focus cycling)
-			if not Result and event.is_tab then
-				if event.has_shift then
-					focus_previous
-				else
-					focus_next
+				-- Dispatch to focused widget FIRST (widgets may handle Tab internally)
+				if not Result and attached focused_widget as fw then
+					Result := fw.handle_key (event)
 				end
-				Result := True
-			end
 
-			-- Check Alt+key for menu shortcuts
-			if not Result and event.has_alt and attached menu_bar as mb then
-				Result := mb.handle_key (event)
-			end
-
-			-- Dispatch to focused widget
-			if not Result and attached focused_widget as fw then
-				Result := fw.handle_key (event)
+				-- Check for Tab (focus cycling) only if widget didn't handle it
+				if not Result and event.is_tab then
+					if event.has_shift then
+						focus_previous
+					else
+						focus_next
+					end
+					Result := True
+				end
 			end
 		end
 
@@ -441,24 +471,35 @@ feature {NONE} -- Event Loop
 		local
 			target: detachable TUI_WIDGET
 		do
-			-- Check menu bar first
-			if attached menu_bar as mb then
-				if event.mouse_y = 1 or mb.is_menu_open then
-					Result := mb.handle_mouse (event)
+			-- Modal widget captures all mouse input when visible
+			if attached modal_widget as mw then
+				if mw.is_visible then
+					Result := mw.handle_mouse (event)
+					-- Modal consumes all mouse events
+					Result := True
 				end
 			end
 
-			-- Find widget under mouse
-			if not Result and attached root as r then
-				target := r.find_widget_at (event.mouse_x, event.mouse_y)
-				if attached target as t then
-					-- Focus clicked widget if focusable
-					if event.is_mouse_press and event.mouse_button = 1 then
-						if t.is_focusable and t /= focused_widget then
-							set_focus (t)
-						end
+			if not Result then
+				-- Check menu bar first
+				if attached menu_bar as mb then
+					if event.mouse_y = 1 or mb.is_menu_open then
+						Result := mb.handle_mouse (event)
 					end
-					Result := t.handle_mouse (event)
+				end
+
+				-- Find widget under mouse
+				if not Result and attached root as r then
+					target := r.find_widget_at (event.mouse_x, event.mouse_y)
+					if attached target as t then
+						-- Focus clicked widget if focusable
+						if event.is_mouse_press and event.mouse_button = 1 then
+							if t.is_focusable and t /= focused_widget then
+								set_focus (t)
+							end
+						end
+						Result := t.handle_mouse (event)
+					end
 				end
 			end
 		end
@@ -509,6 +550,13 @@ feature {NONE} -- Event Loop
 				if attached menu_bar as mb and then mb.is_menu_open then
 					if attached mb.current_menu as dropdown then
 						dropdown.render (buf)
+					end
+				end
+
+				-- Render modal widget on top of everything
+				if attached modal_widget as mw then
+					if mw.is_visible then
+						mw.render (buf)
 					end
 				end
 

@@ -196,6 +196,28 @@ feature -- Focus
 			focused: is_focused
 		end
 
+	focus_from_next
+			-- Focus from Tab (forward direction).
+			-- Override in widgets that need direction-aware focus.
+		require
+			focusable: is_focusable
+		do
+			focus
+		ensure
+			focused: is_focused
+		end
+
+	focus_from_previous
+			-- Focus from Shift+Tab (backward direction).
+			-- Override in widgets that need direction-aware focus.
+		require
+			focusable: is_focusable
+		do
+			focus
+		ensure
+			focused: is_focused
+		end
+
 	unfocus
 			-- Remove focus from this widget.
 		do

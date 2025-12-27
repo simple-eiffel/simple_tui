@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide - simple_tui</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>simple_tui</h1>
+        <p class="tagline">User Guide</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+            <span class="badge">Windows</span>
+            <span class="badge badge-rfc">EV Compatible</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="user-guide.html" class="active">User Guide</a></li>
+            <li><a href="cookbook.html">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_tui">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+
+            <h3>Installation</h3>
+            <p>Add simple_tui to your project:</p>
+
+            <ol>
+                <li>Set the environment variable:
+<pre><code>SIMPLE_EIFFEL=D:\prod</code></pre>
+                </li>
+                <li>Add to your ECF file:
+<pre><code>&lt;library name="simple_tui" location="$SIMPLE_EIFFEL/simple_tui/simple_tui.ecf"/&gt;</code></pre>
+                </li>
+            </ol>
+
+            <h3>Your First Application</h3>
+            <p>Every simple_tui application inherits from <code>TUI_APPLICATION</code>:</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">MY_APP</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span>
+
+    setup
+            <span class="comment">-- Called automatically. Build your UI here.</span>
+        <span class="keyword">do</span>
+            <span class="comment">-- Add widgets to root</span>
+            root.extend (my_widget)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+
+            <p>The lifecycle is:</p>
+            <ol>
+                <li><code>make</code> - Creates application</li>
+                <li><code>setup</code> - Your override to build UI</li>
+                <li><code>initialize</code> - Initializes terminal</li>
+                <li><code>run</code> - Event loop starts</li>
+                <li><code>quit</code> - Stops event loop</li>
+                <li><code>shutdown</code> - Cleans up terminal</li>
+            </ol>
+        </section>
+
+        <section id="widget-system">
+            <h2>Widget System</h2>
+
+            <h3>Widget Hierarchy</h3>
+            <p>All widgets inherit from <code>TUI_WIDGET</code>, which provides:</p>
+            <ul>
+                <li><strong>Position</strong> - <code>set_position(x, y)</code> relative to parent</li>
+                <li><strong>Size</strong> - <code>set_size(w, h)</code> or <code>width</code>/<code>height</code></li>
+                <li><strong>Visibility</strong> - <code>show</code>, <code>hide</code>, <code>is_visible</code></li>
+                <li><strong>Focus</strong> - <code>focus</code>, <code>unfocus</code>, <code>is_focused</code></li>
+                <li><strong>Children</strong> - <code>extend</code>, <code>prune</code>, <code>children</code></li>
+            </ul>
+
+            <h3>Coordinate System</h3>
+            <p>Coordinates are 1-based (terminal standard):</p>
+            <ul>
+                <li>Top-left of screen is (1, 1)</li>
+                <li>X increases rightward</li>
+                <li>Y increases downward</li>
+                <li>Child positions are relative to parent</li>
+            </ul>
+
+            <h3>Focus System</h3>
+            <p>Widgets with <code>is_focusable = True</code> receive keyboard input:</p>
+            <ul>
+                <li><strong>Tab</strong> - Move to next focusable widget</li>
+                <li><strong>Shift+Tab</strong> - Move to previous widget</li>
+                <li><strong>Enter/Space</strong> - Activate focused widget</li>
+            </ul>
+            <p>Focus order is determined by widget tree order (depth-first).</p>
+        </section>
+
+        <section id="layout">
+            <h2>Layout System</h2>
+
+            <h3>Manual Positioning</h3>
+            <p>The simplest approach - set exact positions:</p>
+
+<pre><code>widget.set_position (10, 5)  <span class="comment">-- x=10, y=5 in parent</span></code></pre>
+
+            <h3>TUI_VBOX - Vertical Layout</h3>
+            <p>Stacks children vertically with optional gap:</p>
+
+<pre><code><span class="keyword">create</span> vbox.make (40, 20)
+vbox.set_gap (1)  <span class="comment">-- 1 row between children</span>
+vbox.extend (label)    <span class="comment">-- Added at top</span>
+vbox.extend (field)    <span class="comment">-- Below label</span>
+vbox.extend (button)   <span class="comment">-- Below field</span></code></pre>
+
+            <h3>TUI_HBOX - Horizontal Layout</h3>
+            <p>Stacks children horizontally:</p>
+
+<pre><code><span class="keyword">create</span> hbox.make (80, 10)
+hbox.set_gap (2)  <span class="comment">-- 2 columns between children</span>
+hbox.extend (left_panel)
+hbox.extend (center_panel)
+hbox.extend (right_panel)</code></pre>
+
+            <h3>TUI_BOX - Bordered Container</h3>
+            <p>Container with optional border and title:</p>
+
+<pre><code><span class="keyword">create</span> box.make_with_title (<span class="string">"Settings"</span>, 40, 15)
+box.set_padding (1)  <span class="comment">-- Space inside border</span>
+box.set_border_style (my_style)
+box.set_title_style (title_style)
+box.extend (content)</code></pre>
+        </section>
+
+        <section id="styling">
+            <h2>Styling</h2>
+
+            <h3>TUI_STYLE</h3>
+            <p>Define text appearance:</p>
+
+<pre><code><span class="keyword">create</span> style.make_default
+
+<span class="comment">-- Colors</span>
+style.set_foreground (color)
+style.set_background (color)
+
+<span class="comment">-- Attributes</span>
+style.set_bold (True)
+style.set_reverse (True)     <span class="comment">-- Swap fg/bg</span>
+style.set_underline (True)
+style.set_dim (True)</code></pre>
+
+            <h3>TUI_COLOR</h3>
+            <p>256-color terminal palette:</p>
+
+<pre><code><span class="comment">-- Standard 16 colors (0-15)</span>
+<span class="keyword">create</span> color.make_index (0)   <span class="comment">-- Black</span>
+<span class="keyword">create</span> color.make_index (1)   <span class="comment">-- Red</span>
+<span class="keyword">create</span> color.make_index (2)   <span class="comment">-- Green</span>
+<span class="keyword">create</span> color.make_index (14)  <span class="comment">-- Bright cyan</span>
+<span class="keyword">create</span> color.make_index (15)  <span class="comment">-- Bright white</span>
+
+<span class="comment">-- Extended colors (16-255)</span>
+<span class="keyword">create</span> color.make_index (202) <span class="comment">-- Orange</span>
+<span class="keyword">create</span> color.make_index (51)  <span class="comment">-- Aqua</span></code></pre>
+
+            <h3>Widget-Specific Styles</h3>
+            <p>Most widgets support multiple style states:</p>
+
+<pre><code><span class="comment">-- Button styles</span>
+button.set_normal_style (normal)
+button.set_focused_style (focused)
+button.set_pressed_style (pressed)
+button.set_disabled_style (disabled)
+
+<span class="comment">-- Text field styles</span>
+field.set_normal_style (normal)
+field.set_focused_style (focused)
+
+<span class="comment">-- List styles</span>
+list.set_normal_style (normal)
+list.set_selected_style (selected)</code></pre>
+        </section>
+
+        <section id="event-handling">
+            <h2>Event Handling</h2>
+
+            <h3>Click Events</h3>
+<pre><code>button.set_on_click (<span class="keyword">agent</span> on_button_clicked)
+
+on_button_clicked
+    <span class="keyword">do</span>
+        <span class="comment">-- Handle click</span>
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Change Events</h3>
+<pre><code><span class="comment">-- Checkbox: passes new state</span>
+checkbox.set_on_change (<span class="keyword">agent</span> on_check_changed)
+on_check_changed (checked: BOOLEAN) <span class="keyword">do</span> ... <span class="keyword">end</span>
+
+<span class="comment">-- Radio group: passes selected index</span>
+group.set_on_change (<span class="keyword">agent</span> on_selection_changed)
+on_selection_changed (index: INTEGER) <span class="keyword">do</span> ... <span class="keyword">end</span>
+
+<span class="comment">-- List: passes selected index</span>
+list.set_on_select (<span class="keyword">agent</span> on_item_selected)
+on_item_selected (index: INTEGER) <span class="keyword">do</span> ... <span class="keyword">end</span>
+
+<span class="comment">-- Combo box: passes selected index</span>
+combo.set_on_change (<span class="keyword">agent</span> on_combo_changed)
+on_combo_changed (index: INTEGER) <span class="keyword">do</span> ... <span class="keyword">end</span>
+
+<span class="comment">-- Tabs: passes tab index</span>
+tabs.set_on_tab_change (<span class="keyword">agent</span> on_tab_changed)
+on_tab_changed (index: INTEGER) <span class="keyword">do</span> ... <span class="keyword">end</span></code></pre>
+
+            <h3>Keyboard Shortcuts</h3>
+<pre><code><span class="comment">-- Register global shortcuts</span>
+register_shortcut (<span class="string">'s'</span>, True, False, False, <span class="keyword">agent</span> on_save)  <span class="comment">-- Ctrl+S</span>
+register_shortcut (<span class="string">'z'</span>, True, False, False, <span class="keyword">agent</span> on_undo)  <span class="comment">-- Ctrl+Z</span>
+register_shortcut (<span class="string">'q'</span>, True, False, False, <span class="keyword">agent</span> quit)     <span class="comment">-- Ctrl+Q</span>
+
+<span class="comment">-- Parameters: key, ctrl, alt, shift, handler</span></code></pre>
+
+            <h3>Frame Tick</h3>
+<pre><code><span class="comment">-- Called every frame (for animations)</span>
+set_on_tick (<span class="keyword">agent</span> on_tick)
+
+on_tick
+    <span class="keyword">do</span>
+        <span class="comment">-- Update animations</span>
+        progress.increment (1)
+        spinner.tick
+    <span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="menus">
+            <h2>Menu System</h2>
+
+            <h3>Creating Menus</h3>
+<pre><code><span class="comment">-- Create menu bar</span>
+<span class="keyword">create</span> menu_bar.make (80)
+
+<span class="comment">-- Create menu (& marks Alt+key shortcut)</span>
+<span class="keyword">create</span> file_menu.make_with_title (<span class="string">"&File"</span>)
+
+<span class="comment">-- Add items</span>
+<span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&New"</span>, <span class="keyword">agent</span> on_new)
+file_menu.add_item (item)
+
+<span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Save"</span>, <span class="keyword">agent</span> on_save)
+file_menu.add_item (item)
+
+<span class="comment">-- Add separator</span>
+file_menu.add_separator
+
+<span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"E&xit"</span>, <span class="keyword">agent</span> quit)
+file_menu.add_item (item)
+
+<span class="comment">-- Add menu to bar</span>
+menu_bar.add_menu (file_menu)
+
+<span class="comment">-- Set menu bar on application</span>
+set_menu_bar (menu_bar)</code></pre>
+
+            <h3>Menu Navigation</h3>
+            <ul>
+                <li><strong>Alt+key</strong> - Open menu by shortcut letter</li>
+                <li><strong>Left/Right</strong> - Switch between menus</li>
+                <li><strong>Up/Down</strong> - Navigate items</li>
+                <li><strong>Enter/Space</strong> - Activate item</li>
+                <li><strong>Escape</strong> - Close menu</li>
+            </ul>
+        </section>
+
+        <section id="dialogs">
+            <h2>Modal Dialogs</h2>
+
+            <h3>Message Box</h3>
+<pre><code><span class="keyword">local</span>
+    mb: TUI_MESSAGE_BOX
+<span class="keyword">do</span>
+    <span class="comment">-- OK-only alert</span>
+    <span class="keyword">create</span> mb.make_ok (<span class="string">"Title"</span>, <span class="string">"Message text"</span>)
+
+    <span class="comment">-- OK/Cancel confirmation</span>
+    <span class="keyword">create</span> mb.make_ok_cancel (<span class="string">"Confirm"</span>, <span class="string">"Are you sure?"</span>)
+
+    <span class="comment">-- Handle result</span>
+    mb.set_on_close (<span class="keyword">agent</span> on_dialog_close)
+
+    <span class="comment">-- Center and show</span>
+    <span class="keyword">if</span> <span class="keyword">attached</span> backend <span class="keyword">as</span> b <span class="keyword">then</span>
+        mb.show_centered (b.width, b.height)
+    <span class="keyword">end</span>
+
+    <span class="comment">-- Make modal (captures all input)</span>
+    set_modal (mb)
+<span class="keyword">end</span>
+
+on_dialog_close (button_id: INTEGER)
+    <span class="keyword">do</span>
+        <span class="keyword">if</span> button_id = {TUI_MESSAGE_BOX}.Button_ok <span class="keyword">then</span>
+            <span class="comment">-- OK clicked</span>
+        <span class="keyword">elseif</span> button_id = {TUI_MESSAGE_BOX}.Button_cancel <span class="keyword">then</span>
+            <span class="comment">-- Cancel clicked</span>
+        <span class="keyword">end</span>
+        clear_modal  <span class="comment">-- Remove modal state</span>
+    <span class="keyword">end</span></code></pre>
+
+            <h3>Custom Dialogs</h3>
+            <p>Any widget can be made modal:</p>
+<pre><code><span class="comment">-- Create your custom dialog widget</span>
+<span class="keyword">create</span> my_dialog.make (...)
+
+<span class="comment">-- Position it</span>
+my_dialog.set_position (x, y)
+my_dialog.show
+
+<span class="comment">-- Make it modal</span>
+set_modal (my_dialog)
+
+<span class="comment">-- Later, close it</span>
+my_dialog.hide
+clear_modal</code></pre>
+        </section>
+
+        <section id="input-widgets">
+            <h2>Input Widgets Reference</h2>
+
+            <h3>TUI_BUTTON</h3>
+<pre><code><span class="keyword">create</span> button.make (<span class="string">"Label"</span>)
+button.set_label (<span class="string">"New Label"</span>)
+button.set_enabled (True)
+button.set_on_click (<span class="keyword">agent</span> handler)
+button.click  <span class="comment">-- Programmatic click</span></code></pre>
+
+            <h3>TUI_TEXT_FIELD</h3>
+<pre><code><span class="keyword">create</span> field.make (width)
+field.set_text (<span class="string">"Initial text"</span>)
+field.set_placeholder (<span class="string">"Hint..."</span>)
+field.set_password (True)  <span class="comment">-- Show asterisks</span>
+field.text  <span class="comment">-- Get current text</span></code></pre>
+
+            <h3>TUI_CHECKBOX</h3>
+<pre><code><span class="keyword">create</span> cb.make (<span class="string">"Label text"</span>)
+cb.set_checked (True)
+cb.toggle
+cb.is_checked  <span class="comment">-- Query state</span>
+cb.set_on_change (<span class="keyword">agent</span> handler (?, BOOLEAN))</code></pre>
+
+            <h3>TUI_RADIO_BUTTON / TUI_RADIO_GROUP</h3>
+<pre><code><span class="keyword">create</span> group.make
+<span class="keyword">create</span> r1.make (<span class="string">"Option 1"</span>)
+<span class="keyword">create</span> r2.make (<span class="string">"Option 2"</span>)
+group.add_button (r1)
+group.add_button (r2)
+group.selected_index  <span class="comment">-- 1-based</span>
+group.set_on_change (<span class="keyword">agent</span> handler (?, INTEGER))</code></pre>
+
+            <h3>TUI_LIST</h3>
+<pre><code><span class="keyword">create</span> list.make (width, visible_height)
+list.add_item (<span class="string">"Item 1"</span>)
+list.add_item (<span class="string">"Item 2"</span>)
+list.clear
+list.selected_index  <span class="comment">-- 1-based, 0 if none</span>
+list.selected_item   <span class="comment">-- detachable STRING</span>
+list.set_on_select (<span class="keyword">agent</span> handler (?, INTEGER))</code></pre>
+
+            <h3>TUI_COMBO_BOX</h3>
+<pre><code><span class="keyword">create</span> combo.make (width)
+combo.add_item (<span class="string">"Choice 1"</span>)
+combo.add_item (<span class="string">"Choice 2"</span>)
+combo.selected_index
+combo.selected_text
+combo.set_on_change (<span class="keyword">agent</span> handler (?, INTEGER))</code></pre>
+
+            <h3>TUI_PROGRESS</h3>
+<pre><code><span class="keyword">create</span> progress.make (width)
+progress.set_value (50)           <span class="comment">-- 0-100</span>
+progress.increment (5)
+progress.set_show_percentage (True)
+progress.set_indeterminate (True) <span class="comment">-- Spinner mode</span>
+progress.tick                     <span class="comment">-- Animate spinner</span>
+progress.set_fill_char (<span class="string">'#'</span>)
+progress.set_empty_char (<span class="string">'-'</span>)</code></pre>
+
+            <h3>TUI_TABS</h3>
+<pre><code><span class="keyword">create</span> tabs.make (width, height)
+<span class="keyword">create</span> tab1_content.make (...)
+<span class="keyword">create</span> tab2_content.make (...)
+tabs.add_tab (<span class="string">"Tab 1"</span>, tab1_content)
+tabs.add_tab (<span class="string">"Tab 2"</span>, tab2_content)
+tabs.select_tab (2)  <span class="comment">-- Show tab 2</span>
+tabs.set_on_tab_change (<span class="keyword">agent</span> handler (?, INTEGER))</code></pre>
+        </section>
+
+        <section id="best-practices">
+            <h2>Best Practices</h2>
+
+            <h3>Widget Organization</h3>
+            <ul>
+                <li>Create widgets as class attributes for access in handlers</li>
+                <li>Group related widgets in containers (TUI_BOX, TUI_VBOX)</li>
+                <li>Use meaningful variable names</li>
+            </ul>
+
+            <h3>Event Handlers</h3>
+            <ul>
+                <li>Keep handlers short - delegate to feature methods</li>
+                <li>Use descriptive handler names (<code>on_save_clicked</code>)</li>
+                <li>Validate input before processing</li>
+            </ul>
+
+            <h3>Styling</h3>
+            <ul>
+                <li>Create a consistent color theme</li>
+                <li>Define styles once, reuse across widgets</li>
+                <li>Consider colorblind-friendly palettes</li>
+            </ul>
+
+            <h3>Performance</h3>
+            <ul>
+                <li>Use <code>on_tick</code> sparingly - only for animations</li>
+                <li>Minimize widget tree depth</li>
+                <li>Simple_tui uses double buffering automatically</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
+    </footer>
+</body>
+</html>

@@ -25,6 +25,8 @@ inherit
 		redefine
 			handle_key,
 			handle_mouse,
+			focus_from_next,
+			focus_from_previous,
 			preferred_width,
 			preferred_height,
 			layout
@@ -227,6 +229,30 @@ feature -- Modification
 			style_set: selected_tab_style = s
 		end
 
+feature -- Focus
+
+	focus_from_next
+			-- Focus first tab when Tab-ing forward.
+		do
+			Precursor
+			if tabs.count > 0 and selected_tab = 0 then
+				select_tab (1)
+			end
+		ensure then
+			has_selection: tabs.count > 0 implies selected_tab >= 1
+		end
+
+	focus_from_previous
+			-- Focus last tab when Shift+Tab-ing backward.
+		do
+			Precursor
+			if tabs.count > 0 then
+				select_tab (tabs.count)
+			end
+		ensure then
+			last_selected: tabs.count > 0 implies selected_tab = tabs.count
+		end
+
 feature -- Layout
 
 	layout
@@ -290,14 +316,29 @@ feature -- Event Handling
 
 	handle_key (event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
+			-- Tab cycles through tabs, then escapes to next widget.
 		do
 			if is_focused then
-				if event.is_left or (event.is_tab and event.has_shift) then
+				if event.is_left then
 					select_previous_tab
 					Result := True
-				elseif event.is_right or event.is_tab then
+				elseif event.is_right then
 					select_next_tab
 					Result := True
+				elseif event.is_tab and event.has_shift then
+					-- Shift+Tab: only consume if not on first tab
+					if selected_tab > 1 then
+						select_previous_tab
+						Result := True
+					end
+					-- else: let Tab escape to previous widget
+				elseif event.is_tab then
+					-- Tab: only consume if not on last tab
+					if selected_tab < tabs.count then
+						select_next_tab
+						Result := True
+					end
+					-- else: let Tab escape to next widget
 				end
 			end
 		end

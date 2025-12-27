@@ -65,6 +65,9 @@ feature {NONE} -- Widgets
 	view_menu: TUI_MENU
 	help_menu: TUI_MENU
 
+	-- Message box for dialogs
+	message_box: detachable TUI_MESSAGE_BOX
+
 	-- Header
 	title_label: TUI_LABEL
 	subtitle_label: TUI_LABEL
@@ -143,10 +146,10 @@ feature {NONE} -- Widget Creation
 			create app.make
 			log.info ("app created")
 
-			-- Root container
-			create root_box.make (80, 23)  -- Leave room for menu bar
-			root_box.set_gap (1)
-			log.info ("root_box created: 80x24")
+			-- Root container (gap 0 to fit in 24-row terminal)
+			create root_box.make (80, 22)  -- Leave room for menu bar
+			root_box.set_gap (0)
+			log.info ("root_box created: 80x22")
 
 			-- === Header ===
 			-- Use Unicode escapes for box drawing to avoid UTF-8 source file issues
@@ -167,11 +170,11 @@ feature {NONE} -- Widget Creation
 			root_box.add_child (subtitle_label)
 
 			-- === Content Area ===
-			create content_hbox.make (80, 15)
+			create content_hbox.make (80, 11)
 			content_hbox.set_gap (2)
 
 			-- Left Panel: Form
-			create form_box.make_with_title ("Login Form", 24, 13)
+			create form_box.make_with_title ("Login Form", 24, 9)
 			form_box.set_padding (1)
 			form_box.set_border_style (form_border_style)
 			form_box.set_title_style (form_title_style)
@@ -214,7 +217,7 @@ feature {NONE} -- Widget Creation
 			layout_form
 
 			-- Middle Panel: Progress
-			create progress_box.make_with_title ("Progress", 24, 13)
+			create progress_box.make_with_title ("Progress", 24, 9)
 			progress_box.set_padding (1)
 			progress_box.set_border_style (progress_border_style)
 			progress_box.set_title_style (progress_title_style)
@@ -254,12 +257,12 @@ feature {NONE} -- Widget Creation
 			layout_progress
 
 			-- Right Panel: List
-			create list_box.make_with_title ("Items", 26, 13)
+			create list_box.make_with_title ("Items", 26, 9)
 			list_box.set_padding (1)
 			list_box.set_border_style (list_border_style)
 			list_box.set_title_style (list_title_style)
 
-			create demo_list.make (22, 8)
+			create demo_list.make (22, 4)
 			demo_list.set_normal_style (list_item_style)
 			demo_list.set_selected_style (list_selected_style)
 			demo_list.add_item ("First item")
@@ -398,7 +401,7 @@ feature {NONE} -- Widget Creation
 			root_box.add_child (content_hbox2)
 
 			-- === Footer ===
-			create footer_hbox.make (80, 3)
+			create footer_hbox.make (80, 1)
 			footer_hbox.set_gap (2)
 
 			create quit_button.make ("Quit")
@@ -448,32 +451,32 @@ feature {NONE} -- Widget Creation
 		end
 
 	layout_form
-			-- Position form widgets.
+			-- Position form widgets (compact layout for 9-row box).
 		do
 			name_label.set_position (1, 1)
-			name_field.set_position (1, 2)
-			password_label.set_position (1, 4)
-			password_field.set_position (1, 5)
-			checkbox1.set_position (1, 7)
-			checkbox2.set_position (1, 8)
-			submit_button.set_position (1, 10)
+			name_field.set_position (8, 1)  -- Same row as label
+			password_label.set_position (1, 2)
+			password_field.set_position (8, 2)  -- Same row as label
+			checkbox1.set_position (1, 3)
+			checkbox2.set_position (1, 4)
+			submit_button.set_position (1, 5)
 		end
 
 	layout_progress
-			-- Position progress widgets.
+			-- Position progress widgets (compact layout for 9-row box).
 		do
 			progress_label.set_position (1, 1)
-			progress1.set_position (1, 3)
-			progress2.set_position (1, 5)
-			progress3.set_position (1, 7)
-			start_button.set_position (1, 9)
+			progress1.set_position (1, 2)
+			progress2.set_position (1, 3)
+			progress3.set_position (1, 4)
+			start_button.set_position (1, 5)
 		end
 
 	layout_list
-			-- Position list widgets.
+			-- Position list widgets (compact layout for 9-row box).
 		do
 			demo_list.set_position (1, 1)
-			list_status.set_position (1, 10)
+			list_status.set_position (1, 6)
 		end
 
 feature {NONE} -- Color Theme
@@ -1024,19 +1027,105 @@ feature {NONE} -- Menu Creation
 
 feature {NONE} -- Menu Handlers
 
-	on_menu_new do status_label.set_text ("Menu: New") end
-	on_menu_open do status_label.set_text ("Menu: Open") end
-	on_menu_save do status_label.set_text ("Menu: Save") end
-	on_menu_undo do status_label.set_text ("Menu: Undo") end
-	on_menu_redo do status_label.set_text ("Menu: Redo") end
-	on_menu_cut do status_label.set_text ("Menu: Cut") end
-	on_menu_copy do status_label.set_text ("Menu: Copy") end
-	on_menu_paste do status_label.set_text ("Menu: Paste") end
-	on_menu_toolbar do status_label.set_text ("Menu: Toggle Toolbar") end
-	on_menu_statusbar do status_label.set_text ("Menu: Toggle Status Bar") end
-	on_menu_refresh do status_label.set_text ("Menu: Refresh") end
-	on_menu_docs do status_label.set_text ("Menu: Documentation") end
-	on_menu_about do status_label.set_text ("simple_tui Demo v1.0") end
+	on_menu_new
+		do
+			show_message_box ("New File", "Create a new file?", True)
+		end
+
+	on_menu_open
+		do
+			show_message_box ("Open File", "Open an existing file?", True)
+		end
+
+	on_menu_save
+		do
+			show_message_box ("Save", "File saved successfully!", False)
+		end
+
+	on_menu_undo
+		do
+			show_message_box ("Undo", "Undo last action?", True)
+		end
+
+	on_menu_redo
+		do
+			show_message_box ("Redo", "Redo last action?", True)
+		end
+
+	on_menu_cut
+		do
+			show_message_box ("Cut", "Text cut to clipboard.", False)
+		end
+
+	on_menu_copy
+		do
+			show_message_box ("Copy", "Text copied to clipboard.", False)
+		end
+
+	on_menu_paste
+		do
+			show_message_box ("Paste", "Text pasted from clipboard.", False)
+		end
+
+	on_menu_toolbar
+		do
+			show_message_box ("Toolbar", "Toggle toolbar visibility?", True)
+		end
+
+	on_menu_statusbar
+		do
+			show_message_box ("Status Bar", "Toggle status bar?", True)
+		end
+
+	on_menu_refresh
+		do
+			show_message_box ("Refresh", "View refreshed!", False)
+		end
+
+	on_menu_docs
+		do
+			show_message_box ("Documentation", "Visit: simple-eiffel.github.io", False)
+		end
+
+	on_menu_about
+		do
+			show_message_box ("About", "simple_tui Demo v1.0", False)
+		end
+
+	show_message_box (a_title, a_message: STRING; with_cancel: BOOLEAN)
+			-- Show a message box dialog.
+		local
+			mb: TUI_MESSAGE_BOX
+		do
+			if with_cancel then
+				create mb.make_ok_cancel (a_title, a_message)
+			else
+				create mb.make_ok (a_title, a_message)
+			end
+			mb.set_on_close (agent on_message_box_close)
+			mb.set_border_style (create {TUI_STYLE}.make)
+			mb.border_style.set_foreground (create {TUI_COLOR}.make_index (14))  -- Cyan
+			mb.set_button_selected_style (create {TUI_STYLE}.make)
+			mb.button_selected_style.set_reverse (True)
+			mb.button_selected_style.set_bold (True)
+			if attached app.backend as b then
+				mb.show_centered (b.width, b.height)
+			end
+			message_box := mb
+			app.set_modal (mb)  -- Make dialog modal
+		end
+
+	on_message_box_close (button_id: INTEGER)
+			-- Handle message box close.
+		do
+			if button_id = {TUI_MESSAGE_BOX}.Button_ok then
+				status_label.set_text ("Dialog: OK clicked")
+			elseif button_id = {TUI_MESSAGE_BOX}.Button_cancel then
+				status_label.set_text ("Dialog: Cancel clicked")
+			end
+			message_box := Void
+			app.clear_modal  -- Remove modal state
+		end
 
 feature {NONE} -- Box Drawing Helpers
 

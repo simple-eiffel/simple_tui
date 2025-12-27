@@ -436,9 +436,10 @@ feature {NONE} -- Implementation
 		local
 			key_code, char_code, ctrl_keys: INTEGER
 			event_type: INTEGER
-			x, y: INTEGER
+			x, y, button_state, event_flags: INTEGER
+			mouse_type: INTEGER
 		do
-			c_read_console_input (stdin_handle, $event_type, $key_code, $char_code, $ctrl_keys, $x, $y)
+			c_read_console_input (stdin_handle, $event_type, $key_code, $char_code, $ctrl_keys, $x, $y, $button_state, $event_flags)
 
 			inspect event_type
 			when 1 then -- KEY_EVENT
@@ -448,7 +449,46 @@ feature {NONE} -- Implementation
 					create Result.make_key (translate_key (key_code), modifiers_from_ctrl_keys (ctrl_keys))
 				end
 			when 2 then -- MOUSE_EVENT
-				create Result.make_mouse (x + 1, y + 1, 1, {TUI_EVENT}.Type_mouse_press, 0)
+				-- Determine mouse event type based on button state and flags
+				if (event_flags & 1) /= 0 then
+					-- MOUSE_MOVED flag (0x0001) - mouse move event
+					mouse_type := {TUI_EVENT}.Type_mouse_move
+				elseif button_state /= last_button_state then
+					if button_state /= 0 then
+						-- Button newly pressed - remember which button
+						mouse_type := {TUI_EVENT}.Type_mouse_press
+						last_pressed_button := button_state
+					else
+						-- Button released
+						mouse_type := {TUI_EVENT}.Type_mouse_release
+					end
+					last_button_state := button_state
+				else
+					-- No change in button state, treat as move
+					mouse_type := {TUI_EVENT}.Type_mouse_move
+				end
+				-- Determine which button (1=left, 2=right, 3=middle)
+				-- For release events, use the last pressed button state
+				if mouse_type = {TUI_EVENT}.Type_mouse_release then
+					-- Use last_pressed_button to know which was released
+					if (last_pressed_button & 1) /= 0 then
+						create Result.make_mouse (x + 1, y + 1, 1, mouse_type, 0)
+					elseif (last_pressed_button & 2) /= 0 then
+						create Result.make_mouse (x + 1, y + 1, 2, mouse_type, 0)
+					elseif (last_pressed_button & 4) /= 0 then
+						create Result.make_mouse (x + 1, y + 1, 3, mouse_type, 0)
+					else
+						create Result.make_mouse (x + 1, y + 1, 0, mouse_type, 0)
+					end
+				elseif (button_state & 1) /= 0 then
+					create Result.make_mouse (x + 1, y + 1, 1, mouse_type, 0)
+				elseif (button_state & 2) /= 0 then
+					create Result.make_mouse (x + 1, y + 1, 2, mouse_type, 0)
+				elseif (button_state & 4) /= 0 then
+					create Result.make_mouse (x + 1, y + 1, 3, mouse_type, 0)
+				else
+					create Result.make_mouse (x + 1, y + 1, 0, mouse_type, 0)
+				end
 			when 4 then -- WINDOW_BUFFER_SIZE_EVENT
 				refresh_size
 				create Result.make_resize (cached_width, cached_height)
@@ -456,6 +496,12 @@ feature {NONE} -- Implementation
 				create Result.make_none
 			end
 		end
+
+	last_button_state: INTEGER
+			-- Previous mouse button state for detecting press/release.
+
+	last_pressed_button: INTEGER
+			-- Button state when last pressed (for reporting on release).
 
 	modifiers_from_ctrl_keys (ctrl_keys: INTEGER): INTEGER
 			-- Convert Win32 control key state to our modifiers.
@@ -560,12 +606,14 @@ feature {NONE} -- External
 		]"
 		end
 
-	c_read_console_input (h: POINTER; etype, kcode, ccode, ctrl, mx, my: TYPED_POINTER [INTEGER])
+	c_read_console_input (h: POINTER; etype, kcode, ccode, ctrl, mx, my, btn_state, evt_flags: TYPED_POINTER [INTEGER])
 		external "C inline use <windows.h>"
 		alias "[
 			INPUT_RECORD rec;
 			DWORD read;
 			*$etype = 0;
+			*$btn_state = 0;
+			*$evt_flags = 0;
 			if (ReadConsoleInputW((HANDLE)$h, &rec, 1, &read) && read > 0) {
 				*$etype = rec.EventType;
 				if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
@@ -575,6 +623,8 @@ feature {NONE} -- External
 				} else if (rec.EventType == MOUSE_EVENT) {
 					*$mx = rec.Event.MouseEvent.dwMousePosition.X;
 					*$my = rec.Event.MouseEvent.dwMousePosition.Y;
+					*$btn_state = rec.Event.MouseEvent.dwButtonState;
+					*$evt_flags = rec.Event.MouseEvent.dwEventFlags;
 				} else if (rec.EventType == WINDOW_BUFFER_SIZE_EVENT) {
 					// Handled elsewhere
 				}

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookbook - simple_tui</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>simple_tui</h1>
+        <p class="tagline">Cookbook</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+            <span class="badge">Windows</span>
+            <span class="badge badge-rfc">EV Compatible</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="user-guide.html">User Guide</a></li>
+            <li><a href="cookbook.html" class="active">Cookbook</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_tui">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="intro">
+            <h2>Cookbook Recipes</h2>
+            <p>Practical examples for building terminal user interfaces with simple_tui.</p>
+        </section>
+
+        <section id="login-form" class="recipe">
+            <h2>Recipe 1: Login Form</h2>
+            <p>Build a classic username/password form with validation.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">LOGIN_FORM</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI Components</span>
+
+    form_box: TUI_BOX
+    username_label: TUI_LABEL
+    username_field: TUI_TEXT_FIELD
+    password_label: TUI_LABEL
+    password_field: TUI_TEXT_FIELD
+    remember_checkbox: TUI_CHECKBOX
+    login_button: TUI_BUTTON
+    cancel_button: TUI_BUTTON
+    status_label: TUI_LABEL
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">do</span>
+            <span class="comment">-- Create form container</span>
+            <span class="keyword">create</span> form_box.make_with_title (<span class="string">"Login"</span>, 40, 12)
+            form_box.set_padding (1)
+
+            <span class="comment">-- Username field</span>
+            <span class="keyword">create</span> username_label.make_with_text (<span class="string">"Username:"</span>)
+            <span class="keyword">create</span> username_field.make (25)
+            username_field.set_placeholder (<span class="string">"Enter username..."</span>)
+
+            <span class="comment">-- Password field</span>
+            <span class="keyword">create</span> password_label.make_with_text (<span class="string">"Password:"</span>)
+            <span class="keyword">create</span> password_field.make (25)
+            password_field.set_password (True)
+            password_field.set_placeholder (<span class="string">"Enter password..."</span>)
+
+            <span class="comment">-- Options</span>
+            <span class="keyword">create</span> remember_checkbox.make (<span class="string">"Remember me"</span>)
+
+            <span class="comment">-- Buttons</span>
+            <span class="keyword">create</span> login_button.make (<span class="string">"Login"</span>)
+            login_button.set_on_click (<span class="keyword">agent</span> on_login)
+            <span class="keyword">create</span> cancel_button.make (<span class="string">"Cancel"</span>)
+            cancel_button.set_on_click (<span class="keyword">agent</span> on_cancel)
+
+            <span class="comment">-- Status</span>
+            <span class="keyword">create</span> status_label.make (35)
+
+            <span class="comment">-- Layout</span>
+            form_box.extend (username_label)
+            form_box.extend (username_field)
+            form_box.extend (password_label)
+            form_box.extend (password_field)
+            form_box.extend (remember_checkbox)
+            form_box.extend (login_button)
+            form_box.extend (cancel_button)
+            form_box.extend (status_label)
+            layout_form
+
+            root.extend (form_box)
+        <span class="keyword">end</span>
+
+    layout_form
+        <span class="keyword">do</span>
+            username_label.set_position (1, 1)
+            username_field.set_position (12, 1)
+            password_label.set_position (1, 2)
+            password_field.set_position (12, 2)
+            remember_checkbox.set_position (1, 4)
+            login_button.set_position (1, 6)
+            cancel_button.set_position (12, 6)
+            status_label.set_position (1, 8)
+        <span class="keyword">end</span>
+
+    on_login
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> validate_form <span class="keyword">then</span>
+                status_label.set_text (<span class="string">"Login successful!"</span>)
+                <span class="comment">-- Proceed with authentication...</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    on_cancel
+        <span class="keyword">do</span>
+            quit
+        <span class="keyword">end</span>
+
+    validate_form: BOOLEAN
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> username_field.text.is_empty <span class="keyword">then</span>
+                status_label.set_text (<span class="string">"Username required"</span>)
+            <span class="keyword">elseif</span> password_field.text.count < 4 <span class="keyword">then</span>
+                status_label.set_text (<span class="string">"Password too short"</span>)
+            <span class="keyword">else</span>
+                Result := True
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="settings-panel" class="recipe">
+            <h2>Recipe 2: Settings Panel with Tabs</h2>
+            <p>Create a tabbed settings interface with different configuration sections.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">SETTINGS_PANEL</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    tabs: TUI_TABS
+    general_tab: TUI_BOX
+    display_tab: TUI_BOX
+    advanced_tab: TUI_BOX
+
+    <span class="comment">-- General settings</span>
+    theme_combo: TUI_COMBO_BOX
+    auto_save_checkbox: TUI_CHECKBOX
+
+    <span class="comment">-- Display settings</span>
+    font_size_list: TUI_LIST
+    show_line_numbers: TUI_CHECKBOX
+
+    <span class="comment">-- Advanced settings</span>
+    debug_mode: TUI_CHECKBOX
+    cache_size_field: TUI_TEXT_FIELD
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> tabs.make (60, 18)
+
+            <span class="comment">-- General Tab</span>
+            <span class="keyword">create</span> general_tab.make (58, 14)
+            <span class="keyword">create</span> theme_combo.make (20)
+            theme_combo.add_item (<span class="string">"Light"</span>)
+            theme_combo.add_item (<span class="string">"Dark"</span>)
+            theme_combo.add_item (<span class="string">"System"</span>)
+            <span class="keyword">create</span> auto_save_checkbox.make (<span class="string">"Auto-save documents"</span>)
+            general_tab.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Theme:"</span>))
+            general_tab.extend (theme_combo)
+            general_tab.extend (auto_save_checkbox)
+            tabs.add_tab (<span class="string">"General"</span>, general_tab)
+
+            <span class="comment">-- Display Tab</span>
+            <span class="keyword">create</span> display_tab.make (58, 14)
+            <span class="keyword">create</span> font_size_list.make (15, 5)
+            font_size_list.add_item (<span class="string">"10pt"</span>)
+            font_size_list.add_item (<span class="string">"12pt"</span>)
+            font_size_list.add_item (<span class="string">"14pt"</span>)
+            font_size_list.add_item (<span class="string">"16pt"</span>)
+            <span class="keyword">create</span> show_line_numbers.make (<span class="string">"Show line numbers"</span>)
+            display_tab.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Font size:"</span>))
+            display_tab.extend (font_size_list)
+            display_tab.extend (show_line_numbers)
+            tabs.add_tab (<span class="string">"Display"</span>, display_tab)
+
+            <span class="comment">-- Advanced Tab</span>
+            <span class="keyword">create</span> advanced_tab.make (58, 14)
+            <span class="keyword">create</span> debug_mode.make (<span class="string">"Enable debug mode"</span>)
+            <span class="keyword">create</span> cache_size_field.make (10)
+            cache_size_field.set_text (<span class="string">"256"</span>)
+            advanced_tab.extend (debug_mode)
+            advanced_tab.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Cache size (MB):"</span>))
+            advanced_tab.extend (cache_size_field)
+            tabs.add_tab (<span class="string">"Advanced"</span>, advanced_tab)
+
+            tabs.set_on_tab_change (<span class="keyword">agent</span> on_tab_changed)
+            root.extend (tabs)
+        <span class="keyword">end</span>
+
+    on_tab_changed (index: INTEGER)
+        <span class="keyword">do</span>
+            <span class="comment">-- Handle tab change (e.g., save previous tab settings)</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="file-browser" class="recipe">
+            <h2>Recipe 3: File Browser</h2>
+            <p>Build a simple file listing interface with selection.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">FILE_BROWSER</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    path_label: TUI_LABEL
+    file_list: TUI_LIST
+    file_info: TUI_LABEL
+    open_button: TUI_BUTTON
+    back_button: TUI_BUTTON
+    current_path: STRING
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">local</span>
+            main_box: TUI_VBOX
+            button_box: TUI_HBOX
+        <span class="keyword">do</span>
+            current_path := <span class="string">"C:\"</span>
+
+            <span class="keyword">create</span> main_box.make (60, 20)
+            main_box.set_gap (1)
+
+            <span class="comment">-- Path display</span>
+            <span class="keyword">create</span> path_label.make_with_text (current_path)
+
+            <span class="comment">-- File listing</span>
+            <span class="keyword">create</span> file_list.make (58, 12)
+            file_list.set_on_select (<span class="keyword">agent</span> on_file_select)
+            refresh_file_list
+
+            <span class="comment">-- File info</span>
+            <span class="keyword">create</span> file_info.make (58)
+
+            <span class="comment">-- Buttons</span>
+            <span class="keyword">create</span> button_box.make (60, 1)
+            button_box.set_gap (2)
+            <span class="keyword">create</span> back_button.make (<span class="string">"< Back"</span>)
+            back_button.set_on_click (<span class="keyword">agent</span> go_back)
+            <span class="keyword">create</span> open_button.make (<span class="string">"Open"</span>)
+            open_button.set_on_click (<span class="keyword">agent</span> open_selected)
+
+            button_box.extend (back_button)
+            button_box.extend (open_button)
+
+            main_box.extend (path_label)
+            main_box.extend (file_list)
+            main_box.extend (file_info)
+            main_box.extend (button_box)
+
+            root.extend (main_box)
+        <span class="keyword">end</span>
+
+    refresh_file_list
+        <span class="keyword">local</span>
+            dir: DIRECTORY
+            entries: ARRAYED_LIST [PATH]
+        <span class="keyword">do</span>
+            file_list.clear
+            <span class="keyword">create</span> dir.make (current_path)
+            <span class="keyword">if</span> dir.exists <span class="keyword">then</span>
+                entries := dir.entries
+                <span class="keyword">across</span> entries <span class="keyword">as</span> e <span class="keyword">loop</span>
+                    file_list.add_item (e.name)
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    on_file_select (index: INTEGER)
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> file_list.selected_item <span class="keyword">as</span> name <span class="keyword">then</span>
+                file_info.set_text (<span class="string">"Selected: "</span> + name.out)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    go_back
+        <span class="keyword">do</span>
+            <span class="comment">-- Navigate to parent directory</span>
+            <span class="comment">-- (implementation depends on path handling)</span>
+        <span class="keyword">end</span>
+
+    open_selected
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> file_list.selected_item <span class="keyword">as</span> name <span class="keyword">then</span>
+                <span class="comment">-- Open file or navigate into directory</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="progress-tracker" class="recipe">
+            <h2>Recipe 4: Animated Progress Tracker</h2>
+            <p>Display multiple progress bars with animation.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">PROGRESS_TRACKER</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    download_progress: TUI_PROGRESS
+    install_progress: TUI_PROGRESS
+    spinner: TUI_PROGRESS
+    start_button: TUI_BUTTON
+    status_label: TUI_LABEL
+
+    is_running: BOOLEAN
+    tick_count: INTEGER
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">local</span>
+            box: TUI_BOX
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> box.make_with_title (<span class="string">"Installation Progress"</span>, 50, 12)
+            box.set_padding (1)
+
+            <span class="comment">-- Download progress</span>
+            <span class="keyword">create</span> download_progress.make (40)
+            download_progress.set_show_percentage (True)
+            download_progress.set_value (0)
+
+            <span class="comment">-- Install progress with custom chars</span>
+            <span class="keyword">create</span> install_progress.make (40)
+            install_progress.set_fill_char (<span class="string">'#'</span>)
+            install_progress.set_empty_char (<span class="string">'-'</span>)
+            install_progress.set_show_percentage (True)
+            install_progress.set_value (0)
+
+            <span class="comment">-- Indeterminate spinner</span>
+            <span class="keyword">create</span> spinner.make (40)
+            spinner.set_indeterminate (True)
+
+            <span class="comment">-- Controls</span>
+            <span class="keyword">create</span> start_button.make (<span class="string">"Start"</span>)
+            start_button.set_on_click (<span class="keyword">agent</span> toggle_progress)
+            <span class="keyword">create</span> status_label.make (40)
+            status_label.set_text (<span class="string">"Press Start to begin"</span>)
+
+            box.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Downloading:"</span>))
+            box.extend (download_progress)
+            box.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Installing:"</span>))
+            box.extend (install_progress)
+            box.extend (create {TUI_LABEL}.make_with_text (<span class="string">"Working:"</span>))
+            box.extend (spinner)
+            box.extend (start_button)
+            box.extend (status_label)
+
+            set_on_tick (<span class="keyword">agent</span> on_tick)
+            root.extend (box)
+        <span class="keyword">end</span>
+
+    toggle_progress
+        <span class="keyword">do</span>
+            is_running := not is_running
+            <span class="keyword">if</span> is_running <span class="keyword">then</span>
+                start_button.set_label (<span class="string">"Stop"</span>)
+                status_label.set_text (<span class="string">"Working..."</span>)
+            <span class="keyword">else</span>
+                start_button.set_label (<span class="string">"Start"</span>)
+                status_label.set_text (<span class="string">"Paused"</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    on_tick
+        <span class="keyword">do</span>
+            tick_count := tick_count + 1
+
+            <span class="comment">-- Always animate spinner</span>
+            <span class="keyword">if</span> tick_count \\ 2 = 0 <span class="keyword">then</span>
+                spinner.tick
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> is_running <span class="keyword">then</span>
+                <span class="comment">-- Animate progress bars</span>
+                <span class="keyword">if</span> tick_count \\ 5 = 0 <span class="keyword">then</span>
+                    download_progress.increment (1)
+                    <span class="keyword">if</span> download_progress.current_value >= 100 <span class="keyword">then</span>
+                        download_progress.set_value (0)
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+
+                <span class="keyword">if</span> tick_count \\ 8 = 0 <span class="keyword">then</span>
+                    install_progress.increment (1)
+                    <span class="keyword">if</span> install_progress.current_value >= 100 <span class="keyword">then</span>
+                        install_progress.set_value (0)
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="menu-application" class="recipe">
+            <h2>Recipe 5: Application with Menu Bar</h2>
+            <p>Create a complete application with File, Edit, Help menus.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">MENU_APP</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    my_menu_bar: TUI_MENU_BAR
+    file_menu: TUI_MENU
+    edit_menu: TUI_MENU
+    help_menu: TUI_MENU
+    status_label: TUI_LABEL
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">local</span>
+            item: TUI_MENU_ITEM
+            content: TUI_BOX
+        <span class="keyword">do</span>
+            <span class="comment">-- Create menu bar</span>
+            <span class="keyword">create</span> my_menu_bar.make (80)
+
+            <span class="comment">-- File menu (& marks Alt+key shortcut)</span>
+            <span class="keyword">create</span> file_menu.make_with_title (<span class="string">"&File"</span>)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&New"</span>, <span class="keyword">agent</span> on_new)
+            file_menu.add_item (item)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Open"</span>, <span class="keyword">agent</span> on_open)
+            file_menu.add_item (item)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Save"</span>, <span class="keyword">agent</span> on_save)
+            file_menu.add_item (item)
+            file_menu.add_separator
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"E&xit"</span>, <span class="keyword">agent</span> quit)
+            file_menu.add_item (item)
+            my_menu_bar.add_menu (file_menu)
+
+            <span class="comment">-- Edit menu</span>
+            <span class="keyword">create</span> edit_menu.make_with_title (<span class="string">"&Edit"</span>)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Undo"</span>, <span class="keyword">agent</span> on_undo)
+            edit_menu.add_item (item)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Redo"</span>, <span class="keyword">agent</span> on_redo)
+            edit_menu.add_item (item)
+            edit_menu.add_separator
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"Cu&t"</span>, <span class="keyword">agent</span> on_cut)
+            edit_menu.add_item (item)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Copy"</span>, <span class="keyword">agent</span> on_copy)
+            edit_menu.add_item (item)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Paste"</span>, <span class="keyword">agent</span> on_paste)
+            edit_menu.add_item (item)
+            my_menu_bar.add_menu (edit_menu)
+
+            <span class="comment">-- Help menu</span>
+            <span class="keyword">create</span> help_menu.make_with_title (<span class="string">"&Help"</span>)
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&Documentation"</span>, <span class="keyword">agent</span> on_docs)
+            help_menu.add_item (item)
+            help_menu.add_separator
+            <span class="keyword">create</span> item.make_with_text_and_action (<span class="string">"&About"</span>, <span class="keyword">agent</span> on_about)
+            help_menu.add_item (item)
+            my_menu_bar.add_menu (help_menu)
+
+            <span class="comment">-- Set menu bar</span>
+            set_menu_bar (my_menu_bar)
+
+            <span class="comment">-- Main content</span>
+            <span class="keyword">create</span> content.make_with_title (<span class="string">"Content"</span>, 78, 20)
+            <span class="keyword">create</span> status_label.make (70)
+            status_label.set_text (<span class="string">"Use Alt+F, Alt+E, Alt+H for menus"</span>)
+            content.extend (status_label)
+            root.extend (content)
+
+            <span class="comment">-- Register keyboard shortcuts</span>
+            register_shortcut (<span class="string">'n'</span>, True, False, False, <span class="keyword">agent</span> on_new)   <span class="comment">-- Ctrl+N</span>
+            register_shortcut (<span class="string">'o'</span>, True, False, False, <span class="keyword">agent</span> on_open)  <span class="comment">-- Ctrl+O</span>
+            register_shortcut (<span class="string">'s'</span>, True, False, False, <span class="keyword">agent</span> on_save)  <span class="comment">-- Ctrl+S</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- Menu Handlers</span>
+
+    on_new
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"New file created"</span>)
+        <span class="keyword">end</span>
+
+    on_open
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Open file dialog..."</span>)
+        <span class="keyword">end</span>
+
+    on_save
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"File saved"</span>)
+        <span class="keyword">end</span>
+
+    on_undo
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Undo"</span>)
+        <span class="keyword">end</span>
+
+    on_redo
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Redo"</span>)
+        <span class="keyword">end</span>
+
+    on_cut
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Cut to clipboard"</span>)
+        <span class="keyword">end</span>
+
+    on_copy
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Copied to clipboard"</span>)
+        <span class="keyword">end</span>
+
+    on_paste
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Pasted from clipboard"</span>)
+        <span class="keyword">end</span>
+
+    on_docs
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"Visit: simple-eiffel.github.io"</span>)
+        <span class="keyword">end</span>
+
+    on_about
+        <span class="keyword">do</span>
+            status_label.set_text (<span class="string">"simple_tui v1.0"</span>)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="modal-dialog" class="recipe">
+            <h2>Recipe 6: Modal Dialogs</h2>
+            <p>Show confirmation and alert dialogs.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">DIALOG_DEMO</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    alert_button: TUI_BUTTON
+    confirm_button: TUI_BUTTON
+    result_label: TUI_LABEL
+    current_dialog: <span class="keyword">detachable</span> TUI_MESSAGE_BOX
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">local</span>
+            box: TUI_BOX
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> box.make_with_title (<span class="string">"Dialog Demo"</span>, 50, 10)
+            box.set_padding (1)
+
+            <span class="keyword">create</span> alert_button.make (<span class="string">"Show Alert"</span>)
+            alert_button.set_on_click (<span class="keyword">agent</span> show_alert)
+
+            <span class="keyword">create</span> confirm_button.make (<span class="string">"Show Confirm"</span>)
+            confirm_button.set_on_click (<span class="keyword">agent</span> show_confirm)
+
+            <span class="keyword">create</span> result_label.make (40)
+            result_label.set_text (<span class="string">"Click a button to show dialog"</span>)
+
+            box.extend (alert_button)
+            box.extend (confirm_button)
+            box.extend (result_label)
+            alert_button.set_position (1, 1)
+            confirm_button.set_position (1, 3)
+            result_label.set_position (1, 5)
+
+            root.extend (box)
+        <span class="keyword">end</span>
+
+    show_alert
+        <span class="keyword">local</span>
+            mb: TUI_MESSAGE_BOX
+        <span class="keyword">do</span>
+            <span class="comment">-- OK-only alert</span>
+            <span class="keyword">create</span> mb.make_ok (<span class="string">"Alert"</span>, <span class="string">"This is an alert message!"</span>)
+            mb.set_on_close (<span class="keyword">agent</span> on_dialog_close)
+
+            <span class="comment">-- Center on screen</span>
+            <span class="keyword">if</span> <span class="keyword">attached</span> backend <span class="keyword">as</span> b <span class="keyword">then</span>
+                mb.show_centered (b.width, b.height)
+            <span class="keyword">end</span>
+
+            current_dialog := mb
+            set_modal (mb)
+        <span class="keyword">end</span>
+
+    show_confirm
+        <span class="keyword">local</span>
+            mb: TUI_MESSAGE_BOX
+        <span class="keyword">do</span>
+            <span class="comment">-- OK/Cancel confirmation</span>
+            <span class="keyword">create</span> mb.make_ok_cancel (<span class="string">"Confirm"</span>, <span class="string">"Do you want to proceed?"</span>)
+            mb.set_on_close (<span class="keyword">agent</span> on_dialog_close)
+
+            <span class="keyword">if</span> <span class="keyword">attached</span> backend <span class="keyword">as</span> b <span class="keyword">then</span>
+                mb.show_centered (b.width, b.height)
+            <span class="keyword">end</span>
+
+            current_dialog := mb
+            set_modal (mb)
+        <span class="keyword">end</span>
+
+    on_dialog_close (button_id: INTEGER)
+        <span class="keyword">do</span>
+            <span class="keyword">if</span> button_id = {TUI_MESSAGE_BOX}.Button_ok <span class="keyword">then</span>
+                result_label.set_text (<span class="string">"User clicked OK"</span>)
+            <span class="keyword">elseif</span> button_id = {TUI_MESSAGE_BOX}.Button_cancel <span class="keyword">then</span>
+                result_label.set_text (<span class="string">"User clicked Cancel"</span>)
+            <span class="keyword">end</span>
+
+            current_dialog := Void
+            clear_modal
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="styled-theme" class="recipe">
+            <h2>Recipe 7: Custom Color Theme</h2>
+            <p>Create a consistent color theme for your application.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">THEMED_APP</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- Theme Colors</span>
+
+    primary_color: TUI_COLOR
+    secondary_color: TUI_COLOR
+    accent_color: TUI_COLOR
+    text_color: TUI_COLOR
+    background_color: TUI_COLOR
+
+    title_style: TUI_STYLE
+    label_style: TUI_STYLE
+    button_style: TUI_STYLE
+    button_focused_style: TUI_STYLE
+    input_style: TUI_STYLE
+    input_focused_style: TUI_STYLE
+    border_style: TUI_STYLE
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">do</span>
+            <span class="comment">-- Initialize theme</span>
+            setup_ocean_theme
+            <span class="comment">-- Or: setup_dark_theme, setup_high_contrast_theme</span>
+
+            <span class="comment">-- Build UI with themed styles</span>
+            build_themed_ui
+        <span class="keyword">end</span>
+
+    setup_ocean_theme
+            <span class="comment">-- Blue ocean color scheme</span>
+        <span class="keyword">do</span>
+            <span class="comment">-- Define colors (256-color palette)</span>
+            <span class="keyword">create</span> primary_color.make_index (33)    <span class="comment">-- Deep blue</span>
+            <span class="keyword">create</span> secondary_color.make_index (39)  <span class="comment">-- Sky blue</span>
+            <span class="keyword">create</span> accent_color.make_index (51)     <span class="comment">-- Cyan/aqua</span>
+            <span class="keyword">create</span> text_color.make_index (15)       <span class="comment">-- White</span>
+            <span class="keyword">create</span> background_color.make_index (17) <span class="comment">-- Dark blue</span>
+
+            <span class="comment">-- Create styles</span>
+            <span class="keyword">create</span> title_style.make
+            title_style.set_foreground (accent_color)
+            title_style.set_bold (True)
+
+            <span class="keyword">create</span> label_style.make
+            label_style.set_foreground (text_color)
+
+            <span class="keyword">create</span> button_style.make
+            button_style.set_foreground (secondary_color)
+
+            <span class="keyword">create</span> button_focused_style.make
+            button_focused_style.set_foreground (accent_color)
+            button_focused_style.set_reverse (True)
+            button_focused_style.set_bold (True)
+
+            <span class="keyword">create</span> input_style.make
+            input_style.set_foreground (text_color)
+
+            <span class="keyword">create</span> input_focused_style.make
+            input_focused_style.set_foreground (accent_color)
+            input_focused_style.set_reverse (True)
+
+            <span class="keyword">create</span> border_style.make
+            border_style.set_foreground (secondary_color)
+        <span class="keyword">end</span>
+
+    setup_dark_theme
+            <span class="comment">-- Dark mode theme</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> primary_color.make_index (236)   <span class="comment">-- Dark gray</span>
+            <span class="keyword">create</span> secondary_color.make_index (250) <span class="comment">-- Light gray</span>
+            <span class="keyword">create</span> accent_color.make_index (208)    <span class="comment">-- Orange</span>
+            <span class="keyword">create</span> text_color.make_index (255)      <span class="comment">-- Bright white</span>
+            <span class="keyword">create</span> background_color.make_index (232) <span class="comment">-- Near black</span>
+
+            <span class="comment">-- Create styles...</span>
+            <span class="keyword">create</span> title_style.make
+            title_style.set_foreground (accent_color)
+            title_style.set_bold (True)
+            <span class="comment">-- etc...</span>
+        <span class="keyword">end</span>
+
+    build_themed_ui
+        <span class="keyword">local</span>
+            box: TUI_BOX
+            label: TUI_LABEL
+            button: TUI_BUTTON
+            field: TUI_TEXT_FIELD
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> box.make_with_title (<span class="string">"Themed Application"</span>, 50, 12)
+            box.set_border_style (border_style)
+            box.set_title_style (title_style)
+
+            <span class="keyword">create</span> label.make_with_text (<span class="string">"Enter your name:"</span>)
+            label.set_style (label_style)
+
+            <span class="keyword">create</span> field.make (30)
+            field.set_normal_style (input_style)
+            field.set_focused_style (input_focused_style)
+
+            <span class="keyword">create</span> button.make (<span class="string">"Submit"</span>)
+            button.set_normal_style (button_style)
+            button.set_focused_style (button_focused_style)
+
+            box.extend (label)
+            box.extend (field)
+            box.extend (button)
+
+            root.extend (box)
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="radio-selection" class="recipe">
+            <h2>Recipe 8: Radio Button Selection</h2>
+            <p>Create mutually exclusive option groups.</p>
+
+<pre><code><span class="keyword">class</span>
+    <span class="type">OPTIONS_PANEL</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {NONE} <span class="comment">-- UI</span>
+
+    size_group: TUI_RADIO_GROUP
+    size_small: TUI_RADIO_BUTTON
+    size_medium: TUI_RADIO_BUTTON
+    size_large: TUI_RADIO_BUTTON
+
+    format_group: TUI_RADIO_GROUP
+    format_pdf: TUI_RADIO_BUTTON
+    format_doc: TUI_RADIO_BUTTON
+    format_txt: TUI_RADIO_BUTTON
+
+    result_label: TUI_LABEL
+
+<span class="keyword">feature</span>
+
+    setup
+        <span class="keyword">local</span>
+            main_box: TUI_HBOX
+            size_box: TUI_BOX
+            format_box: TUI_BOX
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> main_box.make (70, 10)
+            main_box.set_gap (2)
+
+            <span class="comment">-- Size options</span>
+            <span class="keyword">create</span> size_box.make_with_title (<span class="string">"Size"</span>, 25, 8)
+            <span class="keyword">create</span> size_group.make
+            <span class="keyword">create</span> size_small.make (<span class="string">"Small"</span>)
+            <span class="keyword">create</span> size_medium.make (<span class="string">"Medium"</span>)
+            <span class="keyword">create</span> size_large.make (<span class="string">"Large"</span>)
+            size_group.add_button (size_small)
+            size_group.add_button (size_medium)
+            size_group.add_button (size_large)
+            size_group.set_on_change (<span class="keyword">agent</span> on_size_change)
+            size_box.extend (size_group)
+
+            <span class="comment">-- Format options</span>
+            <span class="keyword">create</span> format_box.make_with_title (<span class="string">"Format"</span>, 25, 8)
+            <span class="keyword">create</span> format_group.make
+            <span class="keyword">create</span> format_pdf.make (<span class="string">"PDF"</span>)
+            <span class="keyword">create</span> format_doc.make (<span class="string">"DOCX"</span>)
+            <span class="keyword">create</span> format_txt.make (<span class="string">"Text"</span>)
+            format_group.add_button (format_pdf)
+            format_group.add_button (format_doc)
+            format_group.add_button (format_txt)
+            format_group.set_on_change (<span class="keyword">agent</span> on_format_change)
+            format_box.extend (format_group)
+
+            main_box.extend (size_box)
+            main_box.extend (format_box)
+
+            <span class="keyword">create</span> result_label.make (60)
+            result_label.set_text (<span class="string">"Select options..."</span>)
+
+            root.extend (main_box)
+            root.extend (result_label)
+        <span class="keyword">end</span>
+
+    on_size_change (index: INTEGER)
+        <span class="keyword">local</span>
+            sizes: ARRAY [STRING]
+        <span class="keyword">do</span>
+            sizes := &lt;&lt;<span class="string">"Small"</span>, <span class="string">"Medium"</span>, <span class="string">"Large"</span>&gt;&gt;
+            <span class="keyword">if</span> index >= 1 <span class="keyword">and</span> index <= 3 <span class="keyword">then</span>
+                result_label.set_text (<span class="string">"Size: "</span> + sizes [index])
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+    on_format_change (index: INTEGER)
+        <span class="keyword">local</span>
+            formats: ARRAY [STRING]
+        <span class="keyword">do</span>
+            formats := &lt;&lt;<span class="string">"PDF"</span>, <span class="string">"DOCX"</span>, <span class="string">"Text"</span>&gt;&gt;
+            <span class="keyword">if</span> index >= 1 <span class="keyword">and</span> index <= 3 <span class="keyword">then</span>
+                result_label.set_text (<span class="string">"Format: "</span> + formats [index])
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">simple_*</a> ecosystem.</p>
+        <p>&copy; 2025 Larry Rix. MIT License.</p>
+    </footer>
+</body>
+</html>

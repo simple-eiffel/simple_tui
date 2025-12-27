@@ -24,6 +24,7 @@ inherit
 	TUI_WIDGET
 		redefine
 			handle_key,
+			handle_mouse,
 			preferred_width,
 			preferred_height
 		end
@@ -214,6 +215,8 @@ feature -- Display
 			show
 			-- Select first selectable item
 			select_first
+			-- Ignore first Enter to prevent immediate execution
+			ignore_next_enter := True
 		ensure
 			visible: is_visible
 		end
@@ -308,19 +311,63 @@ feature -- Event Handling
 			if is_visible then
 				if event.is_up then
 					select_previous
+					ignore_next_enter := False
 					Result := True
 				elseif event.is_down then
 					select_next
+					ignore_next_enter := False
 					Result := True
 				elseif event.is_enter or event.is_space then
-					execute_selected
+					if ignore_next_enter then
+						-- Skip first Enter after menu opened (same key that opened it)
+						ignore_next_enter := False
+					else
+						execute_selected
+					end
 					Result := True
 				elseif event.is_escape then
 					close
 					Result := True
 				else
 					-- Check shortcut keys
+					ignore_next_enter := False
 					Result := try_shortcut (event.char)
+				end
+			end
+		end
+
+	handle_mouse (event: TUI_EVENT): BOOLEAN
+			-- Handle mouse event for hover and click.
+		local
+			ax, ay, item_index, my: INTEGER
+		do
+			if is_visible then
+				ax := absolute_x
+				ay := absolute_y
+
+				-- Check if mouse is within menu bounds
+				if event.mouse_x >= ax and event.mouse_x < ax + preferred_width then
+					my := event.mouse_y
+					-- Item area is from ay+1 to ay+items.count (borders at ay and ay+items.count+1)
+					if my > ay and my <= ay + items.count then
+						item_index := my - ay
+						-- Highlight on hover (any mouse event in item area)
+						if item_index >= 1 and item_index <= items.count then
+							if not items.i_th (item_index).is_separator and items.i_th (item_index).is_sensitive then
+								selected_index := item_index
+								ignore_next_enter := False
+							end
+						end
+						-- Click to execute
+						if event.is_mouse_press and event.mouse_button = 1 then
+							if selected_index > 0 then
+								execute_selected
+							end
+							Result := True
+						else
+							Result := True  -- Consume hover events too
+						end
+					end
 				end
 			end
 		end
@@ -424,6 +471,9 @@ feature -- Queries
 		end
 
 feature {NONE} -- Implementation
+
+	ignore_next_enter: BOOLEAN
+			-- Skip next Enter to prevent immediate execution after opening.
 
 	format_item (item: TUI_MENU_ITEM; w: INTEGER): STRING_32
 			-- Format item text to width with padding.

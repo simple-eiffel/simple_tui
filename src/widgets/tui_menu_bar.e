@@ -25,6 +25,9 @@ inherit
 		redefine
 			handle_key,
 			handle_mouse,
+			focus_from_next,
+			focus_from_previous,
+			unfocus,
 			preferred_width,
 			preferred_height
 		end
@@ -143,6 +146,41 @@ feature -- Modification
 			style_set: open_style = s
 		end
 
+feature -- Focus
+
+	focus_from_next
+			-- Focus first menu when Tab-ing forward.
+		do
+			Precursor
+			if menus.count > 0 then
+				selected_menu := 1
+			end
+		ensure then
+			first_selected: menus.count > 0 implies selected_menu = 1
+		end
+
+	focus_from_previous
+			-- Focus last menu when Shift+Tab-ing backward.
+		do
+			Precursor
+			if menus.count > 0 then
+				selected_menu := menus.count
+			end
+		ensure then
+			last_selected: menus.count > 0 implies selected_menu = menus.count
+		end
+
+	unfocus
+			-- Clear selection and close any open menu.
+		do
+			Precursor
+			close_menu
+			selected_menu := 0
+		ensure then
+			no_selection: selected_menu = 0
+			menu_closed: not is_menu_open
+		end
+
 feature -- Menu Control
 
 	open_menu (index: INTEGER)
@@ -214,7 +252,12 @@ feature -- Event Handling
 	handle_key (event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
-			if is_focused or is_menu_open then
+			-- Always check Alt+key shortcuts, even when not focused
+			if event.has_alt and not is_menu_open then
+				Result := try_menu_shortcut (event)
+			end
+
+			if not Result and (is_focused or is_menu_open) then
 				if is_menu_open then
 					-- Let open menu handle keys first
 					if attached current_menu as menu then
@@ -241,6 +284,20 @@ feature -- Event Handling
 					elseif event.is_right then
 						select_next_menu
 						Result := True
+					elseif event.is_tab and event.has_shift then
+						-- Shift+Tab: only consume if not on first menu
+						if selected_menu > 1 then
+							select_previous_menu
+							Result := True
+						end
+						-- else: let Tab escape to previous widget
+					elseif event.is_tab then
+						-- Tab: only consume if not on last menu
+						if selected_menu < menus.count then
+							select_next_menu
+							Result := True
+						end
+						-- else: let Tab escape to next widget
 					elseif event.is_enter or event.is_space or event.is_down then
 						if selected_menu > 0 then
 							open_menu (selected_menu)
@@ -250,7 +307,7 @@ feature -- Event Handling
 						end
 						Result := True
 					else
-						-- Check Alt+key shortcuts
+						-- Check Alt+key shortcuts (for focused state)
 						Result := try_menu_shortcut (event)
 					end
 				end
@@ -262,19 +319,31 @@ feature -- Event Handling
 		local
 			mx, clicked_menu: INTEGER
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
+			-- Pass mouse events to open menu dropdown first
+			if is_menu_open and attached current_menu as menu then
+				Result := menu.handle_mouse (event)
+			end
+
+			if not Result then
 				if event.mouse_y = absolute_y then
-					-- Click on menu bar
+					-- Mouse on menu bar
 					mx := event.mouse_x - absolute_x
 					clicked_menu := menu_at_position (mx)
-					if clicked_menu > 0 then
-						if is_menu_open and clicked_menu = selected_menu then
-							close_menu
-						else
-							open_menu (clicked_menu)
+					if event.is_mouse_press and event.mouse_button = 1 then
+						-- Click on menu bar
+						if clicked_menu > 0 then
+							if is_menu_open and clicked_menu = selected_menu then
+								close_menu
+							else
+								open_menu (clicked_menu)
+							end
+							Result := True
 						end
-						Result := True
 					end
+				elseif is_menu_open and event.is_mouse_press then
+					-- Click outside menu bar while menu is open - close it
+					close_menu
+					Result := True
 				end
 			end
 		end
