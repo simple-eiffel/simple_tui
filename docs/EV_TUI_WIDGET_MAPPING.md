@@ -21,18 +21,18 @@ This document maps EiffelVision2 (EV) widgets to their simple_tui (TUI) equivale
 | EV_BUTTON | TUI_BUTTON | ✅ | Click handlers, disabled state |
 | EV_TOGGLE_BUTTON | TUI_TOGGLE_BUTTON | 🔨 | On/off button (like checkbox but button style) |
 | EV_CHECK_BUTTON | TUI_CHECKBOX | ✅ | Binary + indeterminate states |
-| EV_RADIO_BUTTON | TUI_RADIO_BUTTON | 🔨 | Needs TUI_RADIO_GROUP for mutual exclusion |
+| EV_RADIO_BUTTON | TUI_RADIO_BUTTON | ✅ | With TUI_RADIO_GROUP for mutual exclusion |
 | EV_TEXT_FIELD | TUI_TEXT_FIELD | ✅ | Single-line, password mode, placeholder |
 | EV_TEXT | TUI_TEXT_AREA | 🔨 | Multi-line text editing |
-| EV_COMBO_BOX | TUI_COMBO_BOX | 🔨 | Dropdown selection |
+| EV_COMBO_BOX | TUI_COMBO_BOX | ✅ | Dropdown selection |
 | EV_LIST | TUI_LIST | ✅ | Scrollable, single/multi select |
 | EV_MULTI_COLUMN_LIST | TUI_TABLE | 🔨 | Tabular data display |
 | EV_TREE | TUI_TREE | 🔨 | Hierarchical expand/collapse |
 | EV_PROGRESS_BAR | TUI_PROGRESS | ✅ | Determinate + indeterminate |
 | EV_SPIN_BUTTON | TUI_SPIN_BUTTON | 🔨 | Numeric input with +/- |
 | EV_RANGE / EV_HORIZONTAL_RANGE | TUI_SLIDER | 🔨 | Value selection slider |
-| EV_HORIZONTAL_SEPARATOR | TUI_SEPARATOR | 🔨 | Horizontal line divider |
-| EV_VERTICAL_SEPARATOR | TUI_SEPARATOR | 🔨 | Vertical line divider |
+| EV_HORIZONTAL_SEPARATOR | TUI_SEPARATOR | ✅ | Horizontal line divider |
+| EV_VERTICAL_SEPARATOR | TUI_SEPARATOR | ✅ | Vertical line divider |
 | EV_DRAWING_AREA | TUI_CANVAS | 🔨 | Custom drawing surface |
 | EV_PIXMAP | ➖ | N/A | TUI uses text/block characters |
 
@@ -47,7 +47,7 @@ This document maps EiffelVision2 (EV) widgets to their simple_tui (TUI) equivale
 | EV_HORIZONTAL_BOX | TUI_HBOX | ✅ | Horizontal child layout |
 | EV_VERTICAL_BOX | TUI_VBOX | ✅ | Vertical child layout |
 | EV_FRAME | TUI_BOX | ✅ | Same as TUI_BOX with border |
-| EV_NOTEBOOK | TUI_TABS | 🔨 | Tabbed panels |
+| EV_NOTEBOOK | TUI_TABS | ✅ | Tabbed panels |
 | EV_HORIZONTAL_SPLIT_AREA | TUI_HSPLIT | 🔨 | Resizable horizontal split |
 | EV_VERTICAL_SPLIT_AREA | TUI_VSPLIT | 🔨 | Resizable vertical split |
 | EV_SCROLLABLE_AREA | TUI_SCROLLABLE | 🔨 | Scrollable viewport |
@@ -75,10 +75,10 @@ This document maps EiffelVision2 (EV) widgets to their simple_tui (TUI) equivale
 
 | EV Widget | TUI Widget | Status | Notes |
 |-----------|------------|--------|-------|
-| EV_MENU_BAR | TUI_MENU_BAR | 🔨 | Horizontal menu bar |
-| EV_MENU | TUI_MENU | 🔨 | Dropdown menu |
-| EV_MENU_ITEM | TUI_MENU_ITEM | 🔨 | Menu entry |
-| EV_MENU_SEPARATOR | TUI_MENU_SEPARATOR | 🔨 | Menu divider |
+| EV_MENU_BAR | TUI_MENU_BAR | ✅ | Horizontal menu bar with Alt shortcuts |
+| EV_MENU | TUI_MENU | ✅ | Dropdown menu |
+| EV_MENU_ITEM | TUI_MENU_ITEM | ✅ | Menu entry with & shortcut |
+| EV_MENU_SEPARATOR | (via TUI_MENU_ITEM) | ✅ | Menu divider (is_separator mode) |
 | EV_CHECK_MENU_ITEM | TUI_CHECK_MENU_ITEM | 🔨 | Toggleable menu item |
 | EV_RADIO_MENU_ITEM | TUI_RADIO_MENU_ITEM | 🔨 | Radio group menu item |
 
@@ -97,8 +97,8 @@ This document maps EiffelVision2 (EV) widgets to their simple_tui (TUI) equivale
 
 ## Priority Implementation Order
 
-### Phase 1 - Core Widgets (Current)
-Already implemented:
+### Phase 1 - Core Widgets ✅
+Implemented:
 - TUI_LABEL ✅
 - TUI_BUTTON ✅
 - TUI_CHECKBOX ✅
@@ -109,23 +109,26 @@ Already implemented:
 - TUI_VBOX ✅
 - TUI_HBOX ✅
 
-### Phase 2 - Essential Additions
-High priority for typical TUI applications:
-1. TUI_RADIO_BUTTON + TUI_RADIO_GROUP
-2. TUI_COMBO_BOX (dropdown)
-3. TUI_TEXT_AREA (multi-line)
-4. TUI_SEPARATOR (horizontal/vertical)
-5. TUI_DIALOG (modal)
-6. TUI_TABS (tabbed panels)
+### Phase 2 - Essential Additions ✅
+Implemented:
+- TUI_RADIO_BUTTON + TUI_RADIO_GROUP ✅
+- TUI_COMBO_BOX (dropdown) ✅
+- TUI_SEPARATOR (horizontal/vertical) ✅
+- TUI_TABS (tabbed panels) ✅
+- TUI_MENU_BAR + TUI_MENU + TUI_MENU_ITEM ✅
+
+Still to do:
+- TUI_TEXT_AREA (multi-line)
+- TUI_DIALOG (modal)
 
 ### Phase 3 - Advanced Widgets
 For richer applications:
 1. TUI_TREE (hierarchical)
 2. TUI_TABLE (multi-column)
-3. TUI_MENU_BAR + TUI_MENU
-4. TUI_SLIDER
-5. TUI_SPIN_BUTTON
-6. TUI_STATUS_BAR
+3. TUI_SLIDER
+4. TUI_SPIN_BUTTON
+5. TUI_STATUS_BAR
+6. TUI_TOOLBAR
 
 ### Phase 4 - Specialized
 For specific use cases:

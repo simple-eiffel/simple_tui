@@ -43,6 +43,9 @@ feature -- Access
 	root: detachable TUI_WIDGET
 			-- Root widget.
 
+	menu_bar: detachable TUI_MENU_BAR
+			-- Optional menu bar at top.
+
 	is_running: BOOLEAN
 			-- Is event loop running?
 
@@ -72,6 +75,20 @@ feature -- Configuration
 			collect_focusable_widgets
 		ensure
 			root_set: root = widget
+		end
+
+	set_menu_bar (a_menu_bar: TUI_MENU_BAR)
+			-- Set menu bar.
+		require
+			menu_bar_exists: a_menu_bar /= Void
+		do
+			menu_bar := a_menu_bar
+			-- Add menu bar to focusable widgets
+			if a_menu_bar.is_focusable and not focusable_widgets.has (a_menu_bar) then
+				focusable_widgets.put_front (a_menu_bar)
+			end
+		ensure
+			menu_bar_set: menu_bar = a_menu_bar
 		end
 
 	set_target_fps (fps: INTEGER)
@@ -182,9 +199,19 @@ feature -- Lifecycle
 				create buffer.make (b.width, b.height)
 			end
 
-			-- Layout root widget
+			-- Position menu bar if present
+			if attached menu_bar as mb and attached backend as b then
+				mb.set_position (1, 1)
+				mb.set_size (b.width, 1)
+			end
+
+			-- Layout root widget (below menu bar if present)
 			if attached root as r and attached backend as b then
-				r.set_bounds (1, 1, b.width, b.height)
+				if attached menu_bar then
+					r.set_bounds (1, 2, b.width, b.height - 1)
+				else
+					r.set_bounds (1, 1, b.width, b.height)
+				end
 				r.layout
 			end
 
@@ -345,6 +372,13 @@ feature {NONE} -- Event Loop
 				end
 			end
 
+			-- Let menu bar handle if open
+			if not Result and attached menu_bar as mb then
+				if mb.is_menu_open then
+					Result := mb.handle_key (event)
+				end
+			end
+
 			-- Check for Tab (focus cycling)
 			if not Result and event.is_tab then
 				if event.has_shift then
@@ -353,6 +387,11 @@ feature {NONE} -- Event Loop
 					focus_next
 				end
 				Result := True
+			end
+
+			-- Check Alt+key for menu shortcuts
+			if not Result and event.has_alt and attached menu_bar as mb then
+				Result := mb.handle_key (event)
 			end
 
 			-- Dispatch to focused widget
@@ -366,8 +405,15 @@ feature {NONE} -- Event Loop
 		local
 			target: detachable TUI_WIDGET
 		do
+			-- Check menu bar first
+			if attached menu_bar as mb then
+				if event.mouse_y = 1 or mb.is_menu_open then
+					Result := mb.handle_mouse (event)
+				end
+			end
+
 			-- Find widget under mouse
-			if attached root as r then
+			if not Result and attached root as r then
 				target := r.find_widget_at (event.mouse_x, event.mouse_y)
 				if attached target as t then
 					-- Focus clicked widget if focusable
@@ -410,6 +456,11 @@ feature {NONE} -- Event Loop
 			if attached buffer as buf and attached backend as b then
 				-- Clear next buffer
 				buf.clear
+
+				-- Render menu bar
+				if attached menu_bar as mb then
+					mb.render (buf)
+				end
 
 				-- Render widget tree
 				if attached root as r then

@@ -2,13 +2,18 @@ note
 	description: "[
 		Interactive demo application for simple_tui library
 
-		Showcases all widgets:
-		- Labels with different alignments
-		- Buttons with click handlers
-		- Text fields with editing
-		- Checkboxes with toggles
+		Showcases ALL widgets:
+		- Labels, Buttons, Text fields
+		- Checkboxes, Radio buttons
+		- Lists, Combo boxes
 		- Progress bars (animated)
-		- Lists with scrolling
+		- Separators (horizontal/vertical)
+		- Tabbed panels
+
+		Layout containers:
+		- TUI_BOX (bordered panels)
+		- TUI_VBOX (vertical)
+		- TUI_HBOX (horizontal)
 
 		Navigation: Tab to move focus, Enter/Space to activate
 		Quit: Ctrl+Q or press the Quit button
@@ -52,6 +57,13 @@ feature {NONE} -- Widgets
 
 	app: TUI_APPLICATION
 	root_box: TUI_VBOX
+
+	-- Menu bar
+	menu_bar: TUI_MENU_BAR
+	file_menu: TUI_MENU
+	edit_menu: TUI_MENU
+	view_menu: TUI_MENU
+	help_menu: TUI_MENU
 
 	-- Header
 	title_label: TUI_LABEL
@@ -100,6 +112,16 @@ feature {NONE} -- Widgets
 	theme_combo: TUI_COMBO_BOX
 	combo_sep: TUI_SEPARATOR
 
+	-- Right panel - Tabs demo
+	tabs_panel: TUI_TABS
+	tab1_content: TUI_BOX
+	tab1_label: TUI_LABEL
+	tab2_content: TUI_BOX
+	tab2_label: TUI_LABEL
+	tab2_button: TUI_BUTTON
+	tab3_content: TUI_BOX
+	tab3_progress: TUI_PROGRESS
+
 	-- Footer
 	footer_hbox: TUI_HBOX
 	quit_button: TUI_BUTTON
@@ -122,7 +144,7 @@ feature {NONE} -- Widget Creation
 			log.info ("app created")
 
 			-- Root container
-			create root_box.make (80, 24)
+			create root_box.make (80, 23)  -- Leave room for menu bar
 			root_box.set_gap (1)
 			log.info ("root_box created: 80x24")
 
@@ -331,9 +353,47 @@ feature {NONE} -- Widget Creation
 			theme_combo.set_position (1, 2)
 			combo_sep.set_position (1, 4)
 
+			-- Tabs panel
+			create tabs_panel.make (24, 6)
+			tabs_panel.set_normal_tab_style (tabs_normal_style)
+			tabs_panel.set_selected_tab_style (tabs_selected_style)
+
+			-- Tab 1: Info
+			create tab1_content.make (24, 4)
+			create tab1_label.make_with_text ("Welcome to TUI!")
+			tab1_label.set_style (tabs_content_style)
+			tab1_content.add_child (tab1_label)
+			tab1_label.set_position (1, 1)
+			tabs_panel.add_tab ("Info", tab1_content)
+
+			-- Tab 2: Action
+			create tab2_content.make (24, 4)
+			create tab2_label.make_with_text ("Click below:")
+			tab2_label.set_style (tabs_content_style)
+			create tab2_button.make ("Tab Action")
+			tab2_button.set_normal_style (button_style)
+			tab2_button.set_focused_style (button_focused_style)
+			tab2_content.add_child (tab2_label)
+			tab2_content.add_child (tab2_button)
+			tab2_label.set_position (1, 1)
+			tab2_button.set_position (1, 2)
+			tabs_panel.add_tab ("Action", tab2_content)
+
+			-- Tab 3: Status
+			create tab3_content.make (24, 4)
+			create tab3_progress.make (18)
+			tab3_progress.set_value (75)
+			tab3_progress.set_show_percentage (True)
+			tab3_progress.set_fill_style (progress_fill_style)
+			tab3_progress.set_empty_style (progress_empty_style)
+			tab3_content.add_child (tab3_progress)
+			tab3_progress.set_position (1, 1)
+			tabs_panel.add_tab ("Status", tab3_content)
+
 			-- Add second row panels
 			content_hbox2.add_child (radio_box)
 			content_hbox2.add_child (combo_box_panel)
+			content_hbox2.add_child (tabs_panel)
 
 			root_box.add_child (content_hbox2)
 
@@ -354,8 +414,18 @@ feature {NONE} -- Widget Creation
 
 			root_box.add_child (footer_hbox)
 
-			-- Set root
+			-- Initialize menu placeholders (to satisfy compiler)
+			create file_menu.make
+			create edit_menu.make
+			create view_menu.make
+			create help_menu.make
+
+			-- Create menu bar (after widgets so agents can reference them)
+			create_menu_bar
+
+			-- Set root with menu bar
 			app.set_root (root_box)
+			app.set_menu_bar (menu_bar)
 		end
 
 	layout_form
@@ -528,6 +598,32 @@ feature {NONE} -- Color Theme
 			-- Separator style
 			create separator_style.make
 			separator_style.set_foreground (c_gray)
+
+			-- Tabs styles (green theme)
+			create tabs_normal_style.make
+			tabs_normal_style.set_foreground (c_gray)
+			create tabs_selected_style.make
+			tabs_selected_style.set_foreground (c_green)
+			tabs_selected_style.set_reverse (True)
+			tabs_selected_style.set_bold (True)
+			create tabs_content_style.make
+			tabs_content_style.set_foreground (c_white)
+
+			-- Menu bar styles
+			create menu_bar_style.make
+			menu_bar_style.set_foreground (c_white)
+			menu_bar_style.set_background (c_blue)
+			create menu_bar_selected_style.make
+			menu_bar_selected_style.set_foreground (c_blue)
+			menu_bar_selected_style.set_background (c_white)
+			menu_bar_selected_style.set_bold (True)
+			create menu_item_style.make
+			menu_item_style.set_foreground (c_white)
+			menu_item_style.set_background (c_blue)
+			create menu_item_selected_style.make
+			menu_item_selected_style.set_foreground (c_blue)
+			menu_item_selected_style.set_background (c_cyan)
+			menu_item_selected_style.set_bold (True)
 		end
 
 	-- Style attributes
@@ -577,6 +673,15 @@ feature {NONE} -- Color Theme
 
 	separator_style: TUI_STYLE
 
+	tabs_normal_style: TUI_STYLE
+	tabs_selected_style: TUI_STYLE
+	tabs_content_style: TUI_STYLE
+
+	menu_bar_style: TUI_STYLE
+	menu_bar_selected_style: TUI_STYLE
+	menu_item_style: TUI_STYLE
+	menu_item_selected_style: TUI_STYLE
+
 feature {NONE} -- Event Handlers
 
 	setup_handlers
@@ -592,6 +697,8 @@ feature {NONE} -- Event Handlers
 
 			radio_group.set_on_change (agent on_radio_change)
 			theme_combo.set_on_change (agent on_theme_change)
+			tab2_button.set_on_click (agent on_tab_action)
+			tabs_panel.set_on_tab_change (agent on_tab_change)
 
 			app.set_on_tick (agent on_tick)
 		end
@@ -686,6 +793,23 @@ feature {NONE} -- Event Handlers
 			end
 		end
 
+	on_tab_action
+			-- Handle tab button click.
+		do
+			status_label.set_text ("Tab Action clicked!")
+		end
+
+	on_tab_change (index: INTEGER)
+			-- Handle tab change.
+		local
+			tab_names: ARRAY [STRING]
+		do
+			tab_names := <<"Info", "Action", "Status">>
+			if index >= 1 and index <= 3 then
+				status_label.set_text ("Tab: " + tab_names [index])
+			end
+		end
+
 feature {NONE} -- Animation
 
 	progress_running: BOOLEAN
@@ -737,6 +861,90 @@ feature {NONE} -- Execution
 			log.info ("run_demo: event loop ended")
 			app.shutdown
 		end
+
+feature {NONE} -- Menu Creation
+
+	create_menu_bar
+			-- Create and populate menu bar.
+		local
+			item: TUI_MENU_ITEM
+		do
+			create menu_bar.make (80)
+			menu_bar.set_normal_style (menu_bar_style)
+			menu_bar.set_selected_style (menu_bar_selected_style)
+
+			-- File menu
+			create file_menu.make_with_title ("&File")
+			file_menu.set_normal_style (menu_item_style)
+			file_menu.set_selected_style (menu_item_selected_style)
+			create item.make_with_text_and_action ("&New", agent on_menu_new)
+			file_menu.add_item (item)
+			create item.make_with_text_and_action ("&Open", agent on_menu_open)
+			file_menu.add_item (item)
+			create item.make_with_text_and_action ("&Save", agent on_menu_save)
+			file_menu.add_item (item)
+			file_menu.add_separator
+			create item.make_with_text_and_action ("E&xit", agent on_quit)
+			file_menu.add_item (item)
+			menu_bar.add_menu (file_menu)
+
+			-- Edit menu
+			create edit_menu.make_with_title ("&Edit")
+			edit_menu.set_normal_style (menu_item_style)
+			edit_menu.set_selected_style (menu_item_selected_style)
+			create item.make_with_text_and_action ("&Undo", agent on_menu_undo)
+			edit_menu.add_item (item)
+			create item.make_with_text_and_action ("&Redo", agent on_menu_redo)
+			edit_menu.add_item (item)
+			edit_menu.add_separator
+			create item.make_with_text_and_action ("Cu&t", agent on_menu_cut)
+			edit_menu.add_item (item)
+			create item.make_with_text_and_action ("&Copy", agent on_menu_copy)
+			edit_menu.add_item (item)
+			create item.make_with_text_and_action ("&Paste", agent on_menu_paste)
+			edit_menu.add_item (item)
+			menu_bar.add_menu (edit_menu)
+
+			-- View menu
+			create view_menu.make_with_title ("&View")
+			view_menu.set_normal_style (menu_item_style)
+			view_menu.set_selected_style (menu_item_selected_style)
+			create item.make_with_text_and_action ("&Toolbar", agent on_menu_toolbar)
+			view_menu.add_item (item)
+			create item.make_with_text_and_action ("&Status Bar", agent on_menu_statusbar)
+			view_menu.add_item (item)
+			view_menu.add_separator
+			create item.make_with_text_and_action ("&Refresh", agent on_menu_refresh)
+			view_menu.add_item (item)
+			menu_bar.add_menu (view_menu)
+
+			-- Help menu
+			create help_menu.make_with_title ("&Help")
+			help_menu.set_normal_style (menu_item_style)
+			help_menu.set_selected_style (menu_item_selected_style)
+			create item.make_with_text_and_action ("&Documentation", agent on_menu_docs)
+			help_menu.add_item (item)
+			help_menu.add_separator
+			create item.make_with_text_and_action ("&About", agent on_menu_about)
+			help_menu.add_item (item)
+			menu_bar.add_menu (help_menu)
+		end
+
+feature {NONE} -- Menu Handlers
+
+	on_menu_new do status_label.set_text ("Menu: New") end
+	on_menu_open do status_label.set_text ("Menu: Open") end
+	on_menu_save do status_label.set_text ("Menu: Save") end
+	on_menu_undo do status_label.set_text ("Menu: Undo") end
+	on_menu_redo do status_label.set_text ("Menu: Redo") end
+	on_menu_cut do status_label.set_text ("Menu: Cut") end
+	on_menu_copy do status_label.set_text ("Menu: Copy") end
+	on_menu_paste do status_label.set_text ("Menu: Paste") end
+	on_menu_toolbar do status_label.set_text ("Menu: Toggle Toolbar") end
+	on_menu_statusbar do status_label.set_text ("Menu: Toggle Status Bar") end
+	on_menu_refresh do status_label.set_text ("Menu: Refresh") end
+	on_menu_docs do status_label.set_text ("Menu: Documentation") end
+	on_menu_about do status_label.set_text ("simple_tui Demo v1.0") end
 
 feature {NONE} -- Box Drawing Helpers
 

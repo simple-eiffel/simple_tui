@@ -82,6 +82,11 @@ end
 - **TUI_SEPARATOR** - Horizontal/vertical divider
 - **TUI_TABS** - Tabbed panel container
 
+### Menus
+- **TUI_MENU_BAR** - Horizontal menu bar with Alt+key shortcuts
+- **TUI_MENU** - Drop-down menu container
+- **TUI_MENU_ITEM** - Menu item with text, action, and & shortcut marker
+
 ### Layout
 - **TUI_BOX** - Container with optional border and title
 - **TUI_VBOX** - Vertical layout container
@@ -101,6 +106,9 @@ For EV developers, the API uses familiar naming:
 | `EV_LIST` | `TUI_LIST` |
 | `EV_COMBO_BOX` | `TUI_COMBO_BOX` |
 | `EV_NOTEBOOK` | `TUI_TABS` |
+| `EV_MENU_BAR` | `TUI_MENU_BAR` |
+| `EV_MENU` | `TUI_MENU` |
+| `EV_MENU_ITEM` | `TUI_MENU_ITEM` |
 
 See [EV_TUI_WIDGET_MAPPING.md](docs/EV_TUI_WIDGET_MAPPING.md) for complete mapping.
 

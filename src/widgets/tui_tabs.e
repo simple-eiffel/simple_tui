@@ -115,7 +115,7 @@ feature -- Styles
 
 feature -- Modification
 
-	add_tab, extend (title: READABLE_STRING_GENERAL; content: TUI_WIDGET)
+	add_tab (title: READABLE_STRING_GENERAL; content: TUI_WIDGET)
 			-- Add a new tab.
 		require
 			title_exists: title /= Void
@@ -131,7 +131,7 @@ feature -- Modification
 			tab_added: tabs.count = old tabs.count + 1
 		end
 
-	remove_tab, prune (index: INTEGER)
+	remove_tab (index: INTEGER)
 			-- Remove tab at index.
 		require
 			valid_index: index >= 1 and index <= tabs.count

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_tui - Terminal UI for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>simple_tui</h1>
+        <p class="tagline">Terminal User Interface Library for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+            <span class="badge">Windows</span>
+            <span class="badge badge-rfc">EV Compatible</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#widgets">Widgets</a></li>
+            <li><a href="#layout">Layout</a></li>
+            <li><a href="#styling">Styling</a></li>
+            <li><a href="#api-reference">API Reference</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_tui">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_tui</strong> provides a modern terminal-based UI framework
+                for Eiffel applications. Features <strong>EiffelVision2-compatible API</strong>
+                (extend/prune naming), <strong>256-color support</strong>, <strong>mouse input</strong>,
+                <strong>keyboard navigation</strong>, and <strong>Unicode rendering</strong>.
+            </p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>EV Compatible</h4>
+                    <p>Familiar API for EiffelVision2 developers</p>
+                </div>
+                <div class="feature-card">
+                    <h4>256 Colors</h4>
+                    <p>Full terminal color palette support</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Mouse & Keyboard</h4>
+                    <p>Complete input handling with focus management</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Unicode</h4>
+                    <p>Box drawing and special characters</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="quick-start">
+            <h2>Quick Start</h2>
+<pre><code><span class="keyword">class</span> <span class="type">MY_APP</span>
+
+<span class="keyword">inherit</span>
+    <span class="type">TUI_APPLICATION</span>
+        <span class="keyword">redefine</span>
+            setup
+        <span class="keyword">end</span>
+
+<span class="keyword">create</span>
+    make
+
+<span class="keyword">feature</span> {<span class="type">NONE</span>}
+
+    setup
+        <span class="keyword">local</span>
+            box: <span class="type">TUI_BOX</span>
+            btn: <span class="type">TUI_BUTTON</span>
+        <span class="keyword">do</span>
+            <span class="keyword">create</span> box.make (40, 10, <span class="string">"My App"</span>)
+            <span class="keyword">create</span> btn.make_with_text (<span class="string">"Click Me"</span>)
+            btn.set_on_click (<span class="keyword">agent</span> on_click)
+            box.extend (btn)  <span class="comment">-- EV-compatible API</span>
+            root.extend (box)
+        <span class="keyword">end</span>
+
+    on_click
+        <span class="keyword">do</span>
+            quit
+        <span class="keyword">end</span>
+
+<span class="keyword">end</span></code></pre>
+        </section>
+
+        <section id="widgets">
+            <h2>Widgets</h2>
+
+            <h3>Input Widgets</h3>
+            <table>
+                <tr><th>Widget</th><th>EV Equivalent</th><th>Description</th></tr>
+                <tr><td><code>TUI_BUTTON</code></td><td>EV_BUTTON</td><td>Clickable button with press animation</td></tr>
+                <tr><td><code>TUI_TEXT_FIELD</code></td><td>EV_TEXT_FIELD</td><td>Single-line text input</td></tr>
+                <tr><td><code>TUI_CHECKBOX</code></td><td>EV_CHECK_BUTTON</td><td>Toggle checkbox</td></tr>
+                <tr><td><code>TUI_RADIO_BUTTON</code></td><td>EV_RADIO_BUTTON</td><td>Mutually exclusive selection</td></tr>
+                <tr><td><code>TUI_LIST</code></td><td>EV_LIST</td><td>Scrollable selection list</td></tr>
+                <tr><td><code>TUI_COMBO_BOX</code></td><td>EV_COMBO_BOX</td><td>Dropdown selection</td></tr>
+            </table>
+
+            <h3>Display Widgets</h3>
+            <table>
+                <tr><th>Widget</th><th>EV Equivalent</th><th>Description</th></tr>
+                <tr><td><code>TUI_LABEL</code></td><td>EV_LABEL</td><td>Static text display</td></tr>
+                <tr><td><code>TUI_PROGRESS</code></td><td>EV_PROGRESS_BAR</td><td>Progress indicator</td></tr>
+                <tr><td><code>TUI_SEPARATOR</code></td><td>EV_HORIZONTAL_SEPARATOR</td><td>Divider line</td></tr>
+            </table>
+
+            <h3>Container Widgets</h3>
+            <table>
+                <tr><th>Widget</th><th>EV Equivalent</th><th>Description</th></tr>
+                <tr><td><code>TUI_TABS</code></td><td>EV_NOTEBOOK</td><td>Tabbed panel container</td></tr>
+                <tr><td><code>TUI_MENU_BAR</code></td><td>EV_MENU_BAR</td><td>Horizontal menu bar</td></tr>
+                <tr><td><code>TUI_MENU</code></td><td>EV_MENU</td><td>Drop-down menu</td></tr>
+                <tr><td><code>TUI_RADIO_GROUP</code></td><td>(implicit)</td><td>Radio button container</td></tr>
+            </table>
+        </section>
+
+        <section id="layout">
+            <h2>Layout Containers</h2>
+
+            <h3>TUI_BOX</h3>
+            <p>Container with optional border and title. Can nest other widgets.</p>
+<pre><code><span class="keyword">create</span> box.make_with_title (<span class="string">"Settings"</span>, 40, 20)
+box.set_padding (1)
+box.extend (label)
+box.extend (field)</code></pre>
+
+            <h3>TUI_VBOX / TUI_HBOX</h3>
+            <p>Vertical and horizontal flow layouts.</p>
+<pre><code><span class="keyword">create</span> vbox.make (60, 20)
+vbox.set_gap (1)  <span class="comment">-- Spacing between children</span>
+vbox.extend (row1)
+vbox.extend (row2)</code></pre>
+        </section>
+
+        <section id="styling">
+            <h2>Styling</h2>
+
+            <h3>Colors</h3>
+<pre><code><span class="keyword">local</span>
+    style: <span class="type">TUI_STYLE</span>
+    color: <span class="type">TUI_COLOR</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> style.make_default
+
+    <span class="comment">-- Named colors</span>
+    style.set_fg (color.cyan)
+    style.set_bg (color.blue)
+
+    <span class="comment">-- 256-color palette</span>
+    <span class="keyword">create</span> color.make_index (202)  <span class="comment">-- Orange</span>
+    style.set_fg (color)
+
+    <span class="comment">-- Attributes</span>
+    style.set_bold (<span class="keyword">True</span>)
+    style.set_reverse (<span class="keyword">True</span>)
+    style.set_underline (<span class="keyword">True</span>)
+<span class="keyword">end</span></code></pre>
+
+            <h3>Applying Styles</h3>
+<pre><code>button.set_normal_style (my_style)
+button.set_focused_style (focused_style)
+button.set_pressed_style (pressed_style)</code></pre>
+        </section>
+
+        <section id="api-reference">
+            <h2>API Reference</h2>
+
+            <h3>TUI_APPLICATION</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>set_root (widget)</code></td><td>Set root widget</td></tr>
+                <tr><td><code>set_menu_bar (bar)</code></td><td>Set menu bar</td></tr>
+                <tr><td><code>run</code></td><td>Start event loop</td></tr>
+                <tr><td><code>quit</code></td><td>Stop event loop</td></tr>
+                <tr><td><code>focus_next</code></td><td>Move focus forward</td></tr>
+                <tr><td><code>focus_previous</code></td><td>Move focus backward</td></tr>
+            </table>
+
+            <h3>TUI_WIDGET (Base)</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>extend (child)</code></td><td>Add child widget (EV compatible)</td></tr>
+                <tr><td><code>prune (child)</code></td><td>Remove child widget (EV compatible)</td></tr>
+                <tr><td><code>set_position (x, y)</code></td><td>Set widget position</td></tr>
+                <tr><td><code>set_size (w, h)</code></td><td>Set widget size</td></tr>
+                <tr><td><code>show / hide</code></td><td>Control visibility</td></tr>
+                <tr><td><code>focus / unfocus</code></td><td>Control focus state</td></tr>
+            </table>
+
+            <h3>TUI_BUTTON</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>make (label)</code></td><td>Create button with text</td></tr>
+                <tr><td><code>set_on_click (agent)</code></td><td>Set click handler</td></tr>
+                <tr><td><code>set_label (text)</code></td><td>Change button text</td></tr>
+            </table>
+
+            <h3>TUI_TEXT_FIELD</h3>
+            <table>
+                <tr><th>Feature</th><th>Description</th></tr>
+                <tr><td><code>make (width)</code></td><td>Create text field</td></tr>
+                <tr><td><code>text</code></td><td>Get current text</td></tr>
+                <tr><td><code>set_text (s)</code></td><td>Set text content</td></tr>
+                <tr><td><code>set_placeholder (s)</code></td><td>Set placeholder text</td></tr>
+                <tr><td><code>set_password (b)</code></td><td>Enable password mode</td></tr>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>Part of the <a href="https://github.com/simple-eiffel">Simple Eiffel</a> ecosystem.</p>
+        <p class="copyright">Documentation follows EiffelVision2 naming conventions.</p>
+    </footer>
+</body>
+</html>
