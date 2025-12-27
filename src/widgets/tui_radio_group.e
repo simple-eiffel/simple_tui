@@ -37,6 +37,7 @@ feature {NONE} -- Initialization
 		do
 			make_widget
 			create buttons.make (5)
+			create change_actions
 			selected_index := 0
 			is_horizontal := False
 			gap := 0
@@ -88,14 +89,17 @@ feature -- Access
 	gap: INTEGER
 			-- Gap between buttons.
 
-	on_change: detachable PROCEDURE [INTEGER]
-			-- Called when selection changes with new index.
-			-- Aliases: on_select, on_value_change
+feature -- Actions (EV compatible)
 
-	on_select: detachable PROCEDURE [INTEGER]
-			-- Alias for on_change.
+	change_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when selection changes.
+			-- Passes new selected index to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
+
+	select_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Alias for change_actions (EV compatibility).
 		do
-			Result := on_change
+			Result := change_actions
 		end
 
 feature -- Modification
@@ -193,11 +197,11 @@ feature -- Modification
 		end
 
 	set_on_change, set_on_select (handler: PROCEDURE [INTEGER])
-			-- Set change handler.
+			-- Set change handler (clears previous handlers).
+			-- For multiple handlers, use change_actions.extend directly.
 		do
-			on_change := handler
-		ensure
-			handler_set: on_change = handler
+			change_actions.wipe_out
+			change_actions.extend (handler)
 		end
 
 feature -- Layout
@@ -273,15 +277,14 @@ feature -- Rendering
 feature {NONE} -- Implementation
 
 	notify_change
-			-- Notify change handler.
+			-- Notify change handlers.
 		do
-			if attached on_change as handler then
-				handler.call ([selected_index])
-			end
+			change_actions.call ([selected_index])
 		end
 
 invariant
 	buttons_exist: buttons /= Void
+	change_actions_exists: change_actions /= Void
 	valid_selection: selected_index >= 0 and selected_index <= buttons.count
 
 end

@@ -567,31 +567,50 @@ feature {NONE} -- Animation
 
 ## Event Handling
 
-### Button Click
+simple_tui uses EiffelVision2-compatible `ACTION_SEQUENCE` for event handling, allowing multiple handlers per event.
+
+### Simple Approach (Single Handler)
+
+Use the convenience setters for a single handler (clears previous handlers):
 
 ```eiffel
-button.set_on_click (agent handler_name)
-```
-
-### Checkbox/Radio Change
-
-```eiffel
-checkbox.set_on_change (agent on_check (?, BOOLEAN))
-radio_group.set_on_change (agent on_radio (?, INTEGER))
-```
-
-### List/Combo Selection
-
-```eiffel
-list.set_on_select (agent on_select (?, INTEGER))
-combo.set_on_change (agent on_combo (?, INTEGER))
-```
-
-### Tab Change
-
-```eiffel
+button.set_on_click (agent on_button_clicked)
+checkbox.set_on_change (agent on_checked (?, BOOLEAN))
+list.set_on_select (agent on_selected (?, INTEGER))
+combo.set_on_change (agent on_changed (?, INTEGER))
 tabs.set_on_tab_change (agent on_tab (?, INTEGER))
+dialog.set_on_close (agent on_close (?, INTEGER))
 ```
+
+### ACTION_SEQUENCE Approach (Multiple Handlers)
+
+For EV-style multiple handlers, use the action sequences directly:
+
+```eiffel
+-- Add multiple click handlers
+button.click_actions.extend (agent log_click)
+button.click_actions.extend (agent update_ui)
+button.click_actions.extend (agent save_state)
+
+-- Remove a handler
+button.click_actions.prune (agent log_click)
+
+-- Clear all handlers
+button.click_actions.wipe_out
+```
+
+### Available Action Sequences
+
+| Widget | Action Sequence | EV Alias | Argument |
+|--------|-----------------|----------|----------|
+| `TUI_BUTTON` | `click_actions` | `select_actions` | `TUPLE` |
+| `TUI_CHECKBOX` | `change_actions` | `check_actions` | `TUPLE [BOOLEAN]` |
+| `TUI_RADIO_GROUP` | `change_actions` | `select_actions` | `TUPLE [INTEGER]` |
+| `TUI_LIST` | `select_actions` | - | `TUPLE [INTEGER]` |
+| `TUI_LIST` | `activate_actions` | - | `TUPLE [INTEGER]` |
+| `TUI_COMBO_BOX` | `change_actions` | `select_actions` | `TUPLE [INTEGER]` |
+| `TUI_TABS` | `tab_change_actions` | `selection_actions` | `TUPLE [INTEGER]` |
+| `TUI_MESSAGE_BOX` | `close_actions` | - | `TUPLE [INTEGER]` |
 
 ## Installation
 

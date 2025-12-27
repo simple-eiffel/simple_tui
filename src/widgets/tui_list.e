@@ -46,6 +46,8 @@ feature {NONE} -- Initialization
 			is_multi_select := False
 			create selected_indices.make (5)
 			show_scrollbar := True
+			create select_actions
+			create activate_actions
 			create normal_style.make_default
 			create selected_style.make_default
 			create focused_style.make_default
@@ -77,11 +79,17 @@ feature -- Access
 	show_scrollbar: BOOLEAN
 			-- Show scrollbar when content overflows?
 
-	on_select: detachable PROCEDURE [INTEGER]
-			-- Called when selection changes.
+feature -- Actions (EV compatible)
 
-	on_activate: detachable PROCEDURE [INTEGER]
-			-- Called when item is activated (Enter/double-click).
+	select_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when selection changes.
+			-- Passes selected index to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
+			-- EV equivalent: select_actions
+
+	activate_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when item is activated (Enter/double-click).
+			-- Passes activated index to handlers.
 
 feature -- Styles
 
@@ -266,19 +274,19 @@ feature -- Modification
 		end
 
 	set_on_select (handler: PROCEDURE [INTEGER])
-			-- Set selection change handler.
+			-- Set selection change handler (clears previous handlers).
+			-- For multiple handlers, use select_actions.extend directly.
 		do
-			on_select := handler
-		ensure
-			handler_set: on_select = handler
+			select_actions.wipe_out
+			select_actions.extend (handler)
 		end
 
 	set_on_activate (handler: PROCEDURE [INTEGER])
-			-- Set activation handler.
+			-- Set activation handler (clears previous handlers).
+			-- For multiple handlers, use activate_actions.extend directly.
 		do
-			on_activate := handler
-		ensure
-			handler_set: on_activate = handler
+			activate_actions.wipe_out
+			activate_actions.extend (handler)
 		end
 
 	set_normal_style (s: TUI_STYLE)
@@ -524,18 +532,16 @@ feature {NONE} -- Implementation
 		end
 
 	notify_select
-			-- Notify selection handler.
+			-- Notify selection handlers.
 		do
-			if attached on_select as handler then
-				handler.call ([selected_index])
-			end
+			select_actions.call ([selected_index])
 		end
 
 	activate_current
 			-- Activate currently selected item.
 		do
-			if selected_index > 0 and attached on_activate as handler then
-				handler.call ([selected_index])
+			if selected_index > 0 then
+				activate_actions.call ([selected_index])
 			end
 		end
 
@@ -590,6 +596,8 @@ feature {NONE} -- Implementation
 invariant
 	items_exist: items /= Void
 	selected_indices_exist: selected_indices /= Void
+	select_actions_exists: select_actions /= Void
+	activate_actions_exists: activate_actions /= Void
 	valid_selection: selected_index >= 0 and selected_index <= count
 	valid_scroll: scroll_offset >= 0
 	normal_style_exists: normal_style /= Void

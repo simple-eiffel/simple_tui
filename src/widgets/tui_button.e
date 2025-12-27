@@ -6,7 +6,7 @@ note
 		- Click handling (mouse and keyboard)
 		- Visual states (normal, focused, pressed, disabled)
 		- Configurable label
-		- Action callback via agent
+		- Multiple action handlers via ACTION_SEQUENCE (EV compatible)
 	]"
 	author: "Larry Rix"
 	date: "$Date$"
@@ -41,6 +41,7 @@ feature {NONE} -- Initialization
 			is_focusable := True
 			is_enabled := True
 			is_pressed := False
+			create click_actions
 			create normal_style.make_default
 			create focused_style.make_default
 			create pressed_style.make_default
@@ -67,8 +68,18 @@ feature -- Access
 	is_pressed: BOOLEAN
 			-- Is button currently pressed?
 
-	on_click: detachable PROCEDURE
-			-- Action to execute when clicked.
+feature -- Actions (EV compatible)
+
+	click_actions: ACTION_SEQUENCE [TUPLE]
+			-- Actions to execute when button is clicked.
+			-- Use `extend' to add handlers, `prune' to remove.
+			-- EV equivalent: select_actions
+
+	select_actions: ACTION_SEQUENCE [TUPLE]
+			-- Alias for click_actions (EV compatibility).
+		do
+			Result := click_actions
+		end
 
 feature -- Styles
 
@@ -109,11 +120,11 @@ feature -- Modification
 		end
 
 	set_on_click (action: PROCEDURE)
-			-- Set click handler.
+			-- Set click handler (clears previous handlers).
+			-- For multiple handlers, use click_actions.extend directly.
 		do
-			on_click := action
-		ensure
-			handler_set: on_click = action
+			click_actions.wipe_out
+			click_actions.extend (action)
 		end
 
 	set_normal_style (s: TUI_STYLE)
@@ -161,8 +172,8 @@ feature -- Actions
 	click
 			-- Programmatically click the button.
 		do
-			if is_enabled and attached on_click as handler then
-				handler.call (Void)
+			if is_enabled then
+				click_actions.call (Void)
 			end
 		end
 
@@ -264,6 +275,7 @@ feature -- Queries
 
 invariant
 	label_exists: label /= Void
+	click_actions_exists: click_actions /= Void
 	normal_style_exists: normal_style /= Void
 	focused_style_exists: focused_style /= Void
 	pressed_style_exists: pressed_style /= Void

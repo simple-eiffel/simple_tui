@@ -50,6 +50,7 @@ feature {NONE} -- Initialization
 			create tabs.make (5)
 			selected_tab := 0
 			tab_bar_height := 1
+			create tab_change_actions
 			create normal_tab_style.make_default
 			create selected_tab_style.make_default
 			create content_style.make_default
@@ -94,14 +95,18 @@ feature -- Access
 	tab_bar_height: INTEGER
 			-- Height of tab bar.
 
-	on_tab_change: detachable PROCEDURE [INTEGER]
-			-- Called when tab changes.
-			-- Aliases: on_change, on_select
+feature -- Actions (EV compatible)
 
-	on_change: detachable PROCEDURE [INTEGER]
-			-- Alias for on_tab_change.
+	tab_change_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when tab changes.
+			-- Passes new tab index to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
+			-- EV equivalent: selection_actions
+
+	selection_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Alias for tab_change_actions (EV compatibility).
 		do
-			Result := on_tab_change
+			Result := tab_change_actions
 		end
 
 feature -- Styles
@@ -202,11 +207,11 @@ feature -- Modification
 		end
 
 	set_on_tab_change, set_on_change (handler: PROCEDURE [INTEGER])
-			-- Set tab change handler.
+			-- Set tab change handler (clears previous handlers).
+			-- For multiple handlers, use tab_change_actions.extend directly.
 		do
-			on_tab_change := handler
-		ensure
-			handler_set: on_tab_change = handler
+			tab_change_actions.wipe_out
+			tab_change_actions.extend (handler)
 		end
 
 	set_normal_tab_style (s: TUI_STYLE)
@@ -412,15 +417,14 @@ feature {NONE} -- Implementation
 		end
 
 	notify_change
-			-- Notify tab change handler.
+			-- Notify tab change handlers.
 		do
-			if attached on_tab_change as handler then
-				handler.call ([selected_tab])
-			end
+			tab_change_actions.call ([selected_tab])
 		end
 
 invariant
 	tabs_exist: tabs /= Void
+	tab_change_actions_exists: tab_change_actions /= Void
 	valid_selection: selected_tab >= 0 and selected_tab <= tabs.count
 	normal_tab_style_exists: normal_tab_style /= Void
 	selected_tab_style_exists: selected_tab_style /= Void

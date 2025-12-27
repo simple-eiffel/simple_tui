@@ -55,6 +55,7 @@ feature {NONE} -- Initialization
 			create border_style.make_default
 			create button_style.make_default
 			create button_selected_style.make_default
+			create close_actions
 			-- Default styles
 			title_style.set_bold (True)
 			border_style.set_foreground (create {TUI_COLOR}.make_index (14))  -- Cyan
@@ -113,8 +114,12 @@ feature -- Access
 	result_button: INTEGER
 			-- Button ID that was clicked to close dialog.
 
-	on_close: detachable PROCEDURE [INTEGER]
-			-- Called when dialog closes with button ID.
+feature -- Actions (EV compatible)
+
+	close_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when dialog closes.
+			-- Passes button ID to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
 
 feature -- Button IDs
 
@@ -189,11 +194,11 @@ feature -- Modification
 		end
 
 	set_on_close (handler: PROCEDURE [INTEGER])
-			-- Set close handler.
+			-- Set close handler (clears previous handlers).
+			-- For multiple handlers, use close_actions.extend directly.
 		do
-			on_close := handler
-		ensure
-			handler_set: on_close = handler
+			close_actions.wipe_out
+			close_actions.extend (handler)
 		end
 
 	set_title_style (s: TUI_STYLE)
@@ -269,9 +274,7 @@ feature -- Display
 		do
 			result_button := button_id
 			hide
-			if attached on_close as handler then
-				handler.call ([button_id])
-			end
+			close_actions.call ([button_id])
 		ensure
 			hidden: not is_visible
 			result_set: result_button = button_id
@@ -523,6 +526,7 @@ invariant
 	title_exists: title /= Void
 	message_exists: message /= Void
 	buttons_exist: buttons /= Void
+	close_actions_exists: close_actions /= Void
 	title_style_exists: title_style /= Void
 	message_style_exists: message_style /= Void
 	border_style_exists: border_style /= Void

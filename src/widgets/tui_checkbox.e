@@ -45,6 +45,7 @@ feature {NONE} -- Initialization
 			checked_char := '%/0x2713/'     -- Check mark
 			unchecked_char := ' '
 			indeterminate_char := '-'
+			create change_actions
 			create normal_style.make_default
 			create focused_style.make_default
 			-- Make focus very visible with reverse video
@@ -75,8 +76,18 @@ feature -- Access
 	indeterminate_char: CHARACTER_32
 			-- Character for indeterminate state.
 
-	on_change: detachable PROCEDURE [BOOLEAN]
-			-- Called when checked state changes.
+feature -- Actions (EV compatible)
+
+	change_actions: ACTION_SEQUENCE [TUPLE [BOOLEAN]]
+			-- Actions to execute when checked state changes.
+			-- Passes new checked state to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
+
+	check_actions: ACTION_SEQUENCE [TUPLE [BOOLEAN]]
+			-- Alias for change_actions (EV compatibility).
+		do
+			Result := change_actions
+		end
 
 feature -- Styles
 
@@ -163,11 +174,11 @@ feature -- Modification
 		end
 
 	set_on_change (handler: PROCEDURE [BOOLEAN])
-			-- Set change handler.
+			-- Set change handler (clears previous handlers).
+			-- For multiple handlers, use change_actions.extend directly.
 		do
-			on_change := handler
-		ensure
-			handler_set: on_change = handler
+			change_actions.wipe_out
+			change_actions.extend (handler)
 		end
 
 	set_normal_style (s: TUI_STYLE)
@@ -276,15 +287,14 @@ feature -- Queries
 feature {NONE} -- Implementation
 
 	notify_change
-			-- Notify change handler.
+			-- Notify change handlers.
 		do
-			if attached on_change as handler then
-				handler.call ([is_checked])
-			end
+			change_actions.call ([is_checked])
 		end
 
 invariant
 	label_exists: label /= Void
+	change_actions_exists: change_actions /= Void
 	normal_style_exists: normal_style /= Void
 	focused_style_exists: focused_style /= Void
 

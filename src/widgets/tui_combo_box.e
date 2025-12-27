@@ -47,6 +47,7 @@ feature {NONE} -- Initialization
 			selected_index := 0
 			is_expanded := False
 			max_visible_items := 5
+			create change_actions
 			create normal_style.make_default
 			create focused_style.make_default
 			create dropdown_style.make_default
@@ -108,14 +109,18 @@ feature -- Access
 	max_visible_items: INTEGER
 			-- Maximum items visible in dropdown.
 
-	on_change: detachable PROCEDURE [INTEGER]
-			-- Called when selection changes.
-			-- Aliases: on_select
+feature -- Actions (EV compatible)
 
-	on_select: detachable PROCEDURE [INTEGER]
-			-- Alias for on_change.
+	change_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Actions to execute when selection changes.
+			-- Passes selected index to handlers.
+			-- Use `extend' to add handlers, `prune' to remove.
+			-- EV equivalent: select_actions
+
+	select_actions: ACTION_SEQUENCE [TUPLE [INTEGER]]
+			-- Alias for change_actions (EV compatibility).
 		do
-			Result := on_change
+			Result := change_actions
 		end
 
 feature -- Styles
@@ -242,11 +247,11 @@ feature -- Modification
 		end
 
 	set_on_change, set_on_select (handler: PROCEDURE [INTEGER])
-			-- Set change handler.
+			-- Set change handler (clears previous handlers).
+			-- For multiple handlers, use change_actions.extend directly.
 		do
-			on_change := handler
-		ensure
-			handler_set: on_change = handler
+			change_actions.wipe_out
+			change_actions.extend (handler)
 		end
 
 	set_normal_style (s: TUI_STYLE)
@@ -494,15 +499,14 @@ feature {NONE} -- Implementation
 		end
 
 	notify_change
-			-- Notify change handler.
+			-- Notify change handlers.
 		do
-			if attached on_change as handler then
-				handler.call ([selected_index])
-			end
+			change_actions.call ([selected_index])
 		end
 
 invariant
 	items_exist: items /= Void
+	change_actions_exists: change_actions /= Void
 	valid_selection: selected_index >= 0 and selected_index <= items.count
 	normal_style_exists: normal_style /= Void
 	focused_style_exists: focused_style /= Void
