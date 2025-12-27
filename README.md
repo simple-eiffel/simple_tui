@@ -10,7 +10,7 @@
 [![Eiffel](https://img.shields.io/badge/Eiffel-25.02-blue.svg)](https://www.eiffel.org/)
 [![Design by Contract](https://img.shields.io/badge/DbC-enforced-orange.svg)]()
 
-Terminal User Interface library for Eiffel with EiffelVision2-compatible API.
+Terminal User Interface library for Eiffel with EiffelVision2-inspired API.
 
 Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
@@ -22,7 +22,7 @@ Part of the [Simple Eiffel](https://github.com/simple-eiffel) ecosystem.
 
 **simple_tui** provides a modern terminal-based UI framework for Eiffel applications. Build interactive console applications with:
 
-- **EiffelVision2-compatible API** - Familiar `extend`/`prune` naming for EV developers
+- **EiffelVision2-inspired API** - Familiar `extend`/`prune` naming for EV developers
 - **256-color support** - Full terminal color palette
 - **Mouse input** - Click, drag, and hover support
 - **Keyboard navigation** - Tab, arrows, shortcuts, and focus management
@@ -567,7 +567,7 @@ feature {NONE} -- Animation
 
 ## Event Handling
 
-simple_tui uses EiffelVision2-compatible `ACTION_SEQUENCE` for event handling, allowing multiple handlers per event.
+simple_tui uses EiffelVision2-style `ACTION_SEQUENCE` for event handling, allowing multiple handlers per event.
 
 ### Simple Approach (Single Handler)
 
