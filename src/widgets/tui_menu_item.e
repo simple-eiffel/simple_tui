@@ -181,6 +181,16 @@ feature -- Modification
 			not_sensitive: not is_sensitive
 		end
 
+feature -- Action
+
+	execute
+			-- Execute the item's action if sensitive.
+		do
+			if is_sensitive and then attached on_select as action then
+				action.call (Void)
+			end
+		end
+
 feature {TUI_MENU} -- Implementation
 
 	set_parent_menu (a_menu: detachable TUI_MENU)
@@ -189,14 +199,6 @@ feature {TUI_MENU} -- Implementation
 			parent_menu := a_menu
 		ensure
 			parent_set: parent_menu = a_menu
-		end
-
-	execute
-			-- Execute the item's action if sensitive.
-		do
-			if is_sensitive and then attached on_select as action then
-				action.call (Void)
-			end
 		end
 
 invariant

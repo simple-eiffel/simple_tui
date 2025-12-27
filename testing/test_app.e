@@ -126,6 +126,28 @@ feature {NONE} -- Test Runners
 			-- Label UTF-8 test
 			run_test (agent lib_tests.test_label_utf8_box_drawing, "test_label_utf8_box_drawing")
 			run_test (agent lib_tests.test_full_render_pipeline_box_drawing, "test_full_render_pipeline_box_drawing")
+			-- Menu item tests
+			run_test (agent lib_tests.test_menu_item_basic, "test_menu_item_basic")
+			run_test (agent lib_tests.test_menu_item_separator, "test_menu_item_separator")
+			run_test (agent lib_tests.test_menu_item_sensitive, "test_menu_item_sensitive")
+			run_test (agent lib_tests.test_menu_item_shortcut_extraction, "test_menu_item_shortcut_extraction")
+			run_test (agent lib_tests.test_menu_item_execute, "test_menu_item_execute")
+			-- Menu tests
+			run_test (agent lib_tests.test_menu_basic, "test_menu_basic")
+			run_test (agent lib_tests.test_menu_with_title, "test_menu_with_title")
+			run_test (agent lib_tests.test_menu_add_items, "test_menu_add_items")
+			run_test (agent lib_tests.test_menu_add_separator, "test_menu_add_separator")
+			run_test (agent lib_tests.test_menu_navigation, "test_menu_navigation")
+			run_test (agent lib_tests.test_menu_skip_separators, "test_menu_skip_separators")
+			run_test (agent lib_tests.test_menu_skip_disabled, "test_menu_skip_disabled")
+			run_test (agent lib_tests.test_menu_show_close, "test_menu_show_close")
+			run_test (agent lib_tests.test_menu_clear, "test_menu_clear")
+			run_test (agent lib_tests.test_menu_preferred_size, "test_menu_preferred_size")
+			-- Menu bar tests
+			run_test (agent lib_tests.test_menu_bar_basic, "test_menu_bar_basic")
+			run_test (agent lib_tests.test_menu_bar_add_menu, "test_menu_bar_add_menu")
+			run_test (agent lib_tests.test_menu_bar_open_close, "test_menu_bar_open_close")
+			run_test (agent lib_tests.test_menu_bar_navigation, "test_menu_bar_navigation")
 		end
 
 feature {NONE} -- Implementation

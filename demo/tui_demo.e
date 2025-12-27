@@ -426,6 +426,25 @@ feature {NONE} -- Widget Creation
 			-- Set root with menu bar
 			app.set_root (root_box)
 			app.set_menu_bar (menu_bar)
+
+			-- Register keyboard shortcuts
+			register_shortcuts
+		end
+
+	register_shortcuts
+			-- Register global keyboard shortcuts.
+		do
+			-- File menu shortcuts
+			app.register_shortcut ('n', True, False, False, agent on_menu_new)      -- Ctrl+N
+			app.register_shortcut ('o', True, False, False, agent on_menu_open)     -- Ctrl+O
+			app.register_shortcut ('s', True, False, False, agent on_menu_save)     -- Ctrl+S
+
+			-- Edit menu shortcuts
+			app.register_shortcut ('z', True, False, False, agent on_menu_undo)     -- Ctrl+Z
+			app.register_shortcut ('y', True, False, False, agent on_menu_redo)     -- Ctrl+Y
+			app.register_shortcut ('x', True, False, False, agent on_menu_cut)      -- Ctrl+X
+			app.register_shortcut ('c', True, False, False, agent on_menu_copy)     -- Ctrl+C
+			app.register_shortcut ('v', True, False, False, agent on_menu_paste)    -- Ctrl+V
 		end
 
 	layout_form
@@ -789,8 +808,81 @@ feature {NONE} -- Event Handlers
 			-- Handle theme combo change.
 		do
 			if attached theme_combo.selected_text as sel then
+				apply_theme (sel)
 				status_label.set_text ({STRING_32} "Theme: " + sel)
 			end
+		end
+
+	apply_theme (theme_name: STRING_32)
+			-- Apply the selected color theme.
+		local
+			c_fg, c_bg, c_accent, c_highlight, c_dim: TUI_COLOR
+		do
+			if theme_name.same_string ("Dark Mode") then
+				-- Dark mode: Light text on dark backgrounds
+				create c_fg.make_index (15)        -- White
+				create c_bg.make_index (0)         -- Black
+				create c_accent.make_index (14)    -- Cyan
+				create c_highlight.make_index (11) -- Yellow
+				create c_dim.make_index (8)        -- Gray
+			elseif theme_name.same_string ("Light Mode") then
+				-- Light mode: Dark text on light backgrounds
+				create c_fg.make_index (0)         -- Black
+				create c_bg.make_index (15)        -- White
+				create c_accent.make_index (4)     -- Blue
+				create c_highlight.make_index (1)  -- Red
+				create c_dim.make_index (8)        -- Gray
+			elseif theme_name.same_string ("High Contrast") then
+				-- High contrast: Yellow on black
+				create c_fg.make_index (11)        -- Yellow
+				create c_bg.make_index (0)         -- Black
+				create c_accent.make_index (15)    -- White
+				create c_highlight.make_index (9)  -- Bright Red
+				create c_dim.make_index (7)        -- Light Gray
+			elseif theme_name.same_string ("Ocean Blue") then
+				-- Ocean blue: Cyan/blue tones
+				create c_fg.make_index (15)        -- White
+				create c_bg.make_index (17)        -- Dark blue
+				create c_accent.make_index (14)    -- Cyan
+				create c_highlight.make_index (51) -- Aqua
+				create c_dim.make_index (67)       -- Steel blue
+			else
+				-- Default theme
+				create c_fg.make_index (15)        -- White
+				create c_bg.make_index (0)         -- Black
+				create c_accent.make_index (14)    -- Cyan
+				create c_highlight.make_index (10) -- Green
+				create c_dim.make_index (8)        -- Gray
+			end
+
+			-- Update header styles
+			header_style.set_foreground (c_accent)
+			label_style.set_foreground (c_fg)
+			status_style.set_foreground (c_highlight)
+			footer_style.set_foreground (c_accent)
+
+			-- Update panel borders
+			form_border_style.set_foreground (c_highlight)
+			form_title_style.set_foreground (c_highlight)
+			progress_border_style.set_foreground (c_accent)
+			progress_title_style.set_foreground (c_accent)
+			list_border_style.set_foreground (c_accent)
+			list_title_style.set_foreground (c_accent)
+
+			-- Update input styles
+			input_style.set_foreground (c_fg)
+			input_focused_style.set_foreground (c_accent)
+
+			-- Update button styles
+			button_style.set_foreground (c_highlight)
+			button_focused_style.set_foreground (c_highlight)
+
+			-- Update list styles
+			list_item_style.set_foreground (c_fg)
+			list_selected_style.set_foreground (c_accent)
+
+			-- Update separator
+			separator_style.set_foreground (c_dim)
 		end
 
 	on_tab_action

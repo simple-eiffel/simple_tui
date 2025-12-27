@@ -322,28 +322,46 @@ feature -- Event Handling
 feature -- Rendering
 
 	render (buffer: TUI_BUFFER)
-			-- Render menu to buffer.
+			-- Render menu to buffer with border box.
 		local
-			ax, ay, i, item_y: INTEGER
+			ax, ay, i, j, item_y: INTEGER
 			item: TUI_MENU_ITEM
 			item_style: TUI_STYLE
 			item_text: STRING_32
-			menu_width: INTEGER
+			menu_width, inner_width: INTEGER
+			top_border, bottom_border, sep_line: STRING_32
 		do
 			if is_visible then
 				ax := absolute_x
 				ay := absolute_y
 				menu_width := preferred_width
+				inner_width := menu_width - 2  -- Subtract border chars
 
-				-- Draw menu items
+				-- Draw top border: ┌───┐
+				create top_border.make (menu_width)
+				top_border.append_character ('%/0x250C/')  -- ┌
+				from j := 1 until j > inner_width loop
+					top_border.append_character ('%/0x2500/')  -- ─
+					j := j + 1
+				end
+				top_border.append_character ('%/0x2510/')  -- ┐
+				buffer.put_string (ax, ay, top_border, normal_style)
+
+				-- Draw menu items with side borders
 				from i := 1 until i > items.count loop
 					item := items.i_th (i)
-					item_y := ay + i - 1
+					item_y := ay + i  -- +1 for top border
 
 					if item.is_separator then
-						-- Draw separator line
-						create item_text.make_filled ('%/0x2500/', menu_width)
-						buffer.put_string (ax, item_y, item_text, normal_style)
+						-- Draw separator: ├───┤
+						create sep_line.make (menu_width)
+						sep_line.append_character ('%/0x251C/')  -- ├
+						from j := 1 until j > inner_width loop
+							sep_line.append_character ('%/0x2500/')  -- ─
+							j := j + 1
+						end
+						sep_line.append_character ('%/0x2524/')  -- ┤
+						buffer.put_string (ax, item_y, sep_line, normal_style)
 					else
 						-- Choose style
 						if not item.is_sensitive then
@@ -354,12 +372,24 @@ feature -- Rendering
 							item_style := normal_style
 						end
 
-						-- Format item text
-						item_text := format_item (item, menu_width)
-						buffer.put_string (ax, item_y, item_text, item_style)
+						-- Format item text with borders: │ item │
+						item_text := format_item (item, inner_width)
+						buffer.put_char (ax, ay + i, '%/0x2502/', normal_style)  -- │
+						buffer.put_string (ax + 1, ay + i, item_text, item_style)
+						buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', normal_style)  -- │
 					end
 					i := i + 1
 				end
+
+				-- Draw bottom border: └───┘
+				create bottom_border.make (menu_width)
+				bottom_border.append_character ('%/0x2514/')  -- └
+				from j := 1 until j > inner_width loop
+					bottom_border.append_character ('%/0x2500/')  -- ─
+					j := j + 1
+				end
+				bottom_border.append_character ('%/0x2518/')  -- ┘
+				buffer.put_string (ax, ay + items.count + 1, bottom_border, normal_style)
 			end
 		end
 
@@ -381,9 +411,9 @@ feature -- Queries
 		end
 
 	preferred_height: INTEGER
-			-- Height for all items.
+			-- Height for all items plus borders.
 		do
-			Result := items.count.max (1)
+			Result := items.count + 2  -- +2 for top and bottom borders
 		end
 
 feature {NONE} -- Implementation

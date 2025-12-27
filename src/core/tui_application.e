@@ -28,6 +28,7 @@ feature {NONE} -- Initialization
 			target_fps := 30
 			create focusable_widgets.make (10)
 			focused_widget_index := 0
+			create shortcuts.make (10)
 		ensure
 			not_running: not is_running
 		end
@@ -123,6 +124,36 @@ feature -- Configuration
 			on_quit := handler
 		ensure
 			handler_set: on_quit = handler
+		end
+
+feature -- Keyboard Shortcuts
+
+	register_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN; handler: PROCEDURE)
+			-- Register a global keyboard shortcut.
+			-- Example: register_shortcut ('s', True, False, False, agent on_save) for Ctrl+S
+		local
+			shortcut_key: STRING_32
+		do
+			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			shortcuts.force (handler, shortcut_key)
+		end
+
+	unregister_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN)
+			-- Remove a registered shortcut.
+		local
+			shortcut_key: STRING_32
+		do
+			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			shortcuts.remove (shortcut_key)
+		end
+
+	has_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): BOOLEAN
+			-- Is shortcut registered?
+		local
+			shortcut_key: STRING_32
+		do
+			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			Result := shortcuts.has (shortcut_key)
 		end
 
 feature -- Focus Management
@@ -372,6 +403,11 @@ feature {NONE} -- Event Loop
 				end
 			end
 
+			-- Check registered global shortcuts
+			if not Result then
+				Result := try_shortcut (event)
+			end
+
 			-- Let menu bar handle if open
 			if not Result and attached menu_bar as mb then
 				if mb.is_menu_open then
@@ -495,6 +531,35 @@ feature {NONE} -- Focus Collection
 	focused_widget_index: INTEGER
 			-- Index of currently focused widget in focusable_widgets.
 
+feature {NONE} -- Keyboard Shortcuts Implementation
+
+	shortcuts: HASH_TABLE [PROCEDURE, STRING_32]
+			-- Registered global keyboard shortcuts.
+
+	make_shortcut_key (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): STRING_32
+			-- Create unique key for shortcut lookup.
+		do
+			create Result.make (10)
+			if ctrl then Result.append ("C-") end
+			if alt then Result.append ("A-") end
+			if shift then Result.append ("S-") end
+			Result.append_character (key.as_lower)
+		end
+
+	try_shortcut (event: TUI_EVENT): BOOLEAN
+			-- Try to execute registered shortcut. Return True if found and executed.
+		local
+			shortcut_key: STRING_32
+		do
+			shortcut_key := make_shortcut_key (event.char, event.has_ctrl, event.has_alt, event.has_shift)
+			if shortcuts.has (shortcut_key) then
+				if attached shortcuts.item (shortcut_key) as handler then
+					handler.call (Void)
+					Result := True
+				end
+			end
+		end
+
 	collect_focusable_widgets
 			-- Collect all focusable widgets from root.
 		do
@@ -520,6 +585,7 @@ feature {NONE} -- Focus Collection
 
 invariant
 	focusable_widgets_exist: focusable_widgets /= Void
+	shortcuts_exist: shortcuts /= Void
 	valid_fps: target_fps > 0 and target_fps <= 120
 
 end

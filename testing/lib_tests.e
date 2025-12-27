@@ -1155,4 +1155,318 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 			assert ("utf16_correct", l_utf16.item (0) = 0x2554)
 		end
 
+feature -- Test Cases: TUI_MENU_ITEM
+
+	test_menu_item_basic
+			-- Test basic menu item creation.
+		local
+			l_item: TUI_MENU_ITEM
+		do
+			create l_item.make_with_text ("&Save")
+			assert ("text", l_item.text.same_string ("&Save"))
+			assert ("display_text", l_item.display_text.same_string ("Save"))
+			assert ("shortcut", l_item.shortcut_key = 's')
+			assert ("sensitive", l_item.is_sensitive)
+			assert ("not_separator", not l_item.is_separator)
+		end
+
+	test_menu_item_separator
+			-- Test separator menu item.
+		local
+			l_item: TUI_MENU_ITEM
+		do
+			create l_item.make_separator
+			assert ("is_separator", l_item.is_separator)
+			assert ("empty_text", l_item.text.is_empty)
+		end
+
+	test_menu_item_sensitive
+			-- Test enable/disable.
+		local
+			l_item: TUI_MENU_ITEM
+		do
+			create l_item.make_with_text ("Test")
+			assert ("initially_sensitive", l_item.is_sensitive)
+			l_item.disable
+			assert ("disabled", not l_item.is_sensitive)
+			l_item.enable
+			assert ("re_enabled", l_item.is_sensitive)
+		end
+
+	test_menu_item_shortcut_extraction
+			-- Test & shortcut marker extraction.
+		local
+			l_item1, l_item2, l_item3: TUI_MENU_ITEM
+		do
+			-- Shortcut at start
+			create l_item1.make_with_text ("&File")
+			assert ("shortcut_f", l_item1.shortcut_key = 'f')
+			assert ("display_file", l_item1.display_text.same_string ("File"))
+
+			-- Shortcut in middle
+			create l_item2.make_with_text ("E&xit")
+			assert ("shortcut_x", l_item2.shortcut_key = 'x')
+			assert ("display_exit", l_item2.display_text.same_string ("Exit"))
+
+			-- No shortcut
+			create l_item3.make_with_text ("Help")
+			assert ("no_shortcut", l_item3.shortcut_key = '%U')
+		end
+
+	test_menu_item_execute
+			-- Test action execution.
+		local
+			l_item: TUI_MENU_ITEM
+		do
+			test_action_called := False
+			create l_item.make_with_text_and_action ("Test", agent set_test_action_called)
+			l_item.execute
+			assert ("action_called", test_action_called)
+		end
+
+feature -- Test Cases: TUI_MENU
+
+	test_menu_basic
+			-- Test basic menu creation.
+		local
+			l_menu: TUI_MENU
+		do
+			create l_menu.make
+			assert ("empty", l_menu.items.is_empty)
+			assert ("hidden", not l_menu.is_visible)
+			assert ("no_selection", l_menu.selected_index = 0)
+		end
+
+	test_menu_with_title
+			-- Test menu with title.
+		local
+			l_menu: TUI_MENU
+		do
+			create l_menu.make_with_title ("File")
+			assert ("title", l_menu.title.same_string ("File"))
+		end
+
+	test_menu_add_items
+			-- Test adding items to menu.
+		local
+			l_menu: TUI_MENU
+			l_item1, l_item2: TUI_MENU_ITEM
+		do
+			create l_menu.make
+			create l_item1.make_with_text ("New")
+			create l_item2.make_with_text ("Open")
+
+			l_menu.add_item (l_item1)
+			l_menu.add_item (l_item2)
+
+			assert ("count_2", l_menu.items.count = 2)
+			assert ("has_item1", l_menu.items.has (l_item1))
+			assert ("has_item2", l_menu.items.has (l_item2))
+		end
+
+	test_menu_add_separator
+			-- Test adding separator.
+		local
+			l_menu: TUI_MENU
+		do
+			create l_menu.make
+			l_menu.add_separator
+			assert ("has_separator", l_menu.items.count = 1)
+			assert ("is_separator", l_menu.items.first.is_separator)
+		end
+
+	test_menu_navigation
+			-- Test menu navigation.
+		local
+			l_menu: TUI_MENU
+			l_item1, l_item2, l_item3: TUI_MENU_ITEM
+		do
+			create l_menu.make
+			create l_item1.make_with_text ("One")
+			create l_item2.make_with_text ("Two")
+			create l_item3.make_with_text ("Three")
+			l_menu.add_item (l_item1)
+			l_menu.add_item (l_item2)
+			l_menu.add_item (l_item3)
+
+			l_menu.select_first
+			assert ("first_selected", l_menu.selected_index = 1)
+
+			l_menu.select_next
+			assert ("second_selected", l_menu.selected_index = 2)
+
+			l_menu.select_previous
+			assert ("back_to_first", l_menu.selected_index = 1)
+		end
+
+	test_menu_skip_separators
+			-- Test that navigation skips separators.
+		local
+			l_menu: TUI_MENU
+			l_item1, l_item2: TUI_MENU_ITEM
+		do
+			create l_menu.make
+			create l_item1.make_with_text ("Before")
+			l_menu.add_item (l_item1)
+			l_menu.add_separator
+			create l_item2.make_with_text ("After")
+			l_menu.add_item (l_item2)
+
+			l_menu.select_first
+			assert ("starts_at_1", l_menu.selected_index = 1)
+
+			l_menu.select_next
+			assert ("skipped_separator", l_menu.selected_index = 3)
+		end
+
+	test_menu_skip_disabled
+			-- Test that navigation skips disabled items.
+		local
+			l_menu: TUI_MENU
+			l_item1, l_item2, l_item3: TUI_MENU_ITEM
+		do
+			create l_menu.make
+			create l_item1.make_with_text ("Enabled")
+			create l_item2.make_with_text ("Disabled")
+			l_item2.disable
+			create l_item3.make_with_text ("Also Enabled")
+			l_menu.add_item (l_item1)
+			l_menu.add_item (l_item2)
+			l_menu.add_item (l_item3)
+
+			l_menu.select_first
+			l_menu.select_next
+			assert ("skipped_disabled", l_menu.selected_index = 3)
+		end
+
+	test_menu_show_close
+			-- Test showing and closing menu.
+		local
+			l_menu: TUI_MENU
+		do
+			create l_menu.make
+			assert ("initially_hidden", not l_menu.is_visible)
+
+			l_menu.show_at (10, 5)
+			assert ("now_visible", l_menu.is_visible)
+
+			l_menu.close
+			assert ("closed", not l_menu.is_visible)
+		end
+
+	test_menu_clear
+			-- Test clearing menu items.
+		local
+			l_menu: TUI_MENU
+			l_item: TUI_MENU_ITEM
+		do
+			create l_menu.make
+			create l_item.make_with_text ("Test")
+			l_menu.add_item (l_item)
+			assert ("has_item", l_menu.items.count = 1)
+
+			l_menu.clear
+			assert ("empty_after_clear", l_menu.items.is_empty)
+		end
+
+	test_menu_preferred_size
+			-- Test preferred width/height calculation.
+		local
+			l_menu: TUI_MENU
+			l_item1, l_item2: TUI_MENU_ITEM
+		do
+			create l_menu.make_with_title ("File")
+			create l_item1.make_with_text ("Short")
+			create l_item2.make_with_text ("A Much Longer Item")
+			l_menu.add_item (l_item1)
+			l_menu.add_item (l_item2)
+
+			-- Width should accommodate longest item + padding + borders
+			assert ("width_for_longest", l_menu.preferred_width >= 20)
+			-- Height = item count + 2 borders
+			assert ("height_with_borders", l_menu.preferred_height = 4)
+		end
+
+feature -- Test Cases: TUI_MENU_BAR
+
+	test_menu_bar_basic
+			-- Test basic menu bar creation.
+		local
+			l_bar: TUI_MENU_BAR
+		do
+			create l_bar.make (80)
+			assert ("no_menus", l_bar.menus.is_empty)
+			assert ("not_open", not l_bar.is_menu_open)
+		end
+
+	test_menu_bar_add_menu
+			-- Test adding menus to bar.
+		local
+			l_bar: TUI_MENU_BAR
+			l_menu1, l_menu2: TUI_MENU
+		do
+			create l_bar.make (80)
+			create l_menu1.make_with_title ("File")
+			create l_menu2.make_with_title ("Edit")
+
+			l_bar.add_menu (l_menu1)
+			l_bar.add_menu (l_menu2)
+
+			assert ("count_2", l_bar.menus.count = 2)
+		end
+
+	test_menu_bar_open_close
+			-- Test opening and closing menus.
+		local
+			l_bar: TUI_MENU_BAR
+			l_menu: TUI_MENU
+		do
+			create l_bar.make (80)
+			create l_menu.make_with_title ("File")
+			l_bar.add_menu (l_menu)
+
+			assert ("initially_closed", not l_bar.is_menu_open)
+
+			l_bar.open_menu (1)
+			assert ("now_open", l_bar.is_menu_open)
+
+			l_bar.close_menu
+			assert ("closed_again", not l_bar.is_menu_open)
+		end
+
+	test_menu_bar_navigation
+			-- Test menu bar navigation.
+		local
+			l_bar: TUI_MENU_BAR
+			l_menu1, l_menu2, l_menu3: TUI_MENU
+		do
+			create l_bar.make (80)
+			create l_menu1.make_with_title ("File")
+			create l_menu2.make_with_title ("Edit")
+			create l_menu3.make_with_title ("Help")
+			l_bar.add_menu (l_menu1)
+			l_bar.add_menu (l_menu2)
+			l_bar.add_menu (l_menu3)
+
+			l_bar.open_menu (1)
+			assert ("file_open", l_bar.selected_menu = 1)
+
+			l_bar.select_next_menu
+			assert ("edit_open", l_bar.selected_menu = 2)
+
+			l_bar.select_previous_menu
+			assert ("back_to_file", l_bar.selected_menu = 1)
+		end
+
+feature {NONE} -- Test Helpers
+
+	test_action_called: BOOLEAN
+			-- Flag for action execution test.
+
+	set_test_action_called
+			-- Set flag for action test.
+		do
+			test_action_called := True
+		end
+
 end
