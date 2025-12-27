@@ -45,8 +45,11 @@ feature {NONE} -- Initialization
 			create normal_style.make_default
 			create selected_style.make_default
 			create disabled_style.make_default
+			create border_style.make_default
 			selected_style.set_reverse (True)
 			disabled_style.set_foreground (create {TUI_COLOR}.make_index (8))  -- Gray
+			-- Set border to bright cyan for visibility
+			border_style.set_foreground (create {TUI_COLOR}.make_index (14))
 		ensure
 			empty: items.is_empty
 			hidden: not is_visible
@@ -95,6 +98,9 @@ feature -- Styles
 
 	disabled_style: TUI_STYLE
 			-- Style for disabled items.
+
+	border_style: TUI_STYLE
+			-- Style for menu border (box drawing characters).
 
 feature -- Status
 
@@ -345,7 +351,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				top_border.append_character ('%/0x2510/')  -- ┐
-				buffer.put_string (ax, ay, top_border, normal_style)
+				buffer.put_string (ax, ay, top_border, border_style)
 
 				-- Draw menu items with side borders
 				from i := 1 until i > items.count loop
@@ -361,7 +367,7 @@ feature -- Rendering
 							j := j + 1
 						end
 						sep_line.append_character ('%/0x2524/')  -- ┤
-						buffer.put_string (ax, item_y, sep_line, normal_style)
+						buffer.put_string (ax, item_y, sep_line, border_style)
 					else
 						-- Choose style
 						if not item.is_sensitive then
@@ -374,9 +380,9 @@ feature -- Rendering
 
 						-- Format item text with borders: │ item │
 						item_text := format_item (item, inner_width)
-						buffer.put_char (ax, ay + i, '%/0x2502/', normal_style)  -- │
+						buffer.put_char (ax, ay + i, '%/0x2502/', border_style)  -- │
 						buffer.put_string (ax + 1, ay + i, item_text, item_style)
-						buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', normal_style)  -- │
+						buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', border_style)  -- │
 					end
 					i := i + 1
 				end
@@ -389,7 +395,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				bottom_border.append_character ('%/0x2518/')  -- ┘
-				buffer.put_string (ax, ay + items.count + 1, bottom_border, normal_style)
+				buffer.put_string (ax, ay + items.count + 1, bottom_border, border_style)
 			end
 		end
 
@@ -455,5 +461,6 @@ invariant
 	items_exist: items /= Void
 	normal_style_exists: normal_style /= Void
 	selected_style_exists: selected_style /= Void
+	border_style_exists: border_style /= Void
 
 end
