@@ -28,3 +28,4 @@ bin/
 Thumbs.db
 
 tui_demo.log
+exception_trace.log
