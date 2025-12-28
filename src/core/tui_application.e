@@ -362,22 +362,40 @@ feature {NONE} -- Event Loop
 			l_file: PLAIN_TEXT_FILE
 			msg: STRING
 		do
-			create msg.make (100)
-			msg.append ("KEY: type=")
+			create msg.make (150)
+			msg.append ("KEY: ")
+
+			-- Describe the key
 			if event.is_key_event then
-				msg.append ("key")
+				msg.append ("keycode=")
+				msg.append (event.key.out)
+				if event.key = 18 then msg.append ("(Alt)") end
+				if event.key = 16 then msg.append ("(Shift)") end
+				if event.key = 17 then msg.append ("(Ctrl)") end
 			else
-				msg.append ("char")
+				msg.append ("char='")
+				if event.char >= '%/32/' and event.char <= '%/126/' then
+					msg.append_character (event.char.to_character_8)
+				else
+					msg.append ("\")
+					msg.append (event.char.natural_32_code.out)
+				end
+				msg.append ("'")
 			end
-			msg.append (" key=")
-			msg.append (event.key.out)
-			msg.append (" char=")
-			msg.append (event.char.natural_32_code.out)
-			msg.append (" mods=")
-			msg.append (event.modifiers.out)
-			if event.has_shift then msg.append (" SHIFT") end
-			if event.has_ctrl then msg.append (" CTRL") end
-			if event.has_alt then msg.append (" ALT") end
+
+			-- Modifiers
+			if event.has_shift then msg.append (" +SHIFT") end
+			if event.has_ctrl then msg.append (" +CTRL") end
+			if event.has_alt then msg.append (" +ALT") end
+
+			-- Special key detection
+			if event.is_enter then msg.append (" [ENTER]") end
+			if event.is_escape then msg.append (" [ESC]") end
+			if event.is_tab then msg.append (" [TAB]") end
+			if event.is_up then msg.append (" [UP]") end
+			if event.is_down then msg.append (" [DOWN]") end
+			if event.is_left then msg.append (" [LEFT]") end
+			if event.is_right then msg.append (" [RIGHT]") end
 
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
@@ -447,6 +465,11 @@ feature {NONE} -- Event Loop
 				-- Check Alt+key for menu shortcuts
 				if not Result and event.has_alt and attached menu_bar as mb then
 					Result := mb.handle_key (event)
+				end
+
+				-- Check Alt+key for button/widget hotkeys (global activation)
+				if not Result and event.has_alt and not event.has_ctrl then
+					Result := try_widget_hotkey (event)
 				end
 
 				-- Dispatch to focused widget FIRST (widgets may handle Tab internally)
@@ -611,6 +634,40 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 				if attached shortcuts.item (shortcut_key) as handler then
 					handler.call (Void)
 					Result := True
+				end
+			end
+		end
+
+	try_widget_hotkey (event: TUI_EVENT): BOOLEAN
+			-- Try to activate a widget via Alt+key hotkey.
+			-- Searches widget tree for buttons with matching shortcut_key.
+		local
+			key_lower: CHARACTER_32
+		do
+			key_lower := event.char.as_lower
+			if attached root as r then
+				Result := try_hotkey_in_widget (r, key_lower)
+			end
+		end
+
+	try_hotkey_in_widget (widget: TUI_WIDGET; key_lower: CHARACTER_32): BOOLEAN
+			-- Recursively search for button with matching hotkey.
+		local
+			i: INTEGER
+		do
+			-- Check if this widget is a TUI_BUTTON with matching shortcut
+			if attached {TUI_BUTTON} widget as btn then
+				if btn.is_visible and btn.shortcut_key.as_lower = key_lower then
+					btn.click
+					Result := True
+				end
+			end
+
+			-- Recurse into children if not found
+			if not Result then
+				from i := 1 until i > widget.children.count or Result loop
+					Result := try_hotkey_in_widget (widget.children.i_th (i), key_lower)
+					i := i + 1
 				end
 			end
 		end

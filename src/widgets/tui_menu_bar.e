@@ -52,9 +52,11 @@ feature {NONE} -- Initialization
 			create normal_style.make_default
 			create selected_style.make_default
 			create open_style.make_default
+			create hotkey_style.make_default
 			selected_style.set_reverse (True)
 			open_style.set_reverse (True)
 			open_style.set_bold (True)
+			hotkey_style.set_underline (True)
 		ensure
 			width_set: width = a_width
 			focusable: is_focusable
@@ -89,6 +91,9 @@ feature -- Styles
 
 	open_style: TUI_STYLE
 			-- Style for open menu title.
+
+	hotkey_style: TUI_STYLE
+			-- Style for hotkey character (underlined).
 
 feature -- Modification
 
@@ -252,26 +257,54 @@ feature -- Event Handling
 	handle_key (event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
+			-- F10 toggles menu bar open/close
+			if event.is_key (event.Key_f10) then
+				if is_menu_open then
+					log_debug ("F10 pressed, closing menu")
+					close_menu
+				else
+					log_debug ("F10 pressed, opening menu")
+					if selected_menu = 0 and menus.count > 0 then
+						selected_menu := 1
+					end
+					if selected_menu > 0 then
+						open_menu (selected_menu)
+					end
+				end
+				Result := True
+			end
+
 			-- Always check Alt+key shortcuts, even when not focused
-			if event.has_alt and not is_menu_open then
+			if not Result and event.has_alt and not is_menu_open then
+				log_debug ("Alt+key shortcut check, char=" + event.char.natural_32_code.out)
 				Result := try_menu_shortcut (event)
+				if Result then
+					log_debug ("Alt+key shortcut matched, opened menu")
+				end
 			end
 
 			if not Result and (is_focused or is_menu_open) then
 				if is_menu_open then
 					-- Let open menu handle keys first
 					if attached current_menu as menu then
+						log_debug ("Delegating key to open menu")
 						Result := menu.handle_key (event)
+						if Result then
+							log_debug ("Open menu handled key")
+						end
 					end
 					-- Handle left/right to switch menus
 					if not Result then
 						if event.is_left then
+							log_debug ("LEFT arrow, switching to previous menu")
 							select_previous_menu
 							Result := True
 						elseif event.is_right then
+							log_debug ("RIGHT arrow, switching to next menu")
 							select_next_menu
 							Result := True
 						elseif event.is_escape then
+							log_debug ("ESCAPE, closing menu")
 							close_menu
 							Result := True
 						end
@@ -279,9 +312,11 @@ feature -- Event Handling
 				else
 					-- Menu bar focused but no menu open
 					if event.is_left then
+						log_debug ("LEFT arrow (bar focused), previous menu")
 						select_previous_menu
 						Result := True
 					elseif event.is_right then
+						log_debug ("RIGHT arrow (bar focused), next menu")
 						select_next_menu
 						Result := True
 					elseif event.is_tab and event.has_shift then
@@ -299,6 +334,7 @@ feature -- Event Handling
 						end
 						-- else: let Tab escape to next widget
 					elseif event.is_enter or event.is_space or event.is_down then
+						log_debug ("ENTER/SPACE/DOWN opening menu dropdown")
 						if selected_menu > 0 then
 							open_menu (selected_menu)
 						elseif menus.count > 0 then
@@ -356,7 +392,6 @@ feature -- Rendering
 			ax, ay, i, menu_x: INTEGER
 			l_menu: TUI_MENU
 			title_style: TUI_STYLE
-			padded_title: STRING_32
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -380,14 +415,11 @@ feature -- Rendering
 					title_style := normal_style
 				end
 
-				-- Draw title with padding
-				create padded_title.make (l_menu.title.count + 2)
-				padded_title.append_character (' ')
-				padded_title.append (l_menu.title)
-				padded_title.append_character (' ')
-
-				buffer.put_string (menu_x, ay, padded_title, title_style)
-				menu_x := menu_x + padded_title.count
+				-- Draw title with hotkey underlining
+				buffer.put_char (menu_x, ay, ' ', title_style)
+				render_with_hotkey (buffer, menu_x + 1, ay, l_menu.title, title_style)
+				buffer.put_char (menu_x + 1 + display_width (l_menu.title), ay, ' ', title_style)
+				menu_x := menu_x + display_width (l_menu.title) + 2
 
 				i := i + 1
 			end
@@ -405,7 +437,7 @@ feature -- Queries
 		do
 			total := 0
 			from i := 1 until i > menus.count loop
-				total := total + menus.i_th (i).title.count + 2  -- padding
+				total := total + display_width (menus.i_th (i).title) + 2  -- padding
 				i := i + 1
 			end
 			Result := total.max (width)
@@ -430,7 +462,7 @@ feature {NONE} -- Implementation
 		do
 			Result := absolute_x
 			from i := 1 until i >= index loop
-				Result := Result + menus.i_th (i).title.count + 2
+				Result := Result + display_width (menus.i_th (i).title) + 2
 				i := i + 1
 			end
 		end
@@ -442,7 +474,7 @@ feature {NONE} -- Implementation
 		do
 			pos := 0
 			from i := 1 until i > menus.count or Result > 0 loop
-				title_width := menus.i_th (i).title.count + 2
+				title_width := display_width (menus.i_th (i).title) + 2
 				if mx >= pos and mx < pos + title_width then
 					Result := i
 				end
@@ -494,9 +526,69 @@ feature {NONE} -- Implementation
 			is_menu_open := False
 		end
 
+	render_with_hotkey (buffer: TUI_BUFFER; start_x, start_y: INTEGER; text: STRING_32; base_style: TUI_STYLE)
+			-- Render text with hotkey character underlined.
+			-- Character after & is rendered with underline added to base_style.
+		local
+			i, pos_x: INTEGER
+			c: CHARACTER_32
+			merged_style: TUI_STYLE
+		do
+			pos_x := start_x
+			from i := 1 until i > text.count loop
+				c := text.item (i)
+				if c = '&' and i < text.count then
+					-- Next character is the hotkey - render with underline added
+					i := i + 1
+					c := text.item (i)
+					merged_style := base_style.twin_style
+					merged_style.set_underline (True)
+					buffer.put_char (pos_x, start_y, c, merged_style)
+					pos_x := pos_x + 1
+				else
+					buffer.put_char (pos_x, start_y, c, base_style)
+					pos_x := pos_x + 1
+				end
+				i := i + 1
+			end
+		end
+
+	display_width (text: STRING_32): INTEGER
+			-- Calculate display width of text excluding & markers.
+		local
+			i: INTEGER
+			c: CHARACTER_32
+		do
+			from i := 1 until i > text.count loop
+				c := text.item (i)
+				if c = '&' and i < text.count then
+					-- Skip the &, but count the next character
+					i := i + 1
+					Result := Result + 1
+				else
+					Result := Result + 1
+				end
+				i := i + 1
+			end
+		end
+
+	log_debug (msg: STRING)
+			-- Log debug message to file.
+		local
+			l_file: PLAIN_TEXT_FILE
+		do
+			create l_file.make_open_append ("tui_demo.log")
+			if l_file.is_open_write then
+				l_file.put_string ("  [MENU_BAR] " + msg)
+				l_file.put_new_line
+				l_file.close
+			end
+		end
+
 invariant
 	menus_exist: menus /= Void
 	normal_style_exists: normal_style /= Void
 	selected_style_exists: selected_style /= Void
+	hotkey_style_exists: hotkey_style /= Void
 
 end

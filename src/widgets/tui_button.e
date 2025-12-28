@@ -31,12 +31,14 @@ feature {NONE} -- Initialization
 
 	make (a_label: READABLE_STRING_GENERAL)
 			-- Create button with label.
+			-- Use & before character for keyboard shortcut.
 		require
 			label_exists: a_label /= Void
 		do
 			make_widget
-			label := a_label.to_string_32
-			width := label.count + 4  -- [ Label ]
+			shortcut_key := '%U'
+			shortcut_position := 0
+			set_label (a_label)
 			height := 1
 			is_focusable := True
 			is_enabled := True
@@ -46,11 +48,13 @@ feature {NONE} -- Initialization
 			create focused_style.make_default
 			create pressed_style.make_default
 			create disabled_style.make_default
+			create hotkey_style.make_default
 			-- Default styles - make focus very visible with reverse video
 			focused_style.set_reverse (True)
 			pressed_style.set_reverse (True)
 			pressed_style.set_bold (True)
 			disabled_style.set_dim (True)
+			hotkey_style.set_underline (True)
 		ensure
 			label_set: label.same_string_general (a_label)
 			focusable: is_focusable
@@ -60,7 +64,33 @@ feature {NONE} -- Initialization
 feature -- Access
 
 	label: STRING_32
-			-- Button label text.
+			-- Button label text (may contain & for shortcut).
+
+	display_label: STRING_32
+			-- Label for display (& removed).
+		local
+			i: INTEGER
+			c: CHARACTER_32
+		do
+			create Result.make (label.count)
+			from i := 1 until i > label.count loop
+				c := label.item (i)
+				if c = '&' and i < label.count then
+					-- Skip the & but include next char
+					i := i + 1
+					Result.append_character (label.item (i))
+				else
+					Result.append_character (c)
+				end
+				i := i + 1
+			end
+		end
+
+	shortcut_key: CHARACTER_32
+			-- Keyboard shortcut character (from & marker).
+
+	shortcut_position: INTEGER
+			-- Position of shortcut character in display_label (0 if none).
 
 	is_enabled: BOOLEAN
 			-- Is button enabled (can be clicked)?
@@ -95,15 +125,39 @@ feature -- Styles
 	disabled_style: TUI_STYLE
 			-- Style for disabled state.
 
+	hotkey_style: TUI_STYLE
+			-- Style for hotkey character (underlined).
+
 feature -- Modification
 
 	set_label (a_label: READABLE_STRING_GENERAL)
-			-- Set button label.
+			-- Set button label. Use & before character for shortcut.
 		require
 			label_exists: a_label /= Void
+		local
+			i: INTEGER
+			c: CHARACTER_32
+			found_shortcut: BOOLEAN
+			display_pos: INTEGER
 		do
 			label := a_label.to_string_32
-			width := label.count + 4
+			-- Find shortcut key
+			shortcut_key := '%U'
+			shortcut_position := 0
+			display_pos := 0
+			from i := 1 until i > label.count or found_shortcut loop
+				c := label.item (i)
+				if c = '&' and i < label.count then
+					shortcut_key := label.item (i + 1).as_lower
+					shortcut_position := display_pos + 1
+					found_shortcut := True
+				else
+					display_pos := display_pos + 1
+				end
+				i := i + 1
+			end
+			-- Width based on display_label (without &)
+			width := display_label.count + 4
 		ensure
 			label_set: label.same_string_general (a_label)
 		end
@@ -167,6 +221,16 @@ feature -- Modification
 			style_set: disabled_style = s
 		end
 
+	set_hotkey_style (s: TUI_STYLE)
+			-- Set hotkey style.
+		require
+			s_exists: s /= Void
+		do
+			hotkey_style := s
+		ensure
+			style_set: hotkey_style = s
+		end
+
 feature -- Actions
 
 	click
@@ -180,11 +244,12 @@ feature -- Actions
 feature -- Rendering
 
 	render (buffer: TUI_BUFFER)
-			-- Render button to buffer.
+			-- Render button to buffer with hotkey underlining.
 		local
-			ax, ay: INTEGER
-			current_style: TUI_STYLE
-			display: STRING_32
+			ax, ay, i, pos_x: INTEGER
+			current_style, hotkey_merged: TUI_STYLE
+			c: CHARACTER_32
+			disp: STRING_32
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -200,20 +265,30 @@ feature -- Rendering
 				current_style := normal_style
 			end
 
-			-- Build display string: [ Label ]
-			create display.make (width)
-			display.append_character ('[')
-			display.append_character (' ')
-			display.append (label)
-			display.append_character (' ')
-			display.append_character (']')
+			-- Draw opening bracket and space
+			buffer.put_char (ax, ay, '[', current_style)
+			buffer.put_char (ax + 1, ay, ' ', current_style)
 
-			-- Truncate if needed
-			if display.count > width then
-				display := display.substring (1, width)
+			-- Draw label with hotkey underlining
+			disp := display_label
+			pos_x := ax + 2
+			from i := 1 until i > disp.count loop
+				c := disp.item (i)
+				if i = shortcut_position then
+					-- This is the hotkey character - underline it
+					hotkey_merged := current_style.twin_style
+					hotkey_merged.set_underline (True)
+					buffer.put_char (pos_x, ay, c, hotkey_merged)
+				else
+					buffer.put_char (pos_x, ay, c, current_style)
+				end
+				pos_x := pos_x + 1
+				i := i + 1
 			end
 
-			buffer.put_string (ax, ay, display, current_style)
+			-- Draw closing space and bracket
+			buffer.put_char (pos_x, ay, ' ', current_style)
+			buffer.put_char (pos_x + 1, ay, ']', current_style)
 		end
 
 feature -- Event Handling
@@ -262,9 +337,9 @@ feature -- Event Handling
 feature -- Queries
 
 	preferred_width: INTEGER
-			-- Preferred width based on label.
+			-- Preferred width based on display label.
 		do
-			Result := label.count + 4
+			Result := display_label.count + 4
 		end
 
 	preferred_height: INTEGER
@@ -280,5 +355,6 @@ invariant
 	focused_style_exists: focused_style /= Void
 	pressed_style_exists: pressed_style /= Void
 	disabled_style_exists: disabled_style /= Void
+	hotkey_style_exists: hotkey_style /= Void
 
 end

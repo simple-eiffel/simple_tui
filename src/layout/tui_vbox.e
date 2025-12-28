@@ -71,6 +71,7 @@ feature -- Layout
 			iw: INTEGER
 			i: INTEGER
 		do
+			logger.debug_log ("VBOX.layout: children=" + children.count.out + " abs_x=" + absolute_x.out + " abs_y=" + absolute_y.out + " w=" + width.out + " h=" + height.out)
 			iw := inner_width
 			current_y := 1
 
@@ -86,11 +87,19 @@ feature -- Layout
 				end
 
 				children.i_th (i).set_position (child_x.max (1), current_y)
+				logger.debug_log ("  child[" + i.out + "] pos=(" + child_x.max (1).out + "," + current_y.out + ") abs=(" + children.i_th (i).absolute_x.out + "," + children.i_th (i).absolute_y.out + ") h=" + children.i_th (i).height.out)
 				-- Recursively layout child
 				children.i_th (i).layout
 				current_y := current_y + children.i_th (i).height + gap
 				i := i + 1
 			end
+		end
+
+	logger: SIMPLE_LOGGER
+			-- Shared logger instance.
+		once
+			create Result.make_to_file ("task_manager.log")
+			Result.set_level (Result.Level_debug)
 		end
 
 feature -- Convenience

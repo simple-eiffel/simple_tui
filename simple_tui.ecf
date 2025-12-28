@@ -30,4 +30,25 @@
 		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
 		<cluster name="demo" location=".\demo\"/>
 	</target>
+	<target name="task_manager">
+		<root class="TASK_MANAGER_APP" feature="make"/>
+		<option warning="warning" syntax="provisional" manifest_array_type="mismatch_warning">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<setting name="console_application" value="true"/>
+		<setting name="dead_code_removal" value="feature"/>
+		<capability>
+			<concurrency support="scoop"/>
+			<void_safety support="all"/>
+		</capability>
+		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
+		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
+		<library name="simple_console" location="$SIMPLE_EIFFEL/simple_console/simple_console.ecf"/>
+		<library name="simple_sql" location="$SIMPLE_EIFFEL/simple_sql/simple_sql.ecf"/>
+		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
+		<library name="simple_ai_client" location="$SIMPLE_EIFFEL/simple_ai_client/simple_ai_client.ecf"/>
+		<library name="json" location="$ISE_LIBRARY/contrib/library/text/parser/json/library/json.ecf"/>
+		<cluster name="src" location=".\src\" recursive="true"/>
+		<cluster name="todo_app_classes" location="$SIMPLE_EIFFEL/simple_sql/src/todo_app/" recursive="true"/>
+	</target>
 </system>

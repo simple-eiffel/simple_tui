@@ -47,10 +47,12 @@ feature {NONE} -- Initialization
 			create selected_style.make_default
 			create disabled_style.make_default
 			create border_style.make_default
+			create hotkey_style.make_default
 			selected_style.set_reverse (True)
 			disabled_style.set_foreground (create {TUI_COLOR}.make_index (8))  -- Gray
 			-- Set border to bright cyan for visibility
 			border_style.set_foreground (create {TUI_COLOR}.make_index (14))
+			hotkey_style.set_underline (True)
 		ensure
 			empty: items.is_empty
 			hidden: not is_visible
@@ -102,6 +104,9 @@ feature -- Styles
 
 	border_style: TUI_STYLE
 			-- Style for menu border (box drawing characters).
+
+	hotkey_style: TUI_STYLE
+			-- Style for hotkey character (underlined).
 
 feature -- Status
 
@@ -310,26 +315,32 @@ feature -- Event Handling
 		do
 			if is_visible then
 				if event.is_up then
+					log_debug ("UP arrow, selecting previous")
 					select_previous
 					ignore_next_enter := False
 					Result := True
 				elseif event.is_down then
+					log_debug ("DOWN arrow, selecting next")
 					select_next
 					ignore_next_enter := False
 					Result := True
 				elseif event.is_enter or event.is_space then
 					if ignore_next_enter then
 						-- Skip first Enter after menu opened (same key that opened it)
+						log_debug ("ENTER/SPACE ignored (first after open)")
 						ignore_next_enter := False
 					else
+						log_debug ("ENTER/SPACE executing selected")
 						execute_selected
 					end
 					Result := True
 				elseif event.is_escape then
+					log_debug ("ESCAPE closing menu")
 					close
 					Result := True
 				else
 					-- Check shortcut keys
+					log_debug ("try_shortcut called with char=" + event.char.natural_32_code.out)
 					ignore_next_enter := False
 					Result := try_shortcut (event.char)
 				end
@@ -380,7 +391,6 @@ feature -- Rendering
 			ax, ay, i, j, item_y: INTEGER
 			item: TUI_MENU_ITEM
 			item_style: TUI_STYLE
-			item_text: STRING_32
 			menu_width, inner_width: INTEGER
 			top_border, bottom_border, sep_line: STRING_32
 		do
@@ -425,10 +435,9 @@ feature -- Rendering
 							item_style := normal_style
 						end
 
-						-- Format item text with borders: │ item │
-						item_text := format_item (item, inner_width)
+						-- Draw item with hotkey underlining: │ item │
 						buffer.put_char (ax, ay + i, '%/0x2502/', border_style)  -- │
-						buffer.put_string (ax + 1, ay + i, item_text, item_style)
+						render_item_with_hotkey (buffer, ax + 1, ay + i, item, inner_width, item_style)
 						buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', border_style)  -- │
 					end
 					i := i + 1
@@ -489,22 +498,81 @@ feature {NONE} -- Implementation
 			end
 		end
 
+	render_item_with_hotkey (buffer: TUI_BUFFER; start_x, start_y: INTEGER; item: TUI_MENU_ITEM; w: INTEGER; base_style: TUI_STYLE)
+			-- Render menu item with hotkey character underlined.
+		local
+			i, pos_x, remaining: INTEGER
+			c: CHARACTER_32
+			disp: STRING_32
+			hotkey_merged: TUI_STYLE
+		do
+			disp := item.display_text
+			pos_x := start_x
+
+			-- Leading space
+			buffer.put_char (pos_x, start_y, ' ', base_style)
+			pos_x := pos_x + 1
+
+			-- Render display text with hotkey underlining
+			from i := 1 until i > disp.count loop
+				c := disp.item (i)
+				if i = item.shortcut_position then
+					-- This is the hotkey character - underline it
+					hotkey_merged := base_style.twin_style
+					hotkey_merged.set_underline (True)
+					buffer.put_char (pos_x, start_y, c, hotkey_merged)
+				else
+					buffer.put_char (pos_x, start_y, c, base_style)
+				end
+				pos_x := pos_x + 1
+				i := i + 1
+			end
+
+			-- Pad remaining width with spaces
+			remaining := w - disp.count - 1  -- -1 for leading space
+			from i := 1 until i > remaining loop
+				buffer.put_char (pos_x, start_y, ' ', base_style)
+				pos_x := pos_x + 1
+				i := i + 1
+			end
+		end
+
 	try_shortcut (c: CHARACTER_32): BOOLEAN
 			-- Try to execute item with shortcut key c.
+			-- Only matches actual letter/number shortcuts, not null character.
 		local
 			i: INTEGER
 			item: TUI_MENU_ITEM
 			key_lower: CHARACTER_32
 		do
-			key_lower := c.as_lower
-			from i := 1 until i > items.count or Result loop
-				item := items.i_th (i)
-				if item.is_sensitive and then item.shortcut_key = key_lower then
-					item.execute
-					close
-					Result := True
+			-- Ignore null character (from key release events)
+			if c /= '%U' then
+				key_lower := c.as_lower
+				from i := 1 until i > items.count or Result loop
+					item := items.i_th (i)
+					if item.is_sensitive and item.shortcut_key /= '%U' and then item.shortcut_key = key_lower then
+						log_debug ("try_shortcut matched item: " + item.display_text.to_string_8)
+						item.execute
+						close
+						Result := True
+					end
+					i := i + 1
 				end
-				i := i + 1
+			else
+				log_debug ("try_shortcut ignoring null char")
+			end
+		end
+
+	log_debug (msg: STRING)
+			-- Log debug message to file.
+		local
+			l_file: PLAIN_TEXT_FILE
+		do
+			create l_file.make_open_append ("tui_demo.log")
+			if l_file.is_open_write then
+				l_file.put_string ("  [MENU] " + msg)
+				l_file.put_new_line
+				l_file.close
 			end
 		end
 
@@ -513,5 +581,6 @@ invariant
 	normal_style_exists: normal_style /= Void
 	selected_style_exists: selected_style /= Void
 	border_style_exists: border_style /= Void
+	hotkey_style_exists: hotkey_style /= Void
 
 end

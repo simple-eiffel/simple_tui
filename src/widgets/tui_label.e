@@ -114,6 +114,7 @@ feature -- Rendering
 		do
 			ax := absolute_x
 			ay := absolute_y
+			logger.debug_log ("LABEL.render: text=%"" + text.to_string_8 + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + buffer.height.out)
 
 			if wrap then
 				lines := wrapped_lines
@@ -225,6 +226,13 @@ feature {NONE} -- Implementation
 			end
 		ensure
 			not_empty: not Result.is_empty
+		end
+
+	logger: SIMPLE_LOGGER
+			-- Shared logger instance.
+		once
+			create Result.make_to_file ("task_manager.log")
+			Result.set_level (Result.Level_debug)
 		end
 
 invariant

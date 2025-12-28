@@ -260,6 +260,9 @@ feature -- Display
 		do
 			cx := (screen_width - width) // 2 + 1
 			cy := (screen_height - height) // 2 + 1
+			-- Clamp to valid position (at least 1)
+			cx := cx.max (1)
+			cy := cy.max (1)
 			set_position (cx, cy)
 			show
 			if buttons.count > 0 then
