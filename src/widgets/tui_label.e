@@ -114,7 +114,7 @@ feature -- Rendering
 		do
 			ax := absolute_x
 			ay := absolute_y
-			logger.debug_log ("LABEL.render: text=%"" + text.to_string_8 + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + buffer.height.out)
+			logger.debug_log ("LABEL.render: text=%"" + {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (text) + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + buffer.height.out)
 
 			if wrap then
 				lines := wrapped_lines
