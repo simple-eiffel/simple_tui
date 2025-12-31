@@ -32,7 +32,6 @@
 	<target name="simple_tui_demo" extends="simple_tui">
 		<root class="TUI_DEMO" feature="make"/>
 		<setting name="console_application" value="true"/>
-		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
 		<cluster name="demo" location=".\demo\"/>
 	</target>
 	<target name="task_manager">
