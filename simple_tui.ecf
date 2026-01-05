@@ -15,7 +15,12 @@
 		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
 		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
 		<library name="simple_console" location="$SIMPLE_EIFFEL/simple_console/simple_console.ecf"/>
-		<cluster name="src" location=".\src\" recursive="true"/>
+		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
+		<cluster name="src" location=".\src\" recursive="true">
+			<file_rule>
+				<exclude>/apps$</exclude>
+			</file_rule>
+		</cluster>
 	</target>
 	<target name="simple_tui_tests" extends="simple_tui">
 		<root class="TEST_APP" feature="make"/>
