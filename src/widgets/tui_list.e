@@ -124,15 +124,15 @@ feature -- Queries
 			end
 		end
 
-	is_selected (index: INTEGER): BOOLEAN
+	is_selected (a_index: INTEGER): BOOLEAN
 			-- Is item at index selected (in multi-select mode)?
 		require
-			valid_index: index >= 1 and index <= count
+			valid_index: a_index >= 1 and a_index <= count
 		do
 			if is_multi_select then
-				Result := selected_indices.has (index)
+				Result := selected_indices.has (a_index)
 			else
-				Result := selected_index = index
+				Result := selected_index = a_index
 			end
 		end
 
@@ -163,12 +163,12 @@ feature -- Queries
 
 feature -- Modification
 
-	add_item (item: READABLE_STRING_GENERAL)
+	add_item (a_item: READABLE_STRING_GENERAL)
 			-- Add item to list.
 		require
-			item_exists: item /= Void
+			item_exists: a_item /= Void
 		do
-			items.extend (item.to_string_32)
+			items.extend (a_item.to_string_32)
 			if selected_index = 0 and not items.is_empty then
 				selected_index := 1
 			end
@@ -176,31 +176,31 @@ feature -- Modification
 			item_added: items.count = old items.count + 1
 		end
 
-	add_items (new_items: ITERABLE [READABLE_STRING_GENERAL])
+	add_items (a_new_items: ITERABLE [READABLE_STRING_GENERAL])
 			-- Add multiple items.
 		do
-			across new_items as ic loop
+			across a_new_items as ic loop
 				add_item (ic)
 			end
 		end
 
-	remove_item (index: INTEGER)
+	remove_item (a_index: INTEGER)
 			-- Remove item at index.
 		require
-			valid_index: index >= 1 and index <= count
+			valid_index: a_index >= 1 and a_index <= count
 		local
 			i: INTEGER
 		do
-			items.go_i_th (index)
+			items.go_i_th (a_index)
 			items.remove
 			-- Adjust selection
 			if selected_index > items.count then
 				selected_index := items.count
 			end
-			selected_indices.prune_all (index)
+			selected_indices.prune_all (a_index)
 			-- Adjust indices in multi-select
 			from i := 1 until i > selected_indices.count loop
-				if selected_indices.i_th (i) > index then
+				if selected_indices.i_th (i) > a_index then
 					selected_indices.put_i_th (selected_indices.i_th (i) - 1, i)
 				end
 				i := i + 1
@@ -221,28 +221,28 @@ feature -- Modification
 			no_selection: selected_index = 0
 		end
 
-	set_selected_index (index: INTEGER)
+	set_selected_index (a_index: INTEGER)
 			-- Set selected index.
 		require
-			valid_index: index >= 0 and index <= count
+			valid_index: a_index >= 0 and a_index <= count
 		do
-			selected_index := index
-			ensure_visible (index)
+			selected_index := a_index
+			ensure_visible (a_index)
 			notify_select
 		ensure
-			selected: selected_index = index
+			selected: selected_index = a_index
 		end
 
-	toggle_selection (index: INTEGER)
+	toggle_selection (a_index: INTEGER)
 			-- Toggle selection of item (multi-select mode).
 		require
-			valid_index: index >= 1 and index <= count
+			valid_index: a_index >= 1 and a_index <= count
 			multi_select: is_multi_select
 		do
-			if selected_indices.has (index) then
-				selected_indices.prune_all (index)
+			if selected_indices.has (a_index) then
+				selected_indices.prune_all (a_index)
 			else
-				selected_indices.extend (index)
+				selected_indices.extend (a_index)
 			end
 		end
 
@@ -254,59 +254,59 @@ feature -- Modification
 			no_selections: selected_indices.is_empty
 		end
 
-	set_multi_select (v: BOOLEAN)
+	set_multi_select (a_v: BOOLEAN)
 			-- Set multi-select mode.
 		do
-			is_multi_select := v
-			if not v then
+			is_multi_select := a_v
+			if not a_v then
 				selected_indices.wipe_out
 			end
 		ensure
-			multi_select_set: is_multi_select = v
+			multi_select_set: is_multi_select = a_v
 		end
 
-	set_show_scrollbar (v: BOOLEAN)
+	set_show_scrollbar (a_v: BOOLEAN)
 			-- Set scrollbar visibility.
 		do
-			show_scrollbar := v
+			show_scrollbar := a_v
 		ensure
-			show_scrollbar_set: show_scrollbar = v
+			show_scrollbar_set: show_scrollbar = a_v
 		end
 
-	set_on_select (handler: PROCEDURE [INTEGER])
+	set_on_select (a_handler: PROCEDURE [INTEGER])
 			-- Set selection change handler (clears previous handlers).
 			-- For multiple handlers, use select_actions.extend directly.
 		do
 			select_actions.wipe_out
-			select_actions.extend (handler)
+			select_actions.extend (a_handler)
 		end
 
-	set_on_activate (handler: PROCEDURE [INTEGER])
+	set_on_activate (a_handler: PROCEDURE [INTEGER])
 			-- Set activation handler (clears previous handlers).
 			-- For multiple handlers, use activate_actions.extend directly.
 		do
 			activate_actions.wipe_out
-			activate_actions.extend (handler)
+			activate_actions.extend (a_handler)
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_selected_style (s: TUI_STYLE)
+	set_selected_style (a_s: TUI_STYLE)
 			-- Set selected style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			selected_style := s
+			selected_style := a_s
 		ensure
-			style_set: selected_style = s
+			style_set: selected_style = a_s
 		end
 
 feature -- Navigation
@@ -379,7 +379,7 @@ feature -- Navigation
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render list to buffer.
 		local
 			ax, ay: INTEGER
@@ -421,7 +421,7 @@ feature -- Rendering
 				-- Prepare display text
 				item_text := padded_text (item_text, display_width)
 
-				buffer.put_string (ax, ay + draw_y, item_text, item_style)
+				a_buffer.put_string (ax, ay + draw_y, item_text, item_style)
 
 				draw_y := draw_y + 1
 				i := i + 1
@@ -429,42 +429,42 @@ feature -- Rendering
 
 			-- Fill remaining space
 			from until draw_y >= height loop
-				buffer.put_string (ax, ay + draw_y, spaces (display_width), normal_style)
+				a_buffer.put_string (ax, ay + draw_y, spaces (display_width), normal_style)
 				draw_y := draw_y + 1
 			end
 
 			-- Draw scrollbar
 			if needs_scrollbar then
-				render_scrollbar (buffer, ax + width - 1, ay)
+				render_scrollbar (a_buffer, ax + width - 1, ay)
 			end
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_focused and not items.is_empty then
-				if event.is_up then
+				if a_event.is_up then
 					select_previous
 					Result := True
-				elseif event.is_down then
+				elseif a_event.is_down then
 					select_next
 					Result := True
-				elseif event.is_home then
+				elseif a_event.is_home then
 					select_first
 					Result := True
-				elseif event.is_end_key then
+				elseif a_event.is_end_key then
 					select_last
 					Result := True
-				elseif event.is_page_up then
+				elseif a_event.is_page_up then
 					page_up
 					Result := True
-				elseif event.is_page_down then
+				elseif a_event.is_page_down then
 					page_down
 					Result := True
-				elseif event.is_enter or event.is_space then
-					if is_multi_select and event.is_space then
+				elseif a_event.is_enter or a_event.is_space then
+					if is_multi_select and a_event.is_space then
 						toggle_selection (selected_index)
 					end
 					activate_current
@@ -473,16 +473,16 @@ feature -- Event Handling
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			my: INTEGER
 			clicked_index: INTEGER
 		do
-			if contains_point (event.mouse_x, event.mouse_y) then
-				if event.is_mouse_press and event.mouse_button = 1 then
+			if contains_point (a_event.mouse_x, a_event.mouse_y) then
+				if a_event.is_mouse_press and a_event.mouse_button = 1 then
 					-- Calculate clicked item
-					my := event.mouse_y - absolute_y
+					my := a_event.mouse_y - absolute_y
 					clicked_index := scroll_offset + my + 1
 
 					if clicked_index >= 1 and clicked_index <= items.count then
@@ -492,9 +492,9 @@ feature -- Event Handling
 						set_selected_index (clicked_index)
 						Result := True
 					end
-				elseif event.is_mouse_scroll then
+				elseif a_event.is_mouse_scroll then
 					-- Scroll with mouse wheel
-					if event.mouse_scroll_delta < 0 then
+					if a_event.mouse_scroll_delta < 0 then
 						scroll_up (3)
 					else
 						scroll_down (3)
@@ -506,29 +506,29 @@ feature -- Event Handling
 
 feature {NONE} -- Implementation
 
-	ensure_visible (index: INTEGER)
+	ensure_visible (a_index: INTEGER)
 			-- Scroll to ensure item at index is visible.
 		do
-			if index > 0 then
-				if index <= scroll_offset then
-					scroll_offset := index - 1
-				elseif index > scroll_offset + height then
-					scroll_offset := index - height
+			if a_index > 0 then
+				if a_index <= scroll_offset then
+					scroll_offset := a_index - 1
+				elseif a_index > scroll_offset + height then
+					scroll_offset := a_index - height
 				end
 				scroll_offset := scroll_offset.max (0).min ((items.count - height).max (0))
 			end
 		end
 
-	scroll_up (lines: INTEGER)
+	scroll_up (a_lines: INTEGER)
 			-- Scroll up by lines.
 		do
-			scroll_offset := (scroll_offset - lines).max (0)
+			scroll_offset := (scroll_offset - a_lines).max (0)
 		end
 
-	scroll_down (lines: INTEGER)
+	scroll_down (a_lines: INTEGER)
 			-- Scroll down by lines.
 		do
-			scroll_offset := (scroll_offset + lines).min ((items.count - height).max (0))
+			scroll_offset := (scroll_offset + a_lines).min ((items.count - height).max (0))
 		end
 
 	notify_select
@@ -545,27 +545,27 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	padded_text (text: STRING_32; target_width: INTEGER): STRING_32
+	padded_text (a_text: STRING_32; target_width: INTEGER): STRING_32
 			-- Pad or truncate text to target width.
 		do
-			if text.count >= target_width then
-				Result := text.substring (1, target_width)
+			if a_text.count >= target_width then
+				Result := a_text.substring (1, target_width)
 			else
 				create Result.make (target_width)
-				Result.append (text)
+				Result.append (a_text)
 				from until Result.count >= target_width loop
 					Result.append_character (' ')
 				end
 			end
 		end
 
-	spaces (n: INTEGER): STRING_32
+	spaces (a_n: INTEGER): STRING_32
 			-- Create string of n spaces.
 		do
-			create Result.make_filled (' ', n)
+			create Result.make_filled (' ', a_n)
 		end
 
-	render_scrollbar (buffer: TUI_BUFFER; sx, sy: INTEGER)
+	render_scrollbar (a_buffer: TUI_BUFFER; sx, sy: INTEGER)
 			-- Render vertical scrollbar.
 		local
 			i: INTEGER
@@ -588,7 +588,7 @@ feature {NONE} -- Implementation
 				else
 					char := '%/0x2591/'  -- Light shade
 				end
-				buffer.put_char (sx, sy + i, char, normal_style)
+				a_buffer.put_char (sx, sy + i, char, normal_style)
 				i := i + 1
 			end
 		end

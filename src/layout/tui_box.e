@@ -94,73 +94,73 @@ feature -- Border styles
 
 feature -- Modification
 
-	set_title (t: STRING)
+	set_title (a_t: STRING)
 			-- Set box title.
 		require
-			t_exists: t /= Void
+			t_exists: a_t /= Void
 		do
-			title := t
+			title := a_t
 		ensure
-			title_set: title = t
+			title_set: title = a_t
 		end
 
-	set_border (bs: INTEGER)
+	set_border (a_bs: INTEGER)
 			-- Set border style.
 		require
-			valid_style: bs >= Border_none and bs <= Border_rounded
+			valid_style: a_bs >= Border_none and a_bs <= Border_rounded
 		do
-			border_style := bs
+			border_style := a_bs
 		ensure
-			border_set: border_style = bs
+			border_set: border_style = a_bs
 		end
 
-	set_padding (p: INTEGER)
+	set_padding (a_p: INTEGER)
 			-- Set uniform padding.
 		require
-			valid: p >= 0
+			valid: a_p >= 0
 		do
-			padding_left := p
-			padding_right := p
-			padding_top := p
-			padding_bottom := p
+			padding_left := a_p
+			padding_right := a_p
+			padding_top := a_p
+			padding_bottom := a_p
 		end
 
-	set_padding_horizontal (p: INTEGER)
+	set_padding_horizontal (a_p: INTEGER)
 			-- Set left/right padding.
 		require
-			valid: p >= 0
+			valid: a_p >= 0
 		do
-			padding_left := p
-			padding_right := p
+			padding_left := a_p
+			padding_right := a_p
 		end
 
-	set_padding_vertical (p: INTEGER)
+	set_padding_vertical (a_p: INTEGER)
 			-- Set top/bottom padding.
 		require
-			valid: p >= 0
+			valid: a_p >= 0
 		do
-			padding_top := p
-			padding_bottom := p
+			padding_top := a_p
+			padding_bottom := a_p
 		end
 
-	set_border_style (s: TUI_STYLE)
+	set_border_style (a_s: TUI_STYLE)
 			-- Set style for drawing the border.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			border_color_style := s
+			border_color_style := a_s
 		ensure
-			style_set: border_color_style = s
+			style_set: border_color_style = a_s
 		end
 
-	set_title_style (s: TUI_STYLE)
+	set_title_style (a_s: TUI_STYLE)
 			-- Set style for drawing the title.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			title_color_style := s
+			title_color_style := a_s
 		ensure
-			style_set: title_color_style = s
+			style_set: title_color_style = a_s
 		end
 
 feature -- Queries
@@ -217,7 +217,7 @@ feature -- Queries
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render box to buffer.
 		local
 			ax, ay, i: INTEGER
@@ -244,42 +244,42 @@ feature -- Rendering
 				end
 
 				-- Top border
-				buffer.put_char (ax, ay, chars.tl, l_border_style)
+				a_buffer.put_char (ax, ay, chars.tl, l_border_style)
 				from i := 1 until i >= width - 1 loop
-					buffer.put_char (ax + i, ay, chars.h, l_border_style)
+					a_buffer.put_char (ax + i, ay, chars.h, l_border_style)
 					i := i + 1
 				end
 				if width > 1 then
-					buffer.put_char (ax + width - 1, ay, chars.tr, l_border_style)
+					a_buffer.put_char (ax + width - 1, ay, chars.tr, l_border_style)
 				end
 
 				-- Title (if any)
 				if not title.is_empty and width > 4 then
-					buffer.put_string (ax + 2, ay, title.substring (1, (width - 4).min (title.count)), l_title_style)
+					a_buffer.put_string (ax + 2, ay, title.substring (1, (width - 4).min (title.count)), l_title_style)
 				end
 
 				-- Side borders
 				from i := 1 until i >= height - 1 loop
-					buffer.put_char (ax, ay + i, chars.v, l_border_style)
-					buffer.put_char (ax + width - 1, ay + i, chars.v, l_border_style)
+					a_buffer.put_char (ax, ay + i, chars.v, l_border_style)
+					a_buffer.put_char (ax + width - 1, ay + i, chars.v, l_border_style)
 					i := i + 1
 				end
 
 				-- Bottom border
 				if height > 1 then
-					buffer.put_char (ax, ay + height - 1, chars.bl, l_border_style)
+					a_buffer.put_char (ax, ay + height - 1, chars.bl, l_border_style)
 					from i := 1 until i >= width - 1 loop
-						buffer.put_char (ax + i, ay + height - 1, chars.h, l_border_style)
+						a_buffer.put_char (ax + i, ay + height - 1, chars.h, l_border_style)
 						i := i + 1
 					end
 					if width > 1 then
-						buffer.put_char (ax + width - 1, ay + height - 1, chars.br, l_border_style)
+						a_buffer.put_char (ax + width - 1, ay + height - 1, chars.br, l_border_style)
 					end
 				end
 			end
 
 			-- Render children
-			render_children (buffer)
+			render_children (a_buffer)
 		end
 
 feature -- Layout
@@ -302,10 +302,10 @@ feature -- Layout
 
 feature {NONE} -- Implementation
 
-	border_chars (bs: INTEGER): TUPLE [tl, tr, bl, br, h, v: CHARACTER_32]
+	border_chars (a_bs: INTEGER): TUPLE [tl, tr, bl, br, h, v: CHARACTER_32]
 			-- Get border characters for style.
 		do
-			inspect bs
+			inspect a_bs
 			when Border_single then
 				-- Single line: top-left, top-right, bottom-left, bottom-right, horizontal, vertical
 				Result := ['%/0x250C/', '%/0x2510/', '%/0x2514/', '%/0x2518/', '%/0x2500/', '%/0x2502/']

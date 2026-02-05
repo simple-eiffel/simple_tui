@@ -43,11 +43,11 @@ feature {NONE} -- Initialization
 			is_key: is_key_event
 		end
 
-	make_char (c: CHARACTER_32; a_modifiers: INTEGER)
+	make_char (a_c: CHARACTER_32; a_modifiers: INTEGER)
 			-- Create character input event.
 		do
 			event_type := Type_char
-			character := c
+			character := a_c
 			modifiers := a_modifiers
 			key_code := 0
 			mouse_x := 0
@@ -111,10 +111,10 @@ feature {NONE} -- Initialization
 			is_resize: is_resize_event
 		end
 
-	make_focus (gained: BOOLEAN)
+	make_focus (a_gained: BOOLEAN)
 			-- Create focus event.
 		do
-			if gained then
+			if a_gained then
 				event_type := Type_focus_gained
 			else
 				event_type := Type_focus_lost
@@ -285,10 +285,10 @@ feature -- Modifier queries
 
 feature -- Key queries
 
-	is_key (k: INTEGER): BOOLEAN
+	is_key (a_k: INTEGER): BOOLEAN
 			-- Is this a key event for key `k`?
 		do
-			Result := is_key_event and key_code = k
+			Result := is_key_event and key_code = a_k
 		end
 
 	is_enter: BOOLEAN do Result := is_key (Key_enter) or (is_char_event and (character = '%N' or character = '%/13/')) end

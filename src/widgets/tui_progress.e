@@ -111,96 +111,96 @@ feature -- Modification
 			max_set: max_value = a_max
 		end
 
-	set_value (v: REAL_64)
+	set_value (a_v: REAL_64)
 			-- Set current value.
 		do
-			current_value := v.max (min_value).min (max_value)
+			current_value := a_v.max (min_value).min (max_value)
 		ensure
 			value_clamped: current_value >= min_value and current_value <= max_value
 		end
 
-	set_percentage (p: REAL_64)
+	set_percentage (a_p: REAL_64)
 			-- Set value as percentage (0-100).
 		do
-			set_value (min_value + (max_value - min_value) * (p / 100.0))
+			set_value (min_value + (max_value - min_value) * (a_p / 100.0))
 		end
 
-	increment (delta: REAL_64)
+	increment (a_delta: REAL_64)
 			-- Increment value by delta.
 		do
-			set_value (current_value + delta)
+			set_value (current_value + a_delta)
 		end
 
-	set_indeterminate (v: BOOLEAN)
+	set_indeterminate (a_v: BOOLEAN)
 			-- Set indeterminate mode.
 		do
-			is_indeterminate := v
+			is_indeterminate := a_v
 		ensure
-			indeterminate_set: is_indeterminate = v
+			indeterminate_set: is_indeterminate = a_v
 		end
 
-	set_show_percentage (v: BOOLEAN)
+	set_show_percentage (a_v: BOOLEAN)
 			-- Set whether to show percentage.
 		do
-			show_percentage := v
+			show_percentage := a_v
 		ensure
-			show_percentage_set: show_percentage = v
+			show_percentage_set: show_percentage = a_v
 		end
 
-	set_label (t: READABLE_STRING_GENERAL)
+	set_label (a_t: READABLE_STRING_GENERAL)
 			-- Set label text.
 		require
-			t_exists: t /= Void
+			t_exists: a_t /= Void
 		do
-			label := t.to_string_32
+			label := a_t.to_string_32
 		ensure
-			label_set: label.same_string_general (t)
+			label_set: label.same_string_general (a_t)
 		end
 
-	set_fill_char (c: CHARACTER_32)
+	set_fill_char (a_c: CHARACTER_32)
 			-- Set fill character.
 		do
-			fill_char := c
+			fill_char := a_c
 		ensure
-			fill_char_set: fill_char = c
+			fill_char_set: fill_char = a_c
 		end
 
-	set_empty_char (c: CHARACTER_32)
+	set_empty_char (a_c: CHARACTER_32)
 			-- Set empty character.
 		do
-			empty_char := c
+			empty_char := a_c
 		ensure
-			empty_char_set: empty_char = c
+			empty_char_set: empty_char = a_c
 		end
 
-	set_bar_style (s: TUI_STYLE)
+	set_bar_style (a_s: TUI_STYLE)
 			-- Set bar style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			bar_style := s
+			bar_style := a_s
 		ensure
-			style_set: bar_style = s
+			style_set: bar_style = a_s
 		end
 
-	set_fill_style (s: TUI_STYLE)
+	set_fill_style (a_s: TUI_STYLE)
 			-- Set fill style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			fill_style := s
+			fill_style := a_s
 		ensure
-			style_set: fill_style = s
+			style_set: fill_style = a_s
 		end
 
-	set_empty_style (s: TUI_STYLE)
+	set_empty_style (a_s: TUI_STYLE)
 			-- Set empty style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			empty_style := s
+			empty_style := a_s
 		ensure
-			style_set: empty_style = s
+			style_set: empty_style = a_s
 		end
 
 feature -- Animation
@@ -242,7 +242,7 @@ feature -- Queries
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render progress bar to buffer.
 		local
 			ax, ay: INTEGER
@@ -265,33 +265,33 @@ feature -- Rendering
 			end
 
 			if is_indeterminate then
-				render_indeterminate (buffer, ax, ay, bar_width)
+				render_indeterminate (a_buffer, ax, ay, bar_width)
 			else
 				-- Calculate filled portion
 				filled_count := (bar_width * (percentage / 100.0)).truncated_to_integer
 
 				-- Draw filled portion
 				from i := 0 until i >= filled_count loop
-					buffer.put_char (ax + i, ay, fill_char, fill_style)
+					a_buffer.put_char (ax + i, ay, fill_char, fill_style)
 					i := i + 1
 				end
 
 				-- Draw empty portion
 				from until i >= bar_width loop
-					buffer.put_char (ax + i, ay, empty_char, empty_style)
+					a_buffer.put_char (ax + i, ay, empty_char, empty_style)
 					i := i + 1
 				end
 			end
 
 			-- Draw percentage
 			if show_percentage then
-				buffer.put_string (ax + bar_width + 1, ay, formatted_percentage, bar_style)
+				a_buffer.put_string (ax + bar_width + 1, ay, formatted_percentage, bar_style)
 			end
 		end
 
 feature {NONE} -- Implementation
 
-	render_indeterminate (buffer: TUI_BUFFER; ax, ay, bar_width: INTEGER)
+	render_indeterminate (a_buffer: TUI_BUFFER; ax, ay, bar_width: INTEGER)
 			-- Render indeterminate progress bar.
 		local
 			i: INTEGER
@@ -304,12 +304,12 @@ feature {NONE} -- Implementation
 
 			from i := 0 until i >= bar_width loop
 				if i >= start_pos and i < end_pos then
-					buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
+					a_buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
 				elseif i >= (start_pos - bar_width) and i < (end_pos - bar_width) then
 					-- Wrap around
-					buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
+					a_buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
 				else
-					buffer.put_char (ax + i, ay, empty_char, empty_style)
+					a_buffer.put_char (ax + i, ay, empty_char, empty_style)
 				end
 				i := i + 1
 			end

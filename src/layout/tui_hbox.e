@@ -41,24 +41,24 @@ feature -- Alignment constants
 
 feature -- Modification
 
-	set_gap (g: INTEGER)
+	set_gap (a_g: INTEGER)
 			-- Set gap between children.
 		require
-			valid: g >= 0
+			valid: a_g >= 0
 		do
-			gap := g
+			gap := a_g
 		ensure
-			gap_set: gap = g
+			gap_set: gap = a_g
 		end
 
-	set_valign (a: INTEGER)
+	set_valign (a_a: INTEGER)
 			-- Set vertical alignment.
 		require
-			valid: a >= Align_top and a <= Align_bottom
+			valid: a_a >= Align_top and a_a <= Align_bottom
 		do
-			valign := a
+			valign := a_a
 		ensure
-			valign_set: valign = a
+			valign_set: valign = a_a
 		end
 
 feature -- Layout
@@ -95,10 +95,10 @@ feature -- Layout
 
 feature -- Convenience
 
-	add (child: TUI_WIDGET)
+	add (a_child: TUI_WIDGET)
 			-- Add child and relayout.
 		do
-			add_child (child)
+			add_child (a_child)
 			layout
 		end
 

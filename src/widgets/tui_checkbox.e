@@ -110,22 +110,22 @@ feature -- Modification
 			label_set: label.same_string_general (a_label)
 		end
 
-	set_checked (v: BOOLEAN)
+	set_checked (a_v: BOOLEAN)
 			-- Set checked state.
 		do
-			is_checked := v
+			is_checked := a_v
 			is_indeterminate := False
 		ensure
-			checked_set: is_checked = v
+			checked_set: is_checked = a_v
 			not_indeterminate: not is_indeterminate
 		end
 
-	set_indeterminate (v: BOOLEAN)
+	set_indeterminate (a_v: BOOLEAN)
 			-- Set indeterminate state.
 		do
-			is_indeterminate := v
+			is_indeterminate := a_v
 		ensure
-			indeterminate_set: is_indeterminate = v
+			indeterminate_set: is_indeterminate = a_v
 		end
 
 	check_box
@@ -157,53 +157,53 @@ feature -- Modification
 			not_indeterminate: not is_indeterminate
 		end
 
-	set_checked_char (c: CHARACTER_32)
+	set_checked_char (a_c: CHARACTER_32)
 			-- Set checked character.
 		do
-			checked_char := c
+			checked_char := a_c
 		ensure
-			checked_char_set: checked_char = c
+			checked_char_set: checked_char = a_c
 		end
 
-	set_unchecked_char (c: CHARACTER_32)
+	set_unchecked_char (a_c: CHARACTER_32)
 			-- Set unchecked character.
 		do
-			unchecked_char := c
+			unchecked_char := a_c
 		ensure
-			unchecked_char_set: unchecked_char = c
+			unchecked_char_set: unchecked_char = a_c
 		end
 
-	set_on_change (handler: PROCEDURE [BOOLEAN])
+	set_on_change (a_handler: PROCEDURE [BOOLEAN])
 			-- Set change handler (clears previous handlers).
 			-- For multiple handlers, use change_actions.extend directly.
 		do
 			change_actions.wipe_out
-			change_actions.extend (handler)
+			change_actions.extend (a_handler)
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_focused_style (s: TUI_STYLE)
+	set_focused_style (a_s: TUI_STYLE)
 			-- Set focused style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			focused_style := s
+			focused_style := a_s
 		ensure
-			style_set: focused_style = s
+			style_set: focused_style = a_s
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render checkbox to buffer.
 		local
 			ax, ay: INTEGER
@@ -243,27 +243,27 @@ feature -- Rendering
 				display := display.substring (1, width)
 			end
 
-			buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, display, current_style)
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_focused then
-				if event.is_enter or event.is_space then
+				if a_event.is_enter or a_event.is_space then
 					toggle
 					Result := True
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
-				if contains_point (event.mouse_x, event.mouse_y) then
+			if a_event.is_mouse_press and a_event.mouse_button = 1 then
+				if contains_point (a_event.mouse_x, a_event.mouse_y) then
 					toggle
 					Result := True
 				end

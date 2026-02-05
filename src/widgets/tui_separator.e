@@ -131,40 +131,40 @@ feature -- Modification
 			vertical: is_vertical
 		end
 
-	set_line_style (s: INTEGER)
+	set_line_style (a_s: INTEGER)
 			-- Set line style.
 		require
-			valid_style: s >= Style_single and s <= Style_ascii
+			valid_style: a_s >= Style_single and a_s <= Style_ascii
 		do
-			line_style := s
+			line_style := a_s
 			update_line_char
 		ensure
-			style_set: line_style = s
+			style_set: line_style = a_s
 		end
 
-	set_line_char (c: CHARACTER_32)
+	set_line_char (a_c: CHARACTER_32)
 			-- Set custom line character.
 		do
-			line_char := c
+			line_char := a_c
 		ensure
-			char_set: line_char = c
+			char_set: line_char = a_c
 		end
 
-	set_length (len: INTEGER)
+	set_length (a_len: INTEGER)
 			-- Set separator length.
 		require
-			valid_length: len > 0
+			valid_length: a_len > 0
 		do
 			if is_horizontal then
-				width := len
+				width := a_len
 			else
-				height := len
+				height := a_len
 			end
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render separator to buffer.
 		local
 			ax, ay, i: INTEGER
@@ -174,12 +174,12 @@ feature -- Rendering
 
 			if is_horizontal then
 				from i := 0 until i >= width loop
-					buffer.put_char (ax + i, ay, line_char, style)
+					a_buffer.put_char (ax + i, ay, line_char, style)
 					i := i + 1
 				end
 			else
 				from i := 0 until i >= height loop
-					buffer.put_char (ax, ay + i, line_char, style)
+					a_buffer.put_char (ax, ay + i, line_char, style)
 					i := i + 1
 				end
 			end

@@ -87,10 +87,10 @@ feature -- Output
 		deferred
 		end
 
-	write_cells (cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]])
+	write_cells (a_cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]])
 			-- Write multiple cells (optimized batch).
 		require
-			cells_exist: cells /= Void
+			cells_exist: a_cells /= Void
 		deferred
 		end
 

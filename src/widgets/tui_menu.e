@@ -118,15 +118,15 @@ feature -- Status
 
 feature -- Modification
 
-	add_item (item: TUI_MENU_ITEM)
+	add_item (a_item: TUI_MENU_ITEM)
 			-- Add item to menu.
 		require
-			item_exists: item /= Void
+			item_exists: a_item /= Void
 		do
-			items.extend (item)
-			item.set_parent_menu (Current)
+			items.extend (a_item)
+			a_item.set_parent_menu (Current)
 		ensure
-			item_added: items.has (item)
+			item_added: items.has (a_item)
 		end
 
 	add_separator
@@ -140,15 +140,15 @@ feature -- Modification
 			item_added: items.count = old items.count + 1
 		end
 
-	remove_item (item: TUI_MENU_ITEM)
+	remove_item (a_item: TUI_MENU_ITEM)
 			-- Remove item from menu.
 		require
-			item_exists: item /= Void
+			item_exists: a_item /= Void
 		do
-			item.set_parent_menu (Void)
-			items.prune_all (item)
+			a_item.set_parent_menu (Void)
+			items.prune_all (a_item)
 		ensure
-			item_removed: not items.has (item)
+			item_removed: not items.has (a_item)
 		end
 
 	clear, wipe_out
@@ -173,42 +173,42 @@ feature -- Modification
 			title_set: title.same_string_general (a_title)
 		end
 
-	set_on_close (handler: PROCEDURE)
+	set_on_close (a_handler: PROCEDURE)
 			-- Set close handler.
 		do
-			on_close := handler
+			on_close := a_handler
 		ensure
-			handler_set: on_close = handler
+			handler_set: on_close = a_handler
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal item style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_selected_style (s: TUI_STYLE)
+	set_selected_style (a_s: TUI_STYLE)
 			-- Set selected item style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			selected_style := s
+			selected_style := a_s
 		ensure
-			style_set: selected_style = s
+			style_set: selected_style = a_s
 		end
 
-	set_disabled_style (s: TUI_STYLE)
+	set_disabled_style (a_s: TUI_STYLE)
 			-- Set disabled item style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			disabled_style := s
+			disabled_style := a_s
 		ensure
-			style_set: disabled_style = s
+			style_set: disabled_style = a_s
 		end
 
 feature -- Display
@@ -310,21 +310,21 @@ feature -- Navigation
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_visible then
-				if event.is_up then
+				if a_event.is_up then
 					log_debug ("UP arrow, selecting previous")
 					select_previous
 					ignore_next_enter := False
 					Result := True
-				elseif event.is_down then
+				elseif a_event.is_down then
 					log_debug ("DOWN arrow, selecting next")
 					select_next
 					ignore_next_enter := False
 					Result := True
-				elseif event.is_enter or event.is_space then
+				elseif a_event.is_enter or a_event.is_space then
 					if ignore_next_enter then
 						-- Skip first Enter after menu opened (same key that opened it)
 						log_debug ("ENTER/SPACE ignored (first after open)")
@@ -334,20 +334,20 @@ feature -- Event Handling
 						execute_selected
 					end
 					Result := True
-				elseif event.is_escape then
+				elseif a_event.is_escape then
 					log_debug ("ESCAPE closing menu")
 					close
 					Result := True
 				else
 					-- Check shortcut keys
-					log_debug ("try_shortcut called with char=" + event.char.natural_32_code.out)
+					log_debug ("try_shortcut called with char=" + a_event.char.natural_32_code.out)
 					ignore_next_enter := False
-					Result := try_shortcut (event.char)
+					Result := try_shortcut (a_event.char)
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event for hover and click.
 		local
 			ax, ay, item_index, my: INTEGER
@@ -357,8 +357,8 @@ feature -- Event Handling
 				ay := absolute_y
 
 				-- Check if mouse is within menu bounds
-				if event.mouse_x >= ax and event.mouse_x < ax + preferred_width then
-					my := event.mouse_y
+				if a_event.mouse_x >= ax and a_event.mouse_x < ax + preferred_width then
+					my := a_event.mouse_y
 					-- Item area is from ay+1 to ay+items.count (borders at ay and ay+items.count+1)
 					if my > ay and my <= ay + items.count then
 						item_index := my - ay
@@ -370,7 +370,7 @@ feature -- Event Handling
 							end
 						end
 						-- Click to execute
-						if event.is_mouse_press and event.mouse_button = 1 then
+						if a_event.is_mouse_press and a_event.mouse_button = 1 then
 							if selected_index > 0 then
 								execute_selected
 							end
@@ -385,7 +385,7 @@ feature -- Event Handling
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render menu to buffer with border box.
 		local
 			ax, ay, i, j, item_y: INTEGER
@@ -408,7 +408,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				top_border.append_character ('%/0x2510/')  -- ┐
-				buffer.put_string (ax, ay, top_border, border_style)
+				a_buffer.put_string (ax, ay, top_border, border_style)
 
 				-- Draw menu items with side borders
 				from i := 1 until i > items.count loop
@@ -424,7 +424,7 @@ feature -- Rendering
 							j := j + 1
 						end
 						sep_line.append_character ('%/0x2524/')  -- ┤
-						buffer.put_string (ax, item_y, sep_line, border_style)
+						a_buffer.put_string (ax, item_y, sep_line, border_style)
 					else
 						-- Choose style
 						if not item.is_sensitive then
@@ -436,9 +436,9 @@ feature -- Rendering
 						end
 
 						-- Draw item with hotkey underlining: │ item │
-						buffer.put_char (ax, ay + i, '%/0x2502/', border_style)  -- │
-						render_item_with_hotkey (buffer, ax + 1, ay + i, item, inner_width, item_style)
-						buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', border_style)  -- │
+						a_buffer.put_char (ax, ay + i, '%/0x2502/', border_style)  -- │
+						render_item_with_hotkey (a_buffer, ax + 1, ay + i, item, inner_width, item_style)
+						a_buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', border_style)  -- │
 					end
 					i := i + 1
 				end
@@ -451,7 +451,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				bottom_border.append_character ('%/0x2518/')  -- ┘
-				buffer.put_string (ax, ay + items.count + 1, bottom_border, border_style)
+				a_buffer.put_string (ax, ay + items.count + 1, bottom_border, border_style)
 			end
 		end
 
@@ -484,12 +484,12 @@ feature {NONE} -- Implementation
 	ignore_next_enter: BOOLEAN
 			-- Skip next Enter to prevent immediate execution after opening.
 
-	format_item (item: TUI_MENU_ITEM; w: INTEGER): STRING_32
+	format_item (a_item: TUI_MENU_ITEM; w: INTEGER): STRING_32
 			-- Format item text to width with padding.
 		do
 			create Result.make (w)
 			Result.append_character (' ')
-			Result.append (item.display_text)
+			Result.append (a_item.display_text)
 			from until Result.count >= w loop
 				Result.append_character (' ')
 			end
@@ -498,7 +498,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	render_item_with_hotkey (buffer: TUI_BUFFER; start_x, start_y: INTEGER; item: TUI_MENU_ITEM; w: INTEGER; base_style: TUI_STYLE)
+	render_item_with_hotkey (a_buffer: TUI_BUFFER; start_x, start_y: INTEGER; item: TUI_MENU_ITEM; w: INTEGER; base_style: TUI_STYLE)
 			-- Render menu item with hotkey character underlined.
 		local
 			i, pos_x, remaining: INTEGER
@@ -510,7 +510,7 @@ feature {NONE} -- Implementation
 			pos_x := start_x
 
 			-- Leading space
-			buffer.put_char (pos_x, start_y, ' ', base_style)
+			a_buffer.put_char (pos_x, start_y, ' ', base_style)
 			pos_x := pos_x + 1
 
 			-- Render display text with hotkey underlining
@@ -520,9 +520,9 @@ feature {NONE} -- Implementation
 					-- This is the hotkey character - underline it
 					hotkey_merged := base_style.twin_style
 					hotkey_merged.set_underline (True)
-					buffer.put_char (pos_x, start_y, c, hotkey_merged)
+					a_buffer.put_char (pos_x, start_y, c, hotkey_merged)
 				else
-					buffer.put_char (pos_x, start_y, c, base_style)
+					a_buffer.put_char (pos_x, start_y, c, base_style)
 				end
 				pos_x := pos_x + 1
 				i := i + 1
@@ -531,13 +531,13 @@ feature {NONE} -- Implementation
 			-- Pad remaining width with spaces
 			remaining := w - disp.count - 1  -- -1 for leading space
 			from i := 1 until i > remaining loop
-				buffer.put_char (pos_x, start_y, ' ', base_style)
+				a_buffer.put_char (pos_x, start_y, ' ', base_style)
 				pos_x := pos_x + 1
 				i := i + 1
 			end
 		end
 
-	try_shortcut (c: CHARACTER_32): BOOLEAN
+	try_shortcut (a_c: CHARACTER_32): BOOLEAN
 			-- Try to execute item with shortcut key c.
 			-- Only matches actual letter/number shortcuts, not null character.
 		local
@@ -546,8 +546,8 @@ feature {NONE} -- Implementation
 			key_lower: CHARACTER_32
 		do
 			-- Ignore null character (from key release events)
-			if c /= '%U' then
-				key_lower := c.as_lower
+			if a_c /= '%U' then
+				key_lower := a_c.as_lower
 				from i := 1 until i > items.count or Result loop
 					item := items.i_th (i)
 					if item.is_sensitive and item.shortcut_key /= '%U' and then item.shortcut_key = key_lower then
@@ -563,14 +563,14 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	log_debug (msg: STRING)
+	log_debug (a_msg: STRING)
 			-- Log debug message to file.
 		local
 			l_file: PLAIN_TEXT_FILE
 		do
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
-				l_file.put_string ("  [MENU] " + msg)
+				l_file.put_string ("  [MENU] " + a_msg)
 				l_file.put_new_line
 				l_file.close
 			end

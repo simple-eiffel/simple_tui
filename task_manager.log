@@ -1,0 +1,15 @@
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=1 abs_x=1 abs_y=1 w=20 h=10
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(1,1) h=1
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=2 abs_x=1 abs_y=1 w=20 h=10
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(1,1) h=1
+2026-02-05T14:35:39 DEBUG   child[2] pos=(1,2) abs=(1,2) h=1
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=1 abs_x=1 abs_y=1 w=20 h=20
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(1,1) h=1
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=2 abs_x=1 abs_y=1 w=20 h=20
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(1,1) h=1
+2026-02-05T14:35:39 DEBUG   child[2] pos=(1,4) abs=(1,4) h=1
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=1 abs_x=1 abs_y=1 w=40 h=20
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(1,1) h=5
+2026-02-05T14:35:39 DEBUG VBOX.layout: children=1 abs_x=10 abs_y=5 w=40 h=20
+2026-02-05T14:35:39 DEBUG   child[1] pos=(1,1) abs=(10,5) h=1
+2026-02-05T14:35:39 DEBUG LABEL.render: text="╔" ax=1 ay=1 buf_h=1

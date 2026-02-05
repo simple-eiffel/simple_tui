@@ -148,14 +148,14 @@ feature -- Geometry
 
 feature -- Styling
 
-	set_style (s: TUI_STYLE)
+	set_style (a_s: TUI_STYLE)
 			-- Set widget style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			style := s
+			style := a_s
 		ensure
-			style_set: style = s
+			style_set: style = a_s
 		end
 
 feature -- Visibility
@@ -178,12 +178,12 @@ feature -- Visibility
 
 feature -- Focus
 
-	set_focusable (v: BOOLEAN)
+	set_focusable (a_v: BOOLEAN)
 			-- Set whether widget can receive focus.
 		do
-			is_focusable := v
+			is_focusable := a_v
 		ensure
-			focusable_set: is_focusable = v
+			focusable_set: is_focusable = a_v
 		end
 
 	focus
@@ -228,62 +228,62 @@ feature -- Focus
 
 feature -- Hierarchy
 
-	extend, add_child (child: TUI_WIDGET)
+	extend, add_child (a_child: TUI_WIDGET)
 			-- Add child widget.
 			-- `extend` matches EiffelVision2 container API.
 		require
-			child_exists: child /= Void
-			not_self: child /= Current
-			no_parent: child.parent = Void
+			child_exists: a_child /= Void
+			not_self: a_child /= Current
+			no_parent: a_child.parent = Void
 		do
-			children.extend (child)
-			child.set_parent (Current)
+			children.extend (a_child)
+			a_child.set_parent (Current)
 		ensure
-			child_added: children.has (child)
-			parent_set: child.parent = Current
+			child_added: children.has (a_child)
+			parent_set: a_child.parent = Current
 		end
 
-	prune, remove_child (child: TUI_WIDGET)
+	prune, remove_child (a_child: TUI_WIDGET)
 			-- Remove child widget.
 			-- `prune` matches EiffelVision2 container API.
 		require
-			child_exists: child /= Void
-			is_child: children.has (child)
+			child_exists: a_child /= Void
+			is_child: children.has (a_child)
 		do
-			children.prune_all (child)
-			child.set_parent (Void)
+			children.prune_all (a_child)
+			a_child.set_parent (Void)
 		ensure
-			child_removed: not children.has (child)
-			parent_cleared: child.parent = Void
+			child_removed: not children.has (a_child)
+			parent_cleared: a_child.parent = Void
 		end
 
-	set_parent (p: detachable TUI_WIDGET)
+	set_parent (a_p: detachable TUI_WIDGET)
 			-- Set parent widget.
 		do
-			parent := p
+			parent := a_p
 		ensure
-			parent_set: parent = p
+			parent_set: parent = a_p
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render this widget to the buffer.
 		require
-			buffer_exists: buffer /= Void
+			buffer_exists: a_buffer /= Void
 		deferred
 		end
 
-	render_children (buffer: TUI_BUFFER)
+	render_children (a_buffer: TUI_BUFFER)
 			-- Render all visible children.
 		require
-			buffer_exists: buffer /= Void
+			buffer_exists: a_buffer /= Void
 		local
 			i: INTEGER
 		do
 			from i := 1 until i > children.count loop
 				if children.i_th (i).is_visible then
-					children.i_th (i).render (buffer)
+					children.i_th (i).render (a_buffer)
 				end
 				i := i + 1
 			end
@@ -291,28 +291,28 @@ feature -- Rendering
 
 feature -- Event handling
 
-	handle_event (event: TUI_EVENT): BOOLEAN
+	handle_event (a_event: TUI_EVENT): BOOLEAN
 			-- Handle input event. Return True if handled.
 		require
-			event_exists: event /= Void
+			event_exists: a_event /= Void
 		do
 			Result := False
 		end
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event. Return True if handled.
 		require
-			event_exists: event /= Void
-			is_key: event.is_key_event or event.is_char_event
+			event_exists: a_event /= Void
+			is_key: a_event.is_key_event or a_event.is_char_event
 		do
 			Result := False
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event. Return True if handled.
 		require
-			event_exists: event /= Void
-			is_mouse: event.is_mouse_event
+			event_exists: a_event /= Void
+			is_mouse: a_event.is_mouse_event
 		do
 			Result := False
 		end

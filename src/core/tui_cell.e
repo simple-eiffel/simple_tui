@@ -32,26 +32,26 @@ feature {NONE} -- Initialization
 			width_is_one: width = 1
 		end
 
-	make_with_char (c: CHARACTER_32)
+	make_with_char (a_c: CHARACTER_32)
 			-- Create cell with character and default style.
 		do
-			character := c
+			character := a_c
 			create style.make_default
-			width := compute_width (c)
+			width := compute_width (a_c)
 		ensure
-			char_set: character = c
+			char_set: character = a_c
 		end
 
-	make_with_styled_char (c: CHARACTER_32; s: TUI_STYLE)
+	make_with_styled_char (a_c: CHARACTER_32; s: TUI_STYLE)
 			-- Create cell with character and style.
 		require
 			s_exists: s /= Void
 		do
-			character := c
+			character := a_c
 			style := s
-			width := compute_width (c)
+			width := compute_width (a_c)
 		ensure
-			char_set: character = c
+			char_set: character = a_c
 			style_set: style = s
 		end
 
@@ -80,35 +80,35 @@ feature -- Access
 
 feature -- Modification
 
-	set_character (c: CHARACTER_32)
+	set_character (a_c: CHARACTER_32)
 			-- Set the character.
 		do
-			character := c
-			width := compute_width (c)
+			character := a_c
+			width := compute_width (a_c)
 		ensure
-			char_set: character = c
+			char_set: character = a_c
 		end
 
-	set_style (s: TUI_STYLE)
+	set_style (a_s: TUI_STYLE)
 			-- Set the style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			style := s
+			style := a_s
 		ensure
-			style_set: style = s
+			style_set: style = a_s
 		end
 
-	set (c: CHARACTER_32; s: TUI_STYLE)
+	set (a_c: CHARACTER_32; s: TUI_STYLE)
 			-- Set both character and style.
 		require
 			s_exists: s /= Void
 		do
-			character := c
+			character := a_c
 			style := s
-			width := compute_width (c)
+			width := compute_width (a_c)
 		ensure
-			char_set: character = c
+			char_set: character = a_c
 			style_set: style = s
 		end
 
@@ -138,12 +138,12 @@ feature -- Status
 
 feature -- Comparison
 
-	same_cell (other: TUI_CELL): BOOLEAN
+	same_cell (a_other: TUI_CELL): BOOLEAN
 			-- Is this the same as `other`?
 		require
-			other_exists: other /= Void
+			other_exists: a_other /= Void
 		do
-			Result := character = other.character and style.same_style (other.style)
+			Result := character = a_other.character and style.same_style (a_other.style)
 		end
 
 feature -- Duplication
@@ -158,13 +158,13 @@ feature -- Duplication
 
 feature {NONE} -- Implementation
 
-	compute_width (c: CHARACTER_32): INTEGER
+	compute_width (a_c: CHARACTER_32): INTEGER
 			-- Compute display width of character.
 			-- Returns 2 for wide characters (CJK, emoji), 1 otherwise.
 		local
 			code: NATURAL_32
 		do
-			code := c.natural_32_code
+			code := a_c.natural_32_code
 
 			-- CJK ranges (simplified detection)
 			if code >= 0x1100 and code <= 0x115F then

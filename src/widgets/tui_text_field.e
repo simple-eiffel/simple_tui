@@ -89,96 +89,96 @@ feature -- Styles
 
 feature -- Modification
 
-	set_text (t: READABLE_STRING_GENERAL)
+	set_text (a_t: READABLE_STRING_GENERAL)
 			-- Set text content.
 		require
-			t_exists: t /= Void
+			t_exists: a_t /= Void
 		do
-			text := t.to_string_32
+			text := a_t.to_string_32
 			if max_length > 0 and text.count > max_length then
 				text := text.substring (1, max_length)
 			end
 			cursor_position := text.count
 			adjust_scroll
 		ensure
-			text_set: text.same_string_general (t) or (max_length > 0 and text.count = max_length)
+			text_set: text.same_string_general (a_t) or (max_length > 0 and text.count = max_length)
 		end
 
-	set_placeholder (p: READABLE_STRING_GENERAL)
+	set_placeholder (a_p: READABLE_STRING_GENERAL)
 			-- Set placeholder text.
 		require
-			p_exists: p /= Void
+			p_exists: a_p /= Void
 		do
-			placeholder := p.to_string_32
+			placeholder := a_p.to_string_32
 		ensure
-			placeholder_set: placeholder.same_string_general (p)
+			placeholder_set: placeholder.same_string_general (a_p)
 		end
 
-	set_password (v: BOOLEAN)
+	set_password (a_v: BOOLEAN)
 			-- Set password mode.
 		do
-			is_password := v
+			is_password := a_v
 		ensure
-			password_set: is_password = v
+			password_set: is_password = a_v
 		end
 
-	set_max_length (n: INTEGER)
+	set_max_length (a_n: INTEGER)
 			-- Set maximum length (0 = unlimited).
 		require
-			valid: n >= 0
+			valid: a_n >= 0
 		do
-			max_length := n
+			max_length := a_n
 			if max_length > 0 and text.count > max_length then
 				text := text.substring (1, max_length)
 				cursor_position := cursor_position.min (text.count)
 			end
 		ensure
-			max_length_set: max_length = n
+			max_length_set: max_length = a_n
 		end
 
-	set_on_change (handler: PROCEDURE [STRING_32])
+	set_on_change (a_handler: PROCEDURE [STRING_32])
 			-- Set change handler.
 		do
-			on_change := handler
+			on_change := a_handler
 		ensure
-			handler_set: on_change = handler
+			handler_set: on_change = a_handler
 		end
 
-	set_on_submit (handler: PROCEDURE [STRING_32])
+	set_on_submit (a_handler: PROCEDURE [STRING_32])
 			-- Set submit handler.
 		do
-			on_submit := handler
+			on_submit := a_handler
 		ensure
-			handler_set: on_submit = handler
+			handler_set: on_submit = a_handler
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_focused_style (s: TUI_STYLE)
+	set_focused_style (a_s: TUI_STYLE)
 			-- Set focused style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			focused_style := s
+			focused_style := a_s
 		ensure
-			style_set: focused_style = s
+			style_set: focused_style = a_s
 		end
 
 feature -- Editing
 
-	insert_char (c: CHARACTER_32)
+	insert_char (a_c: CHARACTER_32)
 			-- Insert character at cursor.
 		do
 			if max_length = 0 or text.count < max_length then
-				text.insert_character (c, cursor_position + 1)
+				text.insert_character (a_c, cursor_position + 1)
 				cursor_position := cursor_position + 1
 				adjust_scroll
 				notify_change
@@ -257,7 +257,7 @@ feature -- Cursor movement
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render text field to buffer.
 		local
 			ax, ay: INTEGER
@@ -306,7 +306,7 @@ feature -- Rendering
 				display := display.substring (1, visible_width)
 			end
 
-			buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, display, current_style)
 
 			-- Draw cursor (if focused)
 			if is_focused then
@@ -320,47 +320,47 @@ feature -- Rendering
 						char := ' '
 					end
 					-- Draw inverted cursor
-					buffer.put_char (ax + i, ay, char, current_style.inverted)
+					a_buffer.put_char (ax + i, ay, char, current_style.inverted)
 				end
 			end
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_focused then
 				-- Check special keys first (works for both key and char events)
-				if event.is_tab then
+				if a_event.is_tab then
 					-- Let parent handle tab navigation
 					Result := False
-				elseif event.is_backspace then
+				elseif a_event.is_backspace then
 					backspace
 					Result := True
-				elseif event.is_enter then
+				elseif a_event.is_enter then
 					if attached on_submit as handler then
 						handler.call ([text])
 					end
 					Result := True
-				elseif event.is_left then
+				elseif a_event.is_left then
 					move_left
 					Result := True
-				elseif event.is_right then
+				elseif a_event.is_right then
 					move_right
 					Result := True
-				elseif event.is_home then
+				elseif a_event.is_home then
 					move_home
 					Result := True
-				elseif event.is_end_key then
+				elseif a_event.is_end_key then
 					move_end
 					Result := True
-				elseif event.is_delete then
+				elseif a_event.is_delete then
 					delete_char
 					Result := True
-				elseif event.is_char_event and event.char.natural_32_code >= 32 then
+				elseif a_event.is_char_event and a_event.char.natural_32_code >= 32 then
 					-- Regular printable character input (code >= 32)
-					insert_char (event.char)
+					insert_char (a_event.char)
 					Result := True
 				else
 					Result := False
@@ -368,16 +368,16 @@ feature -- Event Handling
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			mx: INTEGER
 			click_pos: INTEGER
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
-				if contains_point (event.mouse_x, event.mouse_y) then
+			if a_event.is_mouse_press and a_event.mouse_button = 1 then
+				if contains_point (a_event.mouse_x, a_event.mouse_y) then
 					-- Calculate cursor position from click
-					mx := event.mouse_x - absolute_x
+					mx := a_event.mouse_x - absolute_x
 					click_pos := scroll_offset + mx
 					cursor_position := click_pos.min (text.count).max (0)
 					Result := True

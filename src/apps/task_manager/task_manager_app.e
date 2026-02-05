@@ -270,7 +270,7 @@ feature {NONE} -- Data Loading
 	current_items: detachable ARRAYED_LIST [TODO_ITEM]
 			-- Currently displayed items.
 
-	update_count_label (count: INTEGER)
+	update_count_label (a_count: INTEGER)
 			-- Update the task count label.
 		local
 			text: STRING_32
@@ -278,7 +278,7 @@ feature {NONE} -- Data Loading
 			if attached {TUI_LABEL} tui.widget ("count_label") as lbl then
 				create text.make (20)
 				text.append ("Tasks: ")
-				text.append_integer (count)
+				text.append_integer (a_count)
 				lbl.set_text (text)
 			end
 		end
@@ -501,7 +501,7 @@ feature {NONE} -- AI Handlers
 			tui.set_modal (dlg)
 		end
 
-	on_ai_text_submit (values: HASH_TABLE [STRING_32, STRING_32])
+	on_ai_text_submit (a_values: HASH_TABLE [STRING_32, STRING_32])
 			-- Handle AI text input submission.
 		local
 			l_text: STRING_8
@@ -510,7 +510,7 @@ feature {NONE} -- AI Handlers
 		do
 			tui.clear_modal
 
-			if attached values.item ("text") as v then
+			if attached a_values.item ("text") as v then
 				l_text := v.to_string_8
 			else
 				l_text := ""
@@ -649,7 +649,7 @@ feature {NONE} -- AI Handlers
 
 feature {NONE} -- Dialog Handlers
 
-	on_task_dialog_submit (values: HASH_TABLE [STRING_32, STRING_32])
+	on_task_dialog_submit (a_values: HASH_TABLE [STRING_32, STRING_32])
 			-- Handle task dialog submission.
 		local
 			new_item: TODO_ITEM
@@ -661,7 +661,7 @@ feature {NONE} -- Dialog Handlers
 			tui.clear_modal
 
 			-- Extract values with safe handling of Void
-			if attached values.item ("title") as v then
+			if attached a_values.item ("title") as v then
 				l_title := v.to_string_8
 			else
 				l_title := ""
@@ -670,27 +670,27 @@ feature {NONE} -- Dialog Handlers
 				l_title := "Untitled Task"
 			end
 
-			if attached values.item ("description") as v then
+			if attached a_values.item ("description") as v then
 				l_desc := v.to_string_8
 			else
 				l_desc := ""
 			end
-			if attached values.item ("priority") as v then
+			if attached a_values.item ("priority") as v then
 				l_priority := extract_number (v, 3)
 			else
 				l_priority := 3
 			end
-			if attached values.item ("due_date") as v then
+			if attached a_values.item ("due_date") as v then
 				l_due := v.to_string_8
 			else
 				l_due := ""
 			end
-			if attached values.item ("context") as v then
+			if attached a_values.item ("context") as v then
 				l_context := v.to_string_8
 			else
 				l_context := ""
 			end
-			if attached values.item ("energy") as v then
+			if attached a_values.item ("energy") as v then
 				l_energy := extract_number (v, 2)
 			else
 				l_energy := 2

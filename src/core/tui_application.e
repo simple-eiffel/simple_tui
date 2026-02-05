@@ -70,15 +70,15 @@ feature -- Access
 
 feature -- Configuration
 
-	set_root (widget: TUI_WIDGET)
+	set_root (a_widget: TUI_WIDGET)
 			-- Set root widget.
 		require
-			widget_exists: widget /= Void
+			widget_exists: a_widget /= Void
 		do
-			root := widget
+			root := a_widget
 			collect_focusable_widgets
 		ensure
-			root_set: root = widget
+			root_set: root = a_widget
 		end
 
 	set_menu_bar (a_menu_bar: TUI_MENU_BAR)
@@ -95,46 +95,46 @@ feature -- Configuration
 			menu_bar_set: menu_bar = a_menu_bar
 		end
 
-	set_target_fps (fps: INTEGER)
+	set_target_fps (a_fps: INTEGER)
 			-- Set target frame rate.
 		require
-			valid_fps: fps > 0 and fps <= 120
+			valid_fps: a_fps > 0 and a_fps <= 120
 		do
-			target_fps := fps
+			target_fps := a_fps
 		ensure
-			fps_set: target_fps = fps
+			fps_set: target_fps = a_fps
 		end
 
-	set_on_tick (handler: PROCEDURE)
+	set_on_tick (a_handler: PROCEDURE)
 			-- Set tick handler.
 		do
-			on_tick := handler
+			on_tick := a_handler
 		ensure
-			handler_set: on_tick = handler
+			handler_set: on_tick = a_handler
 		end
 
-	set_on_resize (handler: PROCEDURE [INTEGER, INTEGER])
+	set_on_resize (a_handler: PROCEDURE [INTEGER, INTEGER])
 			-- Set resize handler.
 		do
-			on_resize := handler
+			on_resize := a_handler
 		ensure
-			handler_set: on_resize = handler
+			handler_set: on_resize = a_handler
 		end
 
-	set_on_quit (handler: PROCEDURE)
+	set_on_quit (a_handler: PROCEDURE)
 			-- Set quit handler.
 		do
-			on_quit := handler
+			on_quit := a_handler
 		ensure
-			handler_set: on_quit = handler
+			handler_set: on_quit = a_handler
 		end
 
-	set_modal (widget: detachable TUI_WIDGET)
+	set_modal (a_widget: detachable TUI_WIDGET)
 			-- Set modal widget (captures all input when visible).
 		do
-			modal_widget := widget
+			modal_widget := a_widget
 		ensure
-			modal_set: modal_widget = widget
+			modal_set: modal_widget = a_widget
 		end
 
 	clear_modal
@@ -147,31 +147,31 @@ feature -- Configuration
 
 feature -- Keyboard Shortcuts
 
-	register_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN; handler: PROCEDURE)
+	register_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN; handler: PROCEDURE)
 			-- Register a global keyboard shortcut.
 			-- Example: register_shortcut ('s', True, False, False, agent on_save) for Ctrl+S
 		local
 			shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
 			shortcuts.force (handler, shortcut_key)
 		end
 
-	unregister_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN)
+	unregister_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN)
 			-- Remove a registered shortcut.
 		local
 			shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
 			shortcuts.remove (shortcut_key)
 		end
 
-	has_shortcut (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): BOOLEAN
+	has_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): BOOLEAN
 			-- Is shortcut registered?
 		local
 			shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (key, ctrl, alt, shift)
+			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
 			Result := shortcuts.has (shortcut_key)
 		end
 
@@ -210,11 +210,11 @@ feature -- Focus Management
 			end
 		end
 
-	set_focus (widget: TUI_WIDGET)
+	set_focus (a_widget: TUI_WIDGET)
 			-- Set focus to specific widget.
 		require
-			widget_exists: widget /= Void
-			is_focusable: widget.is_focusable
+			widget_exists: a_widget /= Void
+			is_focusable: a_widget.is_focusable
 		local
 			i: INTEGER
 		do
@@ -224,7 +224,7 @@ feature -- Focus Management
 
 			-- Find widget in focusable list
 			from i := 1 until i > focusable_widgets.count loop
-				if focusable_widgets.i_th (i) = widget then
+				if focusable_widgets.i_th (i) = a_widget then
 					focused_widget_index := i
 					i := focusable_widgets.count + 1  -- Exit loop
 				else
@@ -232,10 +232,10 @@ feature -- Focus Management
 				end
 			end
 
-			focused_widget := widget
-			widget.focus
+			focused_widget := a_widget
+			a_widget.focus
 		ensure
-			widget_focused: focused_widget = widget
+			widget_focused: focused_widget = a_widget
 		end
 
 feature -- Lifecycle
@@ -338,25 +338,25 @@ feature {NONE} -- Event Loop
 			end
 		end
 
-	handle_event (event: TUI_EVENT)
+	handle_event (a_event: TUI_EVENT)
 			-- Process input event.
 		require
-			event_exists: event /= Void
+			event_exists: a_event /= Void
 		local
 			handled: BOOLEAN
 		do
-			if event.is_resize_event then
-				handle_resize (event)
-			elseif event.is_key_event or event.is_char_event then
-				log_key_event (event)
-				handled := handle_key (event)
-			elseif event.is_mouse_event then
-				log_mouse_event (event)
-				handled := handle_mouse (event)
+			if a_event.is_resize_event then
+				handle_resize (a_event)
+			elseif a_event.is_key_event or a_event.is_char_event then
+				log_key_event (a_event)
+				handled := handle_key (a_event)
+			elseif a_event.is_mouse_event then
+				log_mouse_event (a_event)
+				handled := handle_mouse (a_event)
 			end
 		end
 
-	log_key_event (event: TUI_EVENT)
+	log_key_event (a_event: TUI_EVENT)
 			-- Log key event details to file.
 		local
 			l_file: PLAIN_TEXT_FILE
@@ -366,36 +366,36 @@ feature {NONE} -- Event Loop
 			msg.append ("KEY: ")
 
 			-- Describe the key
-			if event.is_key_event then
+			if a_event.is_key_event then
 				msg.append ("keycode=")
-				msg.append (event.key.out)
-				if event.key = 18 then msg.append ("(Alt)") end
-				if event.key = 16 then msg.append ("(Shift)") end
-				if event.key = 17 then msg.append ("(Ctrl)") end
+				msg.append (a_event.key.out)
+				if a_event.key = 18 then msg.append ("(Alt)") end
+				if a_event.key = 16 then msg.append ("(Shift)") end
+				if a_event.key = 17 then msg.append ("(Ctrl)") end
 			else
 				msg.append ("char='")
-				if event.char >= '%/32/' and event.char <= '%/126/' then
-					msg.append_character (event.char.to_character_8)
+				if a_event.char >= '%/32/' and a_event.char <= '%/126/' then
+					msg.append_character (a_event.char.to_character_8)
 				else
 					msg.append ("\")
-					msg.append (event.char.natural_32_code.out)
+					msg.append (a_event.char.natural_32_code.out)
 				end
 				msg.append ("'")
 			end
 
 			-- Modifiers
-			if event.has_shift then msg.append (" +SHIFT") end
-			if event.has_ctrl then msg.append (" +CTRL") end
-			if event.has_alt then msg.append (" +ALT") end
+			if a_event.has_shift then msg.append (" +SHIFT") end
+			if a_event.has_ctrl then msg.append (" +CTRL") end
+			if a_event.has_alt then msg.append (" +ALT") end
 
 			-- Special key detection
-			if event.is_enter then msg.append (" [ENTER]") end
-			if event.is_escape then msg.append (" [ESC]") end
-			if event.is_tab then msg.append (" [TAB]") end
-			if event.is_up then msg.append (" [UP]") end
-			if event.is_down then msg.append (" [DOWN]") end
-			if event.is_left then msg.append (" [LEFT]") end
-			if event.is_right then msg.append (" [RIGHT]") end
+			if a_event.is_enter then msg.append (" [ENTER]") end
+			if a_event.is_escape then msg.append (" [ESC]") end
+			if a_event.is_tab then msg.append (" [TAB]") end
+			if a_event.is_up then msg.append (" [UP]") end
+			if a_event.is_down then msg.append (" [DOWN]") end
+			if a_event.is_left then msg.append (" [LEFT]") end
+			if a_event.is_right then msg.append (" [RIGHT]") end
 
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
@@ -405,7 +405,7 @@ feature {NONE} -- Event Loop
 			end
 		end
 
-	log_mouse_event (event: TUI_EVENT)
+	log_mouse_event (a_event: TUI_EVENT)
 			-- Log mouse event details to file.
 		local
 			l_file: PLAIN_TEXT_FILE
@@ -413,13 +413,13 @@ feature {NONE} -- Event Loop
 		do
 			create msg.make (100)
 			msg.append ("MOUSE: x=")
-			msg.append (event.mouse_x.out)
+			msg.append (a_event.mouse_x.out)
 			msg.append (" y=")
-			msg.append (event.mouse_y.out)
+			msg.append (a_event.mouse_y.out)
 			msg.append (" btn=")
-			msg.append (event.mouse_button.out)
-			if event.is_mouse_press then msg.append (" PRESS") end
-			if event.is_mouse_release then msg.append (" RELEASE") end
+			msg.append (a_event.mouse_button.out)
+			if a_event.is_mouse_press then msg.append (" PRESS") end
+			if a_event.is_mouse_release then msg.append (" RELEASE") end
 
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
@@ -429,12 +429,12 @@ feature {NONE} -- Event Loop
 			end
 		end
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event. Return True if handled.
 		do
 			-- Check for quit (Ctrl+Q or Ctrl+C) - always available
-			if event.has_ctrl then
-				if event.char = 'q' or event.char = 'Q' or event.char = '%/3/' then
+			if a_event.has_ctrl then
+				if a_event.char = 'q' or a_event.char = 'Q' or a_event.char = '%/3/' then
 					quit
 					Result := True
 				end
@@ -443,7 +443,7 @@ feature {NONE} -- Event Loop
 			-- Modal widget captures all input when visible
 			if not Result and attached modal_widget as mw then
 				if mw.is_visible then
-					Result := mw.handle_key (event)
+					Result := mw.handle_key (a_event)
 					-- Modal consumes all key events
 					Result := True
 				end
@@ -452,34 +452,34 @@ feature {NONE} -- Event Loop
 			if not Result then
 				-- Check registered global shortcuts
 				if not Result then
-					Result := try_shortcut (event)
+					Result := try_shortcut (a_event)
 				end
 
 				-- Let menu bar handle if open
 				if not Result and attached menu_bar as mb then
 					if mb.is_menu_open then
-						Result := mb.handle_key (event)
+						Result := mb.handle_key (a_event)
 					end
 				end
 
 				-- Check Alt+key for menu shortcuts
-				if not Result and event.has_alt and attached menu_bar as mb then
-					Result := mb.handle_key (event)
+				if not Result and a_event.has_alt and attached menu_bar as mb then
+					Result := mb.handle_key (a_event)
 				end
 
 				-- Check Alt+key for button/widget hotkeys (global activation)
-				if not Result and event.has_alt and not event.has_ctrl then
-					Result := try_widget_hotkey (event)
+				if not Result and a_event.has_alt and not a_event.has_ctrl then
+					Result := try_widget_hotkey (a_event)
 				end
 
 				-- Dispatch to focused widget FIRST (widgets may handle Tab internally)
 				if not Result and attached focused_widget as fw then
-					Result := fw.handle_key (event)
+					Result := fw.handle_key (a_event)
 				end
 
 				-- Check for Tab (focus cycling) only if widget didn't handle it
-				if not Result and event.is_tab then
-					if event.has_shift then
+				if not Result and a_event.is_tab then
+					if a_event.has_shift then
 						focus_previous
 					else
 						focus_next
@@ -489,7 +489,7 @@ feature {NONE} -- Event Loop
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event. Return True if handled.
 		local
 			target: detachable TUI_WIDGET
@@ -497,7 +497,7 @@ feature {NONE} -- Event Loop
 			-- Modal widget captures all mouse input when visible
 			if attached modal_widget as mw then
 				if mw.is_visible then
-					Result := mw.handle_mouse (event)
+					Result := mw.handle_mouse (a_event)
 					-- Modal consumes all mouse events
 					Result := True
 				end
@@ -506,42 +506,42 @@ feature {NONE} -- Event Loop
 			if not Result then
 				-- Check menu bar first
 				if attached menu_bar as mb then
-					if event.mouse_y = 1 or mb.is_menu_open then
-						Result := mb.handle_mouse (event)
+					if a_event.mouse_y = 1 or mb.is_menu_open then
+						Result := mb.handle_mouse (a_event)
 					end
 				end
 
 				-- Find widget under mouse
 				if not Result and attached root as r then
-					target := r.find_widget_at (event.mouse_x, event.mouse_y)
+					target := r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
 					if attached target as t then
 						-- Focus clicked widget if focusable
-						if event.is_mouse_press and event.mouse_button = 1 then
+						if a_event.is_mouse_press and a_event.mouse_button = 1 then
 							if t.is_focusable and t /= focused_widget then
 								set_focus (t)
 							end
 						end
-						Result := t.handle_mouse (event)
+						Result := t.handle_mouse (a_event)
 					end
 				end
 			end
 		end
 
-	handle_resize (event: TUI_EVENT)
+	handle_resize (a_event: TUI_EVENT)
 			-- Handle terminal resize.
 		do
 			if attached backend as b and attached buffer as buf then
-				buf.resize (event.resize_width, event.resize_height)
+				buf.resize (a_event.resize_width, a_event.resize_height)
 
 				-- Resize root widget
 				if attached root as r then
-					r.set_size (event.resize_width, event.resize_height)
+					r.set_size (a_event.resize_width, a_event.resize_height)
 					r.layout
 				end
 
 				-- Notify handler
 				if attached on_resize as handler then
-					handler.call ([event.resize_width, event.resize_height])
+					handler.call ([a_event.resize_width, a_event.resize_height])
 				end
 			end
 		end
@@ -614,22 +614,22 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 	shortcuts: HASH_TABLE [PROCEDURE, STRING_32]
 			-- Registered global keyboard shortcuts.
 
-	make_shortcut_key (key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): STRING_32
+	make_shortcut_key (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): STRING_32
 			-- Create unique key for shortcut lookup.
 		do
 			create Result.make (10)
 			if ctrl then Result.append ("C-") end
 			if alt then Result.append ("A-") end
 			if shift then Result.append ("S-") end
-			Result.append_character (key.as_lower)
+			Result.append_character (a_key.as_lower)
 		end
 
-	try_shortcut (event: TUI_EVENT): BOOLEAN
+	try_shortcut (a_event: TUI_EVENT): BOOLEAN
 			-- Try to execute registered shortcut. Return True if found and executed.
 		local
 			shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (event.char, event.has_ctrl, event.has_alt, event.has_shift)
+			shortcut_key := make_shortcut_key (a_event.char, a_event.has_ctrl, a_event.has_alt, a_event.has_shift)
 			if shortcuts.has (shortcut_key) then
 				if attached shortcuts.item (shortcut_key) as handler then
 					handler.call (Void)
@@ -638,25 +638,25 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			end
 		end
 
-	try_widget_hotkey (event: TUI_EVENT): BOOLEAN
+	try_widget_hotkey (a_event: TUI_EVENT): BOOLEAN
 			-- Try to activate a widget via Alt+key hotkey.
 			-- Searches widget tree for buttons with matching shortcut_key.
 		local
 			key_lower: CHARACTER_32
 		do
-			key_lower := event.char.as_lower
+			key_lower := a_event.char.as_lower
 			if attached root as r then
 				Result := try_hotkey_in_widget (r, key_lower)
 			end
 		end
 
-	try_hotkey_in_widget (widget: TUI_WIDGET; key_lower: CHARACTER_32): BOOLEAN
+	try_hotkey_in_widget (a_widget: TUI_WIDGET; key_lower: CHARACTER_32): BOOLEAN
 			-- Recursively search for button with matching hotkey.
 		local
 			i: INTEGER
 		do
 			-- Check if this widget is a TUI_BUTTON with matching shortcut
-			if attached {TUI_BUTTON} widget as btn then
+			if attached {TUI_BUTTON} a_widget as btn then
 				if btn.is_visible and btn.shortcut_key.as_lower = key_lower then
 					btn.click
 					Result := True
@@ -665,8 +665,8 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 
 			-- Recurse into children if not found
 			if not Result then
-				from i := 1 until i > widget.children.count or Result loop
-					Result := try_hotkey_in_widget (widget.children.i_th (i), key_lower)
+				from i := 1 until i > a_widget.children.count or Result loop
+					Result := try_hotkey_in_widget (a_widget.children.i_th (i), key_lower)
 					i := i + 1
 				end
 			end
@@ -681,16 +681,16 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			end
 		end
 
-	collect_from_widget (widget: TUI_WIDGET)
+	collect_from_widget (a_widget: TUI_WIDGET)
 			-- Recursively collect focusable widgets.
 		local
 			i: INTEGER
 		do
-			if widget.is_focusable then
-				focusable_widgets.extend (widget)
+			if a_widget.is_focusable then
+				focusable_widgets.extend (a_widget)
 			end
-			from i := 1 until i > widget.children.count loop
-				collect_from_widget (widget.children.i_th (i))
+			from i := 1 until i > a_widget.children.count loop
+				collect_from_widget (a_widget.children.i_th (i))
 				i := i + 1
 			end
 		end

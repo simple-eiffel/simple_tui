@@ -97,58 +97,58 @@ feature -- Styles
 
 feature -- Modification
 
-	add_menu (menu: TUI_MENU)
+	add_menu (a_menu: TUI_MENU)
 			-- Add menu to bar.
 		require
-			menu_exists: menu /= Void
+			menu_exists: a_menu /= Void
 		do
-			menus.extend (menu)
-			add_child (menu)
-			menu.hide
-			menu.set_on_close (agent on_menu_closed)
+			menus.extend (a_menu)
+			add_child (a_menu)
+			a_menu.hide
+			a_menu.set_on_close (agent on_menu_closed)
 		ensure
-			menu_added: menus.has (menu)
+			menu_added: menus.has (a_menu)
 		end
 
-	remove_menu (menu: TUI_MENU)
+	remove_menu (a_menu: TUI_MENU)
 			-- Remove menu from bar.
 		require
-			menu_exists: menu /= Void
+			menu_exists: a_menu /= Void
 		do
-			menus.prune_all (menu)
-			remove_child (menu)
+			menus.prune_all (a_menu)
+			remove_child (a_menu)
 		ensure
-			menu_removed: not menus.has (menu)
+			menu_removed: not menus.has (a_menu)
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_selected_style (s: TUI_STYLE)
+	set_selected_style (a_s: TUI_STYLE)
 			-- Set selected style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			selected_style := s
+			selected_style := a_s
 		ensure
-			style_set: selected_style = s
+			style_set: selected_style = a_s
 		end
 
-	set_open_style (s: TUI_STYLE)
+	set_open_style (a_s: TUI_STYLE)
 			-- Set open menu style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			open_style := s
+			open_style := a_s
 		ensure
-			style_set: open_style = s
+			style_set: open_style = a_s
 		end
 
 feature -- Focus
@@ -188,10 +188,10 @@ feature -- Focus
 
 feature -- Menu Control
 
-	open_menu (index: INTEGER)
+	open_menu (a_index: INTEGER)
 			-- Open menu at index.
 		require
-			valid_index: index >= 1 and index <= menus.count
+			valid_index: a_index >= 1 and a_index <= menus.count
 		local
 			menu: TUI_MENU
 			menu_x: INTEGER
@@ -199,16 +199,16 @@ feature -- Menu Control
 			-- Close any open menu first
 			close_menu
 
-			selected_menu := index
+			selected_menu := a_index
 			is_menu_open := True
-			menu := menus.i_th (index)
+			menu := menus.i_th (a_index)
 
 			-- Position menu below its title
-			menu_x := menu_position_x (index)
+			menu_x := menu_position_x (a_index)
 			menu.show_at (menu_x, absolute_y + 1)
 		ensure
 			menu_open: is_menu_open
-			menu_selected: selected_menu = index
+			menu_selected: selected_menu = a_index
 		end
 
 	close_menu
@@ -254,11 +254,11 @@ feature -- Menu Control
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			-- F10 toggles menu bar open/close
-			if event.is_key (event.Key_f10) then
+			if a_event.is_key (a_event.Key_f10) then
 				if is_menu_open then
 					log_debug ("F10 pressed, closing menu")
 					close_menu
@@ -275,9 +275,9 @@ feature -- Event Handling
 			end
 
 			-- Always check Alt+key shortcuts, even when not focused
-			if not Result and event.has_alt and not is_menu_open then
-				log_debug ("Alt+key shortcut check, char=" + event.char.natural_32_code.out)
-				Result := try_menu_shortcut (event)
+			if not Result and a_event.has_alt and not is_menu_open then
+				log_debug ("Alt+key shortcut check, char=" + a_event.char.natural_32_code.out)
+				Result := try_menu_shortcut (a_event)
 				if Result then
 					log_debug ("Alt+key shortcut matched, opened menu")
 				end
@@ -288,22 +288,22 @@ feature -- Event Handling
 					-- Let open menu handle keys first
 					if attached current_menu as menu then
 						log_debug ("Delegating key to open menu")
-						Result := menu.handle_key (event)
+						Result := menu.handle_key (a_event)
 						if Result then
 							log_debug ("Open menu handled key")
 						end
 					end
 					-- Handle left/right to switch menus
 					if not Result then
-						if event.is_left then
+						if a_event.is_left then
 							log_debug ("LEFT arrow, switching to previous menu")
 							select_previous_menu
 							Result := True
-						elseif event.is_right then
+						elseif a_event.is_right then
 							log_debug ("RIGHT arrow, switching to next menu")
 							select_next_menu
 							Result := True
-						elseif event.is_escape then
+						elseif a_event.is_escape then
 							log_debug ("ESCAPE, closing menu")
 							close_menu
 							Result := True
@@ -311,29 +311,29 @@ feature -- Event Handling
 					end
 				else
 					-- Menu bar focused but no menu open
-					if event.is_left then
+					if a_event.is_left then
 						log_debug ("LEFT arrow (bar focused), previous menu")
 						select_previous_menu
 						Result := True
-					elseif event.is_right then
+					elseif a_event.is_right then
 						log_debug ("RIGHT arrow (bar focused), next menu")
 						select_next_menu
 						Result := True
-					elseif event.is_tab and event.has_shift then
+					elseif a_event.is_tab and a_event.has_shift then
 						-- Shift+Tab: only consume if not on first menu
 						if selected_menu > 1 then
 							select_previous_menu
 							Result := True
 						end
 						-- else: let Tab escape to previous widget
-					elseif event.is_tab then
+					elseif a_event.is_tab then
 						-- Tab: only consume if not on last menu
 						if selected_menu < menus.count then
 							select_next_menu
 							Result := True
 						end
 						-- else: let Tab escape to next widget
-					elseif event.is_enter or event.is_space or event.is_down then
+					elseif a_event.is_enter or a_event.is_space or a_event.is_down then
 						log_debug ("ENTER/SPACE/DOWN opening menu dropdown")
 						if selected_menu > 0 then
 							open_menu (selected_menu)
@@ -344,28 +344,28 @@ feature -- Event Handling
 						Result := True
 					else
 						-- Check Alt+key shortcuts (for focused state)
-						Result := try_menu_shortcut (event)
+						Result := try_menu_shortcut (a_event)
 					end
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			mx, clicked_menu: INTEGER
 		do
 			-- Pass mouse events to open menu dropdown first
 			if is_menu_open and attached current_menu as menu then
-				Result := menu.handle_mouse (event)
+				Result := menu.handle_mouse (a_event)
 			end
 
 			if not Result then
-				if event.mouse_y = absolute_y then
+				if a_event.mouse_y = absolute_y then
 					-- Mouse on menu bar
-					mx := event.mouse_x - absolute_x
+					mx := a_event.mouse_x - absolute_x
 					clicked_menu := menu_at_position (mx)
-					if event.is_mouse_press and event.mouse_button = 1 then
+					if a_event.is_mouse_press and a_event.mouse_button = 1 then
 						-- Click on menu bar
 						if clicked_menu > 0 then
 							if is_menu_open and clicked_menu = selected_menu then
@@ -376,7 +376,7 @@ feature -- Event Handling
 							Result := True
 						end
 					end
-				elseif is_menu_open and event.is_mouse_press then
+				elseif is_menu_open and a_event.is_mouse_press then
 					-- Click outside menu bar while menu is open - close it
 					close_menu
 					Result := True
@@ -386,7 +386,7 @@ feature -- Event Handling
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render menu bar to buffer.
 		local
 			ax, ay, i, menu_x: INTEGER
@@ -397,7 +397,7 @@ feature -- Rendering
 			ay := absolute_y
 
 			-- Fill background
-			buffer.put_string (ax, ay, create {STRING_32}.make_filled (' ', width), normal_style)
+			a_buffer.put_string (ax, ay, create {STRING_32}.make_filled (' ', width), normal_style)
 
 			-- Draw menu titles
 			menu_x := ax
@@ -416,9 +416,9 @@ feature -- Rendering
 				end
 
 				-- Draw title with hotkey underlining
-				buffer.put_char (menu_x, ay, ' ', title_style)
-				render_with_hotkey (buffer, menu_x + 1, ay, l_menu.title, title_style)
-				buffer.put_char (menu_x + 1 + display_width (l_menu.title), ay, ' ', title_style)
+				a_buffer.put_char (menu_x, ay, ' ', title_style)
+				render_with_hotkey (a_buffer, menu_x + 1, ay, l_menu.title, title_style)
+				a_buffer.put_char (menu_x + 1 + display_width (l_menu.title), ay, ' ', title_style)
 				menu_x := menu_x + display_width (l_menu.title) + 2
 
 				i := i + 1
@@ -455,19 +455,19 @@ feature -- Queries
 
 feature {NONE} -- Implementation
 
-	menu_position_x (index: INTEGER): INTEGER
+	menu_position_x (a_index: INTEGER): INTEGER
 			-- X position of menu at index.
 		local
 			i: INTEGER
 		do
 			Result := absolute_x
-			from i := 1 until i >= index loop
+			from i := 1 until i >= a_index loop
 				Result := Result + display_width (menus.i_th (i).title) + 2
 				i := i + 1
 			end
 		end
 
-	menu_at_position (mx: INTEGER): INTEGER
+	menu_at_position (a_mx: INTEGER): INTEGER
 			-- Menu index at x position, 0 if none.
 		local
 			i, pos, title_width: INTEGER
@@ -475,7 +475,7 @@ feature {NONE} -- Implementation
 			pos := 0
 			from i := 1 until i > menus.count or Result > 0 loop
 				title_width := display_width (menus.i_th (i).title) + 2
-				if mx >= pos and mx < pos + title_width then
+				if a_mx >= pos and a_mx < pos + title_width then
 					Result := i
 				end
 				pos := pos + title_width
@@ -483,7 +483,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	try_menu_shortcut (event: TUI_EVENT): BOOLEAN
+	try_menu_shortcut (a_event: TUI_EVENT): BOOLEAN
 			-- Try Alt+key shortcut to open menu.
 		local
 			i: INTEGER
@@ -491,8 +491,8 @@ feature {NONE} -- Implementation
 			key_lower: CHARACTER_32
 			title_shortcut: CHARACTER_32
 		do
-			if event.has_alt then
-				key_lower := event.char.as_lower
+			if a_event.has_alt then
+				key_lower := a_event.char.as_lower
 				from i := 1 until i > menus.count or Result loop
 					menu := menus.i_th (i)
 					title_shortcut := extract_shortcut (menu.title)
@@ -505,16 +505,16 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	extract_shortcut (title: STRING_32): CHARACTER_32
+	extract_shortcut (a_title: STRING_32): CHARACTER_32
 			-- Extract shortcut character from title (after &).
 		local
 			i: INTEGER
 		do
 			Result := '%U'
-			from i := 1 until i >= title.count loop
-				if title.item (i) = '&' then
-					Result := title.item (i + 1)
-					i := title.count  -- exit loop
+			from i := 1 until i >= a_title.count loop
+				if a_title.item (i) = '&' then
+					Result := a_title.item (i + 1)
+					i := a_title.count  -- exit loop
 				end
 				i := i + 1
 			end
@@ -526,7 +526,7 @@ feature {NONE} -- Implementation
 			is_menu_open := False
 		end
 
-	render_with_hotkey (buffer: TUI_BUFFER; start_x, start_y: INTEGER; text: STRING_32; base_style: TUI_STYLE)
+	render_with_hotkey (a_buffer: TUI_BUFFER; start_x, start_y: INTEGER; text: STRING_32; base_style: TUI_STYLE)
 			-- Render text with hotkey character underlined.
 			-- Character after & is rendered with underline added to base_style.
 		local
@@ -543,25 +543,25 @@ feature {NONE} -- Implementation
 					c := text.item (i)
 					merged_style := base_style.twin_style
 					merged_style.set_underline (True)
-					buffer.put_char (pos_x, start_y, c, merged_style)
+					a_buffer.put_char (pos_x, start_y, c, merged_style)
 					pos_x := pos_x + 1
 				else
-					buffer.put_char (pos_x, start_y, c, base_style)
+					a_buffer.put_char (pos_x, start_y, c, base_style)
 					pos_x := pos_x + 1
 				end
 				i := i + 1
 			end
 		end
 
-	display_width (text: STRING_32): INTEGER
+	display_width (a_text: STRING_32): INTEGER
 			-- Calculate display width of text excluding & markers.
 		local
 			i: INTEGER
 			c: CHARACTER_32
 		do
-			from i := 1 until i > text.count loop
-				c := text.item (i)
-				if c = '&' and i < text.count then
+			from i := 1 until i > a_text.count loop
+				c := a_text.item (i)
+				if c = '&' and i < a_text.count then
 					-- Skip the &, but count the next character
 					i := i + 1
 					Result := Result + 1
@@ -572,14 +572,14 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	log_debug (msg: STRING)
+	log_debug (a_msg: STRING)
 			-- Log debug message to file.
 		local
 			l_file: PLAIN_TEXT_FILE
 		do
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
-				l_file.put_string ("  [MENU_BAR] " + msg)
+				l_file.put_string ("  [MENU_BAR] " + a_msg)
 				l_file.put_new_line
 				l_file.close
 			end

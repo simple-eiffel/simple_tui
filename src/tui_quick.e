@@ -443,27 +443,27 @@ feature {NONE} -- Implementation
 	named_widgets: HASH_TABLE [TUI_WIDGET, STRING_32]
 			-- Named widgets for retrieval.
 
-	add_to_current (w: TUI_WIDGET)
+	add_to_current (a_w: TUI_WIDGET)
 			-- Add widget to current container.
 		do
 			if attached current_vbox as box then
-				box.add_child (w)
+				box.add_child (a_w)
 			elseif attached current_hbox as box then
-				box.add_child (w)
+				box.add_child (a_w)
 			end
 		end
 
-	on_message_closed (button_id: INTEGER)
+	on_message_closed (a_button_id: INTEGER)
 			-- Handle message box closed.
 		do
 			app.clear_modal
 		end
 
-	on_confirm_closed (button_id: INTEGER; a_callback: PROCEDURE [BOOLEAN])
+	on_confirm_closed (a_button_id: INTEGER; a_callback: PROCEDURE [BOOLEAN])
 			-- Handle confirm dialog closed.
 		do
 			app.clear_modal
-			a_callback.call ([button_id = {TUI_MESSAGE_BOX}.Button_yes])
+			a_callback.call ([a_button_id = {TUI_MESSAGE_BOX}.Button_yes])
 		end
 
 invariant

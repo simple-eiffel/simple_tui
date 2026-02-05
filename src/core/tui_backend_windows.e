@@ -168,7 +168,7 @@ feature -- Output
 			wide_output_buffer.append_character (cell.character)
 		end
 
-	write_cells (cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]])
+	write_cells (a_cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]])
 			-- Write multiple cells (optimized batch).
 		local
 			last_x, last_y, i: INTEGER
@@ -177,8 +177,8 @@ feature -- Output
 		do
 			last_x := -1
 			last_y := -1
-			from i := 1 until i > cells.count loop
-				t := cells.i_th (i)
+			from i := 1 until i > a_cells.count loop
+				t := a_cells.i_th (i)
 				-- Only move cursor if not sequential
 				if t.y /= last_y or t.x /= last_x + 1 then
 					set_cursor_position (t.x, t.y)
@@ -195,17 +195,17 @@ feature -- Output
 			end
 		end
 
-	append_char32 (c: CHARACTER_32)
+	append_char32 (a_c: CHARACTER_32)
 			-- Append CHARACTER_32 to wide output buffer (direct UTF-16).
 			-- Also maintains UTF-8 buffer for backward compatibility with tests.
 		local
 			code: NATURAL_32
 		do
 			-- Append to wide buffer (primary output)
-			wide_output_buffer.append_character (c)
+			wide_output_buffer.append_character (a_c)
 
 			-- Also maintain UTF-8 buffer for test compatibility
-			code := c.natural_32_code
+			code := a_c.natural_32_code
 			if code < 0x80 then
 				output_buffer.append_character (code.to_character_8)
 			elseif code < 0x800 then
@@ -339,10 +339,10 @@ feature {ANY} -- Test Access
 			Result := wide_output_buffer
 		end
 
-	test_append_char32 (c: CHARACTER_32)
+	test_append_char32 (a_c: CHARACTER_32)
 			-- Test access to append_char32.
 		do
-			append_char32 (c)
+			append_char32 (a_c)
 		end
 
 feature {NONE} -- Implementation
@@ -362,29 +362,29 @@ feature {NONE} -- Implementation
 
 	Esc: STRING = "%/27/"
 
-	append_escape (seq: STRING)
+	append_escape (a_seq: STRING)
 			-- Append ESC + sequence to wide output buffer.
 		require
-			sequence_not_empty: seq /= Void and then not seq.is_empty
+			sequence_not_empty: a_seq /= Void and then not a_seq.is_empty
 		local
 			full_seq: STRING_32
 			i: INTEGER
 		do
-			create full_seq.make (seq.count + 1)
+			create full_seq.make (a_seq.count + 1)
 			full_seq.append_character ('%/27/')
-			from i := 1 until i > seq.count loop
-				full_seq.append_character (seq.item (i))
+			from i := 1 until i > a_seq.count loop
+				full_seq.append_character (a_seq.item (i))
 				i := i + 1
 			end
 			wide_output_buffer.append (full_seq)
 		ensure
-			buffer_grew: wide_output_buffer.count >= old wide_output_buffer.count + seq.count + 1
+			buffer_grew: wide_output_buffer.count >= old wide_output_buffer.count + a_seq.count + 1
 		end
 
-	apply_style (s: TUI_STYLE)
+	apply_style (a_s: TUI_STYLE)
 			-- Append ANSI codes for style to wide output buffer.
 		require
-			style_exists: s /= Void
+			style_exists: a_s /= Void
 		local
 			codes: STRING
 		do
@@ -394,38 +394,38 @@ feature {NONE} -- Implementation
 			codes.append ("0")
 
 			-- Attributes
-			if s.is_bold then codes.append (";1") end
-			if s.is_dim then codes.append (";2") end
-			if s.is_italic then codes.append (";3") end
-			if s.is_underline then codes.append (";4") end
-			if s.is_blink then codes.append (";5") end
-			if s.is_reverse then codes.append (";7") end
-			if s.is_strikethrough then codes.append (";9") end
+			if a_s.is_bold then codes.append (";1") end
+			if a_s.is_dim then codes.append (";2") end
+			if a_s.is_italic then codes.append (";3") end
+			if a_s.is_underline then codes.append (";4") end
+			if a_s.is_blink then codes.append (";5") end
+			if a_s.is_reverse then codes.append (";7") end
+			if a_s.is_strikethrough then codes.append (";9") end
 
 			-- Foreground
-			if s.foreground.is_indexed then
-				if s.foreground.index < 8 then
-					codes.append (";" + (30 + s.foreground.index).out)
-				elseif s.foreground.index < 16 then
-					codes.append (";" + (90 + s.foreground.index - 8).out)
+			if a_s.foreground.is_indexed then
+				if a_s.foreground.index < 8 then
+					codes.append (";" + (30 + a_s.foreground.index).out)
+				elseif a_s.foreground.index < 16 then
+					codes.append (";" + (90 + a_s.foreground.index - 8).out)
 				else
-					codes.append (";38;5;" + s.foreground.index.out)
+					codes.append (";38;5;" + a_s.foreground.index.out)
 				end
-			elseif s.foreground.is_rgb then
-				codes.append (";38;2;" + s.foreground.red.out + ";" + s.foreground.green.out + ";" + s.foreground.blue.out)
+			elseif a_s.foreground.is_rgb then
+				codes.append (";38;2;" + a_s.foreground.red.out + ";" + a_s.foreground.green.out + ";" + a_s.foreground.blue.out)
 			end
 
 			-- Background
-			if s.background.is_indexed then
-				if s.background.index < 8 then
-					codes.append (";" + (40 + s.background.index).out)
-				elseif s.background.index < 16 then
-					codes.append (";" + (100 + s.background.index - 8).out)
+			if a_s.background.is_indexed then
+				if a_s.background.index < 8 then
+					codes.append (";" + (40 + a_s.background.index).out)
+				elseif a_s.background.index < 16 then
+					codes.append (";" + (100 + a_s.background.index - 8).out)
 				else
-					codes.append (";48;5;" + s.background.index.out)
+					codes.append (";48;5;" + a_s.background.index.out)
 				end
-			elseif s.background.is_rgb then
-				codes.append (";48;2;" + s.background.red.out + ";" + s.background.green.out + ";" + s.background.blue.out)
+			elseif a_s.background.is_rgb then
+				codes.append (";48;2;" + a_s.background.red.out + ";" + a_s.background.green.out + ";" + a_s.background.blue.out)
 			end
 
 			append_escape ("[" + codes + "m")
@@ -503,25 +503,25 @@ feature {NONE} -- Implementation
 	last_pressed_button: INTEGER
 			-- Button state when last pressed (for reporting on release).
 
-	modifiers_from_ctrl_keys (ctrl_keys: INTEGER): INTEGER
+	modifiers_from_ctrl_keys (a_ctrl_keys: INTEGER): INTEGER
 			-- Convert Win32 control key state to our modifiers.
 		do
 			Result := 0
-			if (ctrl_keys & 0x0008) /= 0 or (ctrl_keys & 0x0004) /= 0 then -- LEFT/RIGHT_CTRL
+			if (a_ctrl_keys & 0x0008) /= 0 or (a_ctrl_keys & 0x0004) /= 0 then -- LEFT/RIGHT_CTRL
 				Result := Result | {TUI_EVENT}.Mod_ctrl
 			end
-			if (ctrl_keys & 0x0002) /= 0 or (ctrl_keys & 0x0001) /= 0 then -- LEFT/RIGHT_ALT
+			if (a_ctrl_keys & 0x0002) /= 0 or (a_ctrl_keys & 0x0001) /= 0 then -- LEFT/RIGHT_ALT
 				Result := Result | {TUI_EVENT}.Mod_alt
 			end
-			if (ctrl_keys & 0x0010) /= 0 then -- SHIFT
+			if (a_ctrl_keys & 0x0010) /= 0 then -- SHIFT
 				Result := Result | {TUI_EVENT}.Mod_shift
 			end
 		end
 
-	translate_key (vk: INTEGER): INTEGER
+	translate_key (a_vk: INTEGER): INTEGER
 			-- Translate Win32 virtual key code to TUI key code.
 		do
-			inspect vk
+			inspect a_vk
 			when 0x0D then Result := {TUI_EVENT}.Key_enter
 			when 0x1B then Result := {TUI_EVENT}.Key_escape
 			when 0x09 then Result := {TUI_EVENT}.Key_tab
@@ -548,65 +548,65 @@ feature {NONE} -- Implementation
 			when 0x79 then Result := {TUI_EVENT}.Key_f10
 			when 0x7A then Result := {TUI_EVENT}.Key_f11
 			when 0x7B then Result := {TUI_EVENT}.Key_f12
-			else Result := vk
+			else Result := a_vk
 			end
 		end
 
 feature {NONE} -- External
 
-	c_get_std_handle (n: INTEGER): POINTER
+	c_get_std_handle (a_n: INTEGER): POINTER
 		external "C inline use <windows.h>"
-		alias "return GetStdHandle((DWORD)$n);"
+		alias "return GetStdHandle((DWORD)$a_n);"
 		end
 
-	c_get_console_mode (h: POINTER): INTEGER
+	c_get_console_mode (a_h: POINTER): INTEGER
 		external "C inline use <windows.h>"
 		alias "[
 			DWORD mode = 0;
-			GetConsoleMode((HANDLE)$h, &mode);
+			GetConsoleMode((HANDLE)$a_h, &mode);
 			return (EIF_INTEGER)mode;
 		]"
 		end
 
-	c_set_console_mode (h: POINTER; mode: INTEGER)
+	c_set_console_mode (a_h: POINTER; mode: INTEGER)
 		external "C inline use <windows.h>"
-		alias "SetConsoleMode((HANDLE)$h, (DWORD)$mode);"
+		alias "SetConsoleMode((HANDLE)$a_h, (DWORD)$mode);"
 		end
 
-	c_set_console_output_cp (cp: INTEGER)
+	c_set_console_output_cp (a_cp: INTEGER)
 		external "C inline use <windows.h>"
-		alias "SetConsoleOutputCP((UINT)$cp);"
+		alias "SetConsoleOutputCP((UINT)$a_cp);"
 		end
 
-	c_get_console_size (h: POINTER; w, ht: TYPED_POINTER [INTEGER])
+	c_get_console_size (a_h: POINTER; w, ht: TYPED_POINTER [INTEGER])
 		external "C inline use <windows.h>"
 		alias "[
 			CONSOLE_SCREEN_BUFFER_INFO info;
-			if (GetConsoleScreenBufferInfo((HANDLE)$h, &info)) {
+			if (GetConsoleScreenBufferInfo((HANDLE)$a_h, &info)) {
 				*$w = info.srWindow.Right - info.srWindow.Left + 1;
 				*$ht = info.srWindow.Bottom - info.srWindow.Top + 1;
 			}
 		]"
 		end
 
-	c_write_console (h: POINTER; s: POINTER; len: INTEGER)
+	c_write_console (a_h: POINTER; s: POINTER; len: INTEGER)
 		external "C inline use <windows.h>"
 		alias "[
 			DWORD written;
-			WriteConsoleA((HANDLE)$h, (const char*)$s, (DWORD)$len, &written, NULL);
+			WriteConsoleA((HANDLE)$a_h, (const char*)$s, (DWORD)$len, &written, NULL);
 		]"
 		end
 
-	c_has_console_input (h: POINTER): BOOLEAN
+	c_has_console_input (a_h: POINTER): BOOLEAN
 		external "C inline use <windows.h>"
 		alias "[
 			DWORD count = 0;
-			GetNumberOfConsoleInputEvents((HANDLE)$h, &count);
+			GetNumberOfConsoleInputEvents((HANDLE)$a_h, &count);
 			return count > 0;
 		]"
 		end
 
-	c_read_console_input (h: POINTER; etype, kcode, ccode, ctrl, mx, my, btn_state, evt_flags: TYPED_POINTER [INTEGER])
+	c_read_console_input (a_h: POINTER; etype, kcode, ccode, ctrl, mx, my, btn_state, evt_flags: TYPED_POINTER [INTEGER])
 		external "C inline use <windows.h>"
 		alias "[
 			INPUT_RECORD rec;
@@ -614,7 +614,7 @@ feature {NONE} -- External
 			*$etype = 0;
 			*$btn_state = 0;
 			*$evt_flags = 0;
-			if (ReadConsoleInputW((HANDLE)$h, &rec, 1, &read) && read > 0) {
+			if (ReadConsoleInputW((HANDLE)$a_h, &rec, 1, &read) && read > 0) {
 				*$etype = rec.EventType;
 				if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
 					*$kcode = rec.Event.KeyEvent.wVirtualKeyCode;
@@ -632,13 +632,13 @@ feature {NONE} -- External
 		]"
 		end
 
-	c_write_console_utf16 (h: POINTER; s: POINTER; len: INTEGER)
+	c_write_console_utf16 (a_h: POINTER; s: POINTER; len: INTEGER)
 			-- Write UTF-16 string (SPECIAL [NATURAL_16]) to console using WriteConsoleW.
 			-- The input is already proper 16-bit UTF-16 from UTF_CONVERTER.
 		external "C inline use <windows.h>"
 		alias "[
 			DWORD written;
-			WriteConsoleW((HANDLE)$h, (const wchar_t*)$s, (DWORD)$len, &written, NULL);
+			WriteConsoleW((HANDLE)$a_h, (const wchar_t*)$s, (DWORD)$len, &written, NULL);
 		]"
 		end
 

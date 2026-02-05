@@ -104,36 +104,36 @@ feature -- Actions (EV compatible)
 
 feature -- Modification
 
-	add_button (button: TUI_RADIO_BUTTON)
+	add_button (a_button: TUI_RADIO_BUTTON)
 			-- Add radio button to group.
 		require
-			button_exists: button /= Void
-			not_in_group: button.group = Void
+			button_exists: a_button /= Void
+			not_in_group: a_button.group = Void
 		do
-			buttons.extend (button)
-			button.set_group (Current)
-			add_child (button)
+			buttons.extend (a_button)
+			a_button.set_group (Current)
+			add_child (a_button)
 			-- Select first button by default
 			if buttons.count = 1 then
 				select_index (1)
 			end
 		ensure
-			button_added: buttons.has (button)
-			button_grouped: button.group = Current
+			button_added: buttons.has (a_button)
+			button_grouped: a_button.group = Current
 		end
 
-	remove_button (button: TUI_RADIO_BUTTON)
+	remove_button (a_button: TUI_RADIO_BUTTON)
 			-- Remove radio button from group.
 		require
-			button_exists: button /= Void
-			in_group: buttons.has (button)
+			button_exists: a_button /= Void
+			in_group: buttons.has (a_button)
 		local
 			idx: INTEGER
 		do
-			idx := buttons.index_of (button, 1)
-			buttons.prune_all (button)
-			button.set_group (Void)
-			remove_child (button)
+			idx := buttons.index_of (a_button, 1)
+			buttons.prune_all (a_button)
+			a_button.set_group (Void)
+			remove_child (a_button)
 			-- Adjust selection
 			if selected_index = idx then
 				selected_index := 0
@@ -141,14 +141,14 @@ feature -- Modification
 				selected_index := selected_index - 1
 			end
 		ensure
-			button_removed: not buttons.has (button)
-			button_ungrouped: button.group = Void
+			button_removed: not buttons.has (a_button)
+			button_ungrouped: a_button.group = Void
 		end
 
-	select_index, set_value (idx: INTEGER)
+	select_index, set_value (a_idx: INTEGER)
 			-- Select button at index.
 		require
-			valid_index: idx >= 0 and idx <= buttons.count
+			valid_index: a_idx >= 0 and a_idx <= buttons.count
 		local
 			i: INTEGER
 		do
@@ -158,50 +158,50 @@ feature -- Modification
 				i := i + 1
 			end
 			-- Select the one
-			selected_index := idx
-			if idx > 0 then
-				buttons.i_th (idx).internal_select
+			selected_index := a_idx
+			if a_idx > 0 then
+				buttons.i_th (a_idx).internal_select
 			end
 			notify_change
 		ensure
-			index_set: selected_index = idx
+			index_set: selected_index = a_idx
 		end
 
-	select_button (button: TUI_RADIO_BUTTON)
+	select_button (a_button: TUI_RADIO_BUTTON)
 			-- Select specified button.
 		require
-			button_exists: button /= Void
-			in_group: buttons.has (button)
+			button_exists: a_button /= Void
+			in_group: buttons.has (a_button)
 		do
-			select_index (buttons.index_of (button, 1))
+			select_index (buttons.index_of (a_button, 1))
 		ensure
-			button_selected: button.is_selected
+			button_selected: a_button.is_selected
 		end
 
-	set_horizontal (v: BOOLEAN)
+	set_horizontal (a_v: BOOLEAN)
 			-- Set horizontal layout.
 		do
-			is_horizontal := v
+			is_horizontal := a_v
 		ensure
-			horizontal_set: is_horizontal = v
+			horizontal_set: is_horizontal = a_v
 		end
 
-	set_gap (g: INTEGER)
+	set_gap (a_g: INTEGER)
 			-- Set gap between buttons.
 		require
-			valid: g >= 0
+			valid: a_g >= 0
 		do
-			gap := g
+			gap := a_g
 		ensure
-			gap_set: gap = g
+			gap_set: gap = a_g
 		end
 
-	set_on_change, set_on_select (handler: PROCEDURE [INTEGER])
+	set_on_change, set_on_select (a_handler: PROCEDURE [INTEGER])
 			-- Set change handler (clears previous handlers).
 			-- For multiple handlers, use change_actions.extend directly.
 		do
 			change_actions.wipe_out
-			change_actions.extend (handler)
+			change_actions.extend (a_handler)
 		end
 
 feature -- Layout
@@ -268,10 +268,10 @@ feature -- Layout
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render radio group (just renders children).
 		do
-			render_children (buffer)
+			render_children (a_buffer)
 		end
 
 feature {NONE} -- Implementation

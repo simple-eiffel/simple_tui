@@ -162,73 +162,73 @@ feature -- Modification
 			label_set: label.same_string_general (a_label)
 		end
 
-	set_enabled (v: BOOLEAN)
+	set_enabled (a_v: BOOLEAN)
 			-- Set enabled state.
 		do
-			is_enabled := v
-			if not v then
+			is_enabled := a_v
+			if not a_v then
 				is_pressed := False
 			end
 		ensure
-			enabled_set: is_enabled = v
+			enabled_set: is_enabled = a_v
 		end
 
-	set_on_click (action: PROCEDURE)
+	set_on_click (a_action: PROCEDURE)
 			-- Set click handler (clears previous handlers).
 			-- For multiple handlers, use click_actions.extend directly.
 		do
 			click_actions.wipe_out
-			click_actions.extend (action)
+			click_actions.extend (a_action)
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_focused_style (s: TUI_STYLE)
+	set_focused_style (a_s: TUI_STYLE)
 			-- Set focused style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			focused_style := s
+			focused_style := a_s
 		ensure
-			style_set: focused_style = s
+			style_set: focused_style = a_s
 		end
 
-	set_pressed_style (s: TUI_STYLE)
+	set_pressed_style (a_s: TUI_STYLE)
 			-- Set pressed style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			pressed_style := s
+			pressed_style := a_s
 		ensure
-			style_set: pressed_style = s
+			style_set: pressed_style = a_s
 		end
 
-	set_disabled_style (s: TUI_STYLE)
+	set_disabled_style (a_s: TUI_STYLE)
 			-- Set disabled style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			disabled_style := s
+			disabled_style := a_s
 		ensure
-			style_set: disabled_style = s
+			style_set: disabled_style = a_s
 		end
 
-	set_hotkey_style (s: TUI_STYLE)
+	set_hotkey_style (a_s: TUI_STYLE)
 			-- Set hotkey style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			hotkey_style := s
+			hotkey_style := a_s
 		ensure
-			style_set: hotkey_style = s
+			style_set: hotkey_style = a_s
 		end
 
 feature -- Actions
@@ -243,7 +243,7 @@ feature -- Actions
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render button to buffer with hotkey underlining.
 		local
 			ax, ay, i, pos_x: INTEGER
@@ -266,8 +266,8 @@ feature -- Rendering
 			end
 
 			-- Draw opening bracket and space
-			buffer.put_char (ax, ay, '[', current_style)
-			buffer.put_char (ax + 1, ay, ' ', current_style)
+			a_buffer.put_char (ax, ay, '[', current_style)
+			a_buffer.put_char (ax + 1, ay, ' ', current_style)
 
 			-- Draw label with hotkey underlining
 			disp := display_label
@@ -278,26 +278,26 @@ feature -- Rendering
 					-- This is the hotkey character - underline it
 					hotkey_merged := current_style.twin_style
 					hotkey_merged.set_underline (True)
-					buffer.put_char (pos_x, ay, c, hotkey_merged)
+					a_buffer.put_char (pos_x, ay, c, hotkey_merged)
 				else
-					buffer.put_char (pos_x, ay, c, current_style)
+					a_buffer.put_char (pos_x, ay, c, current_style)
 				end
 				pos_x := pos_x + 1
 				i := i + 1
 			end
 
 			-- Draw closing space and bracket
-			buffer.put_char (pos_x, ay, ' ', current_style)
-			buffer.put_char (pos_x + 1, ay, ']', current_style)
+			a_buffer.put_char (pos_x, ay, ' ', current_style)
+			a_buffer.put_char (pos_x + 1, ay, ']', current_style)
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_enabled and is_focused then
-				if event.is_enter or event.is_space then
+				if a_event.is_enter or a_event.is_space then
 					-- Activate button
 					click
 					Result := True
@@ -305,21 +305,21 @@ feature -- Event Handling
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			mx, my: INTEGER
 		do
 			if is_enabled then
-				mx := event.mouse_x
-				my := event.mouse_y
+				mx := a_event.mouse_x
+				my := a_event.mouse_y
 
 				if contains_point (mx, my) then
-					if event.mouse_button = 1 then
-						if event.is_mouse_press then
+					if a_event.mouse_button = 1 then
+						if a_event.is_mouse_press then
 							is_pressed := True
 							Result := True
-						elseif event.is_mouse_release then
+						elseif a_event.is_mouse_release then
 							if is_pressed then
 								is_pressed := False
 								click

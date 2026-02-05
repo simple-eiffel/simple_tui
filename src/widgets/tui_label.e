@@ -75,36 +75,36 @@ feature -- Alignment constants
 
 feature -- Modification
 
-	set_text (t: READABLE_STRING_GENERAL)
+	set_text (a_t: READABLE_STRING_GENERAL)
 			-- Set label text.
 			-- If input is STRING_8, it's interpreted as UTF-8 and converted.
 		require
-			t_exists: t /= Void
+			t_exists: a_t /= Void
 		do
-			text := utf8_to_string_32 (t)
+			text := utf8_to_string_32 (a_t)
 		end
 
-	set_align (a: INTEGER)
+	set_align (a_a: INTEGER)
 			-- Set text alignment.
 		require
-			valid: a >= Align_left and a <= Align_right
+			valid: a_a >= Align_left and a_a <= Align_right
 		do
-			align := a
+			align := a_a
 		ensure
-			align_set: align = a
+			align_set: align = a_a
 		end
 
-	set_wrap (w: BOOLEAN)
+	set_wrap (a_w: BOOLEAN)
 			-- Set word wrapping.
 		do
-			wrap := w
+			wrap := a_w
 		ensure
-			wrap_set: wrap = w
+			wrap_set: wrap = a_w
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render label to buffer.
 		local
 			ax, ay: INTEGER
@@ -114,7 +114,7 @@ feature -- Rendering
 		do
 			ax := absolute_x
 			ay := absolute_y
-			logger.debug_log ("LABEL.render: text=%"" + {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (text) + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + buffer.height.out)
+			logger.debug_log ("LABEL.render: text=%"" + {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (text) + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + a_buffer.height.out)
 
 			if wrap then
 				lines := wrapped_lines
@@ -142,7 +142,7 @@ feature -- Rendering
 					if line.count > width then
 						line := line.substring (1, width)
 					end
-					buffer.put_string (draw_x, ay + row, line, style)
+					a_buffer.put_string (draw_x, ay + row, line, style)
 
 					row := row + 1
 				end
@@ -170,18 +170,18 @@ feature -- Queries
 
 feature {NONE} -- Implementation
 
-	utf8_to_string_32 (s: READABLE_STRING_GENERAL): STRING_32
+	utf8_to_string_32 (a_s: READABLE_STRING_GENERAL): STRING_32
 			-- Convert input to STRING_32.
 			-- If STRING_8, interpret as UTF-8 and decode.
 			-- If already STRING_32, use directly.
 		local
 			l_converter: UTF_CONVERTER
 		do
-			if attached {READABLE_STRING_8} s as s8 then
+			if attached {READABLE_STRING_8} a_s as s8 then
 				create l_converter
 				Result := l_converter.utf_8_string_8_to_string_32 (s8)
 			else
-				Result := s.to_string_32
+				Result := a_s.to_string_32
 			end
 		end
 

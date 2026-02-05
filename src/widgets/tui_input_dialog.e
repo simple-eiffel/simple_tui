@@ -248,18 +248,18 @@ feature -- Modification
 			end
 		end
 
-	set_on_submit (handler: PROCEDURE [HASH_TABLE [STRING_32, STRING_32]])
+	set_on_submit (a_handler: PROCEDURE [HASH_TABLE [STRING_32, STRING_32]])
 			-- Set submit handler.
 		do
 			submit_actions.wipe_out
-			submit_actions.extend (handler)
+			submit_actions.extend (a_handler)
 		end
 
-	set_on_cancel (handler: PROCEDURE)
+	set_on_cancel (a_handler: PROCEDURE)
 			-- Set cancel handler.
 		do
 			cancel_actions.wipe_out
-			cancel_actions.extend (handler)
+			cancel_actions.extend (a_handler)
 		end
 
 feature -- Display
@@ -352,29 +352,29 @@ feature -- Navigation
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_visible then
-				if event.is_escape then
+				if a_event.is_escape then
 					cancel
 					Result := True
-				elseif event.is_tab then
-					if event.has_shift then
+				elseif a_event.is_tab then
+					if a_event.has_shift then
 						focus_previous_field
 					else
 						focus_next_field
 					end
 					Result := True
 				elseif button_focused then
-					Result := handle_button_key (event)
+					Result := handle_button_key (a_event)
 				else
-					Result := handle_field_key (event)
+					Result := handle_field_key (a_event)
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			ax, ay, field_y, i, button_row, bx: INTEGER
@@ -383,11 +383,11 @@ feature -- Event Handling
 				ax := absolute_x
 				ay := absolute_y
 
-				if event.is_mouse_press and event.mouse_button = 1 then
+				if a_event.is_mouse_press and a_event.mouse_button = 1 then
 					-- Check field clicks
 					from i := 1 until i > fields.count loop
 						field_y := ay + 1 + i
-						if event.mouse_y = field_y then
+						if a_event.mouse_y = field_y then
 							focused_field := i
 							button_focused := False
 							Result := True
@@ -397,10 +397,10 @@ feature -- Event Handling
 
 					-- Check button clicks
 					button_row := ay + height - 2
-					if event.mouse_y = button_row then
+					if a_event.mouse_y = button_row then
 						bx := ax + (width - 20) // 2  -- Approximate button area
 						button_focused := True
-						if event.mouse_x < bx + 8 then
+						if a_event.mouse_x < bx + 8 then
 							selected_button := 1
 							submit
 						else
@@ -420,7 +420,7 @@ feature -- Event Handling
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render dialog to buffer.
 		local
 			ax, ay, i, row: INTEGER
@@ -444,23 +444,23 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2510/')  -- ┐
-				buffer.put_string (ax, ay, line, border_style)
+				a_buffer.put_string (ax, ay, line, border_style)
 
 				-- Render each field
 				row := 1
 				from i := 1 until i > fields.count loop
 					f := fields.i_th (i)
-					render_field_row (buffer, ax, ay + row, i, f)
+					render_field_row (a_buffer, ax, ay + row, i, f)
 					row := row + 1
 					i := i + 1
 				end
 
 				-- Empty row before buttons
-				render_empty_row (buffer, ax, ay + row)
+				render_empty_row (a_buffer, ax, ay + row)
 				row := row + 1
 
 				-- Button row
-				render_button_row (buffer, ax, ay + row)
+				render_button_row (a_buffer, ax, ay + row)
 				row := row + 1
 
 				-- Bottom border
@@ -471,7 +471,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2518/')  -- ┘
-				buffer.put_string (ax, ay + row, line, border_style)
+				a_buffer.put_string (ax, ay + row, line, border_style)
 			end
 		end
 
@@ -527,26 +527,26 @@ feature {NONE} -- Implementation
 			height := 2 + fields.count + 2
 		end
 
-	handle_button_key (event: TUI_EVENT): BOOLEAN
+	handle_button_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key when focus is on buttons.
 		do
-			if event.is_enter or event.is_space then
+			if a_event.is_enter or a_event.is_space then
 				if selected_button = 1 then
 					submit
 				else
 					cancel
 				end
 				Result := True
-			elseif event.is_left then
+			elseif a_event.is_left then
 				selected_button := 1
 				Result := True
-			elseif event.is_right then
+			elseif a_event.is_right then
 				selected_button := 2
 				Result := True
 			end
 		end
 
-	handle_field_key (event: TUI_EVENT): BOOLEAN
+	handle_field_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key when focus is on a field.
 		local
 			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
@@ -554,14 +554,14 @@ feature {NONE} -- Implementation
 			if focused_field > 0 and focused_field <= fields.count then
 				f := fields.i_th (focused_field)
 				if f.field_type = Field_type_combo then
-					Result := handle_combo_key (event, f)
+					Result := handle_combo_key (a_event, f)
 				else
-					Result := handle_text_key (event, f)
+					Result := handle_text_key (a_event, f)
 				end
 			end
 		end
 
-	handle_text_key (event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
+	handle_text_key (a_event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
 			-- Handle key for text field.
 		local
 			l_val: STRING_32
@@ -573,18 +573,18 @@ feature {NONE} -- Implementation
 				create l_val.make_empty
 			end
 
-			if event.is_backspace then
+			if a_event.is_backspace then
 				if not l_val.is_empty then
 					l_val.remove_tail (1)
 					field_values.force (l_val, f.name)
 				end
 				Result := True
-			elseif event.is_enter then
+			elseif a_event.is_enter then
 				-- Submit on Enter
 				submit
 				Result := True
-			elseif event.is_char_event then
-				l_char := event.char
+			elseif a_event.is_char_event then
+				l_char := a_event.char
 				-- Only accept printable characters
 				if l_char.natural_32_code >= 32 then
 					-- For number fields, only accept digits
@@ -602,7 +602,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	handle_combo_key (event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
+	handle_combo_key (a_event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
 			-- Handle key for combo box field.
 		local
 			l_current: STRING_32
@@ -615,28 +615,28 @@ feature {NONE} -- Implementation
 					l_index := 1
 				end
 
-				if event.is_up or event.is_left then
+				if a_event.is_up or a_event.is_left then
 					l_new_index := l_index - 1
 					if l_new_index < 1 then
 						l_new_index := opts.count
 					end
 					field_values.force (opts.i_th (l_new_index), f.name)
 					Result := True
-				elseif event.is_down or event.is_right or event.is_space then
+				elseif a_event.is_down or a_event.is_right or a_event.is_space then
 					l_new_index := l_index + 1
 					if l_new_index > opts.count then
 						l_new_index := 1
 					end
 					field_values.force (opts.i_th (l_new_index), f.name)
 					Result := True
-				elseif event.is_enter then
+				elseif a_event.is_enter then
 					submit
 					Result := True
 				end
 			end
 		end
 
-	render_field_row (buffer: TUI_BUFFER; ax, ay, index: INTEGER;
+	render_field_row (a_buffer: TUI_BUFFER; ax, ay, index: INTEGER;
 			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]])
 			-- Render a field row.
 		local
@@ -683,11 +683,11 @@ feature {NONE} -- Implementation
 			line.append_character ('%/0x2502/')  -- │
 
 			-- Render line with label style
-			buffer.put_string (ax, ay, line, label_style)
+			a_buffer.put_string (ax, ay, line, label_style)
 
 			-- Render borders
-			buffer.put_char (ax, ay, '%/0x2502/', border_style)
-			buffer.put_char (ax + width - 1, ay, '%/0x2502/', border_style)
+			a_buffer.put_char (ax, ay, '%/0x2502/', border_style)
+			a_buffer.put_char (ax + width - 1, ay, '%/0x2502/', border_style)
 
 			-- Render field value with field style
 			if not button_focused and index = focused_field then
@@ -695,10 +695,10 @@ feature {NONE} -- Implementation
 			else
 				current_style := field_style
 			end
-			buffer.put_string (ax + field_x, ay, field_display, current_style)
+			a_buffer.put_string (ax + field_x, ay, field_display, current_style)
 		end
 
-	render_empty_row (buffer: TUI_BUFFER; ax, ay: INTEGER)
+	render_empty_row (a_buffer: TUI_BUFFER; ax, ay: INTEGER)
 			-- Render an empty row.
 		local
 			line: STRING_32
@@ -711,10 +711,10 @@ feature {NONE} -- Implementation
 				j := j + 1
 			end
 			line.append_character ('%/0x2502/')  -- │
-			buffer.put_string (ax, ay, line, border_style)
+			a_buffer.put_string (ax, ay, line, border_style)
 		end
 
-	render_button_row (buffer: TUI_BUFFER; ax, ay: INTEGER)
+	render_button_row (a_buffer: TUI_BUFFER; ax, ay: INTEGER)
 			-- Render the button row.
 		local
 			line, ok_btn, cancel_btn: STRING_32
@@ -747,12 +747,12 @@ feature {NONE} -- Implementation
 				j := j + 1
 			end
 			line.append_character ('%/0x2502/')  -- │
-			buffer.put_string (ax, ay, line, border_style)
+			a_buffer.put_string (ax, ay, line, border_style)
 
 			-- Center buttons
 			btn_start := ax + (width - ok_btn.count - cancel_btn.count - 3) // 2
-			buffer.put_string (btn_start, ay, ok_btn, ok_style)
-			buffer.put_string (btn_start + ok_btn.count + 2, ay, cancel_btn, cancel_style)
+			a_buffer.put_string (btn_start, ay, ok_btn, ok_style)
+			a_buffer.put_string (btn_start + ok_btn.count + 2, ay, cancel_btn, cancel_style)
 		end
 
 invariant

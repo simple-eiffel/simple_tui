@@ -173,19 +173,19 @@ feature -- Query
 				a_name.same_string ("default")
 		end
 
-	same_color (other: TUI_COLOR): BOOLEAN
+	same_color (a_other: TUI_COLOR): BOOLEAN
 			-- Is this the same color as `other`?
 		require
-			other_exists: other /= Void
+			other_exists: a_other /= Void
 		do
-			if mode /= other.mode then
+			if mode /= a_other.mode then
 				Result := False
 			elseif is_default then
 				Result := True
 			elseif is_indexed then
-				Result := index = other.index
+				Result := index = a_other.index
 			else
-				Result := red_value = other.red_value and green_value = other.green_value and blue_value = other.blue_value
+				Result := red_value = a_other.red_value and green_value = a_other.green_value and blue_value = a_other.blue_value
 			end
 		end
 

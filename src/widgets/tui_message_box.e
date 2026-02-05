@@ -193,62 +193,62 @@ feature -- Modification
 			no_buttons: buttons.is_empty
 		end
 
-	set_on_close (handler: PROCEDURE [INTEGER])
+	set_on_close (a_handler: PROCEDURE [INTEGER])
 			-- Set close handler (clears previous handlers).
 			-- For multiple handlers, use close_actions.extend directly.
 		do
 			close_actions.wipe_out
-			close_actions.extend (handler)
+			close_actions.extend (a_handler)
 		end
 
-	set_title_style (s: TUI_STYLE)
+	set_title_style (a_s: TUI_STYLE)
 			-- Set title style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			title_style := s
+			title_style := a_s
 		ensure
-			style_set: title_style = s
+			style_set: title_style = a_s
 		end
 
-	set_message_style (s: TUI_STYLE)
+	set_message_style (a_s: TUI_STYLE)
 			-- Set message style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			message_style := s
+			message_style := a_s
 		ensure
-			style_set: message_style = s
+			style_set: message_style = a_s
 		end
 
-	set_border_style (s: TUI_STYLE)
+	set_border_style (a_s: TUI_STYLE)
 			-- Set border style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			border_style := s
+			border_style := a_s
 		ensure
-			style_set: border_style = s
+			style_set: border_style = a_s
 		end
 
-	set_button_style (s: TUI_STYLE)
+	set_button_style (a_s: TUI_STYLE)
 			-- Set button style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			button_style := s
+			button_style := a_s
 		ensure
-			style_set: button_style = s
+			style_set: button_style = a_s
 		end
 
-	set_button_selected_style (s: TUI_STYLE)
+	set_button_selected_style (a_s: TUI_STYLE)
 			-- Set selected button style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			button_selected_style := s
+			button_selected_style := a_s
 		ensure
-			style_set: button_selected_style = s
+			style_set: button_selected_style = a_s
 		end
 
 feature -- Display
@@ -272,15 +272,15 @@ feature -- Display
 			visible: is_visible
 		end
 
-	close_with_button (button_id: INTEGER)
+	close_with_button (a_button_id: INTEGER)
 			-- Close dialog with specified button result.
 		do
-			result_button := button_id
+			result_button := a_button_id
 			hide
-			close_actions.call ([button_id])
+			close_actions.call ([a_button_id])
 		ensure
 			hidden: not is_visible
-			result_set: result_button = button_id
+			result_set: result_button = a_button_id
 		end
 
 feature -- Navigation
@@ -319,20 +319,20 @@ feature -- Navigation
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_visible then
-				if event.is_left or (event.is_tab and event.has_shift) then
+				if a_event.is_left or (a_event.is_tab and a_event.has_shift) then
 					select_previous_button
 					Result := True
-				elseif event.is_right or event.is_tab then
+				elseif a_event.is_right or a_event.is_tab then
 					select_next_button
 					Result := True
-				elseif event.is_enter or event.is_space then
+				elseif a_event.is_enter or a_event.is_space then
 					activate_selected
 					Result := True
-				elseif event.is_escape then
+				elseif a_event.is_escape then
 					-- Escape closes with Cancel or last button
 					if buttons.count > 0 then
 						close_with_button (buttons.last.id)
@@ -344,7 +344,7 @@ feature -- Event Handling
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			ax, ay, button_y, bx, i, btn_width: INTEGER
@@ -354,14 +354,14 @@ feature -- Event Handling
 				ay := absolute_y
 				button_y := ay + height - 2  -- Buttons are 2 rows from bottom
 
-				if event.mouse_y = button_y then
+				if a_event.mouse_y = button_y then
 					-- Click on button row
 					bx := ax + (width - total_buttons_width) // 2
 					from i := 1 until i > buttons.count loop
 						btn_width := buttons.i_th (i).label.count + 4  -- [ Label ]
-						if event.mouse_x >= bx and event.mouse_x < bx + btn_width then
+						if a_event.mouse_x >= bx and a_event.mouse_x < bx + btn_width then
 							selected_button := i
-							if event.is_mouse_press and event.mouse_button = 1 then
+							if a_event.is_mouse_press and a_event.mouse_button = 1 then
 								activate_selected
 							end
 							Result := True
@@ -372,7 +372,7 @@ feature -- Event Handling
 				end
 
 				-- Consume all mouse events when visible (modal)
-				if not Result and event.is_mouse_press then
+				if not Result and a_event.is_mouse_press then
 					Result := True
 				end
 			end
@@ -380,7 +380,7 @@ feature -- Event Handling
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render message box to buffer.
 		local
 			ax, ay, i, j, inner_width, bx, btn_width: INTEGER
@@ -403,7 +403,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2510/')  -- ┐
-				buffer.put_string (ax, ay, line, border_style)
+				a_buffer.put_string (ax, ay, line, border_style)
 
 				-- Message row(s): │ Message │
 				create line.make (width)
@@ -414,10 +414,10 @@ feature -- Rendering
 					line.append_character (' ')
 				end
 				line.append_character ('%/0x2502/')  -- │
-				buffer.put_string (ax, ay + 1, line, message_style)
+				a_buffer.put_string (ax, ay + 1, line, message_style)
 				-- Draw left/right borders with message style for content
-				buffer.put_char (ax, ay + 1, '%/0x2502/', border_style)
-				buffer.put_char (ax + width - 1, ay + 1, '%/0x2502/', border_style)
+				a_buffer.put_char (ax, ay + 1, '%/0x2502/', border_style)
+				a_buffer.put_char (ax + width - 1, ay + 1, '%/0x2502/', border_style)
 
 				-- Empty row before buttons: │         │
 				create line.make (width)
@@ -427,7 +427,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2502/')  -- │
-				buffer.put_string (ax, ay + 2, line, border_style)
+				a_buffer.put_string (ax, ay + 2, line, border_style)
 
 				-- Button row: │  [Ok] [Cancel]  │
 				create line.make (width)
@@ -437,12 +437,12 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2502/')  -- │
-				buffer.put_string (ax, ay + 3, line, border_style)
+				a_buffer.put_string (ax, ay + 3, line, border_style)
 
 				-- Render buttons centered
 				bx := ax + (width - total_buttons_width) // 2
 				from i := 1 until i > buttons.count loop
-					render_button (buffer, bx, ay + 3, i)
+					render_button (a_buffer, bx, ay + 3, i)
 					btn_width := buttons.i_th (i).label.count + 4
 					bx := bx + btn_width + 2
 					i := i + 1
@@ -456,7 +456,7 @@ feature -- Rendering
 					j := j + 1
 				end
 				line.append_character ('%/0x2518/')  -- ┘
-				buffer.put_string (ax, ay + 4, line, border_style)
+				a_buffer.put_string (ax, ay + 4, line, border_style)
 			end
 		end
 
@@ -505,7 +505,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	render_button (buffer: TUI_BUFFER; bx, by, index: INTEGER)
+	render_button (a_buffer: TUI_BUFFER; bx, by, index: INTEGER)
 			-- Render button at position.
 		local
 			btn_text: STRING_32
@@ -522,7 +522,7 @@ feature {NONE} -- Implementation
 				btn_style := button_style
 			end
 
-			buffer.put_string (bx, by, btn_text, btn_style)
+			a_buffer.put_string (bx, by, btn_text, btn_style)
 		end
 
 invariant

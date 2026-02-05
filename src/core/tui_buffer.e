@@ -169,16 +169,16 @@ feature -- Modification
 			end
 		end
 
-	clear_with_style (s: TUI_STYLE)
+	clear_with_style (a_s: TUI_STYLE)
 			-- Clear the next buffer with given style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		local
 			i: INTEGER
 			cell: TUI_CELL
 		do
 			from i := 1 until i > width * height loop
-				create cell.make_with_styled_char (' ', s.twin_style)
+				create cell.make_with_styled_char (' ', a_s.twin_style)
 				next_buffer.put (cell, i)
 				i := i + 1
 			end

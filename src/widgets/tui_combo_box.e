@@ -139,12 +139,12 @@ feature -- Styles
 
 feature -- Modification
 
-	add_item (item: READABLE_STRING_GENERAL)
+	add_item (a_item: READABLE_STRING_GENERAL)
 			-- Add item to the list.
 		require
-			item_exists: item /= Void
+			item_exists: a_item /= Void
 		do
-			items.extend (item.to_string_32)
+			items.extend (a_item.to_string_32)
 			if selected_index = 0 then
 				selected_index := 1
 			end
@@ -152,20 +152,20 @@ feature -- Modification
 			item_added: items.count = old items.count + 1
 		end
 
-	add_items (new_items: ITERABLE [READABLE_STRING_GENERAL])
+	add_items (a_new_items: ITERABLE [READABLE_STRING_GENERAL])
 			-- Add multiple items.
 		do
-			across new_items as ic loop
+			across a_new_items as ic loop
 				add_item (ic)
 			end
 		end
 
-	remove_item (index: INTEGER)
+	remove_item (a_index: INTEGER)
 			-- Remove item at index.
 		require
-			valid_index: index >= 1 and index <= items.count
+			valid_index: a_index >= 1 and a_index <= items.count
 		do
-			items.go_i_th (index)
+			items.go_i_th (a_index)
 			items.remove
 			if selected_index > items.count then
 				selected_index := items.count
@@ -184,15 +184,15 @@ feature -- Modification
 			no_selection: selected_index = 0
 		end
 
-	select_index, set_value (idx: INTEGER)
+	select_index, set_value (a_idx: INTEGER)
 			-- Select item at index.
 		require
-			valid_index: idx >= 0 and idx <= items.count
+			valid_index: a_idx >= 0 and a_idx <= items.count
 		do
-			selected_index := idx
+			selected_index := a_idx
 			notify_change
 		ensure
-			index_set: selected_index = idx
+			index_set: selected_index = a_idx
 		end
 
 	expand
@@ -236,57 +236,57 @@ feature -- Modification
 			end
 		end
 
-	set_max_visible_items (n: INTEGER)
+	set_max_visible_items (a_n: INTEGER)
 			-- Set maximum visible items in dropdown.
 		require
-			valid: n > 0
+			valid: a_n > 0
 		do
-			max_visible_items := n
+			max_visible_items := a_n
 		ensure
-			max_set: max_visible_items = n
+			max_set: max_visible_items = a_n
 		end
 
-	set_on_change, set_on_select (handler: PROCEDURE [INTEGER])
+	set_on_change, set_on_select (a_handler: PROCEDURE [INTEGER])
 			-- Set change handler (clears previous handlers).
 			-- For multiple handlers, use change_actions.extend directly.
 		do
 			change_actions.wipe_out
-			change_actions.extend (handler)
+			change_actions.extend (a_handler)
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_focused_style (s: TUI_STYLE)
+	set_focused_style (a_s: TUI_STYLE)
 			-- Set focused style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			focused_style := s
+			focused_style := a_s
 		ensure
-			style_set: focused_style = s
+			style_set: focused_style = a_s
 		end
 
-	set_dropdown_style (s: TUI_STYLE)
+	set_dropdown_style (a_s: TUI_STYLE)
 			-- Set dropdown style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			dropdown_style := s
+			dropdown_style := a_s
 		ensure
-			style_set: dropdown_style = s
+			style_set: dropdown_style = a_s
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render combo box to buffer.
 		local
 			ax, ay: INTEGER
@@ -325,41 +325,41 @@ feature -- Rendering
 				display.append_character ('%/0x25BC/')  -- Down arrow
 			end
 
-			buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, display, current_style)
 
 			-- Render dropdown if expanded
 			if is_expanded then
-				render_dropdown (buffer, ax, ay + 1)
+				render_dropdown (a_buffer, ax, ay + 1)
 			end
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_focused then
 				if is_expanded then
-					Result := handle_key_expanded (event)
+					Result := handle_key_expanded (a_event)
 				else
-					Result := handle_key_collapsed (event)
+					Result := handle_key_collapsed (a_event)
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			my, clicked_index: INTEGER
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
-				if contains_point (event.mouse_x, event.mouse_y) then
+			if a_event.is_mouse_press and a_event.mouse_button = 1 then
+				if contains_point (a_event.mouse_x, a_event.mouse_y) then
 					-- Click on combo box itself
 					toggle
 					Result := True
 				elseif is_expanded then
 					-- Check if click is in dropdown
-					my := event.mouse_y - absolute_y - 1
+					my := a_event.mouse_y - absolute_y - 1
 					if my >= 0 and my < visible_item_count then
 						clicked_index := dropdown_scroll + my + 1
 						if clicked_index >= 1 and clicked_index <= items.count then
@@ -411,7 +411,7 @@ feature {NONE} -- Implementation
 			Result := items.count.min (max_visible_items)
 		end
 
-	render_dropdown (buffer: TUI_BUFFER; dx, dy: INTEGER)
+	render_dropdown (a_buffer: TUI_BUFFER; dx, dy: INTEGER)
 			-- Render dropdown list.
 		local
 			i, draw_y: INTEGER
@@ -438,24 +438,24 @@ feature {NONE} -- Implementation
 					item_style := dropdown_style
 				end
 
-				buffer.put_string (dx, dy + draw_y, item_text, item_style)
+				a_buffer.put_string (dx, dy + draw_y, item_text, item_style)
 				draw_y := draw_y + 1
 				i := i + 1
 			end
 		end
 
-	handle_key_collapsed (event: TUI_EVENT): BOOLEAN
+	handle_key_collapsed (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key when collapsed.
 		do
-			if event.is_enter or event.is_space then
+			if a_event.is_enter or a_event.is_space then
 				expand
 				Result := True
-			elseif event.is_up then
+			elseif a_event.is_up then
 				if selected_index > 1 then
 					select_index (selected_index - 1)
 				end
 				Result := True
-			elseif event.is_down then
+			elseif a_event.is_down then
 				if selected_index < items.count then
 					select_index (selected_index + 1)
 				end
@@ -463,22 +463,22 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	handle_key_expanded (event: TUI_EVENT): BOOLEAN
+	handle_key_expanded (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key when expanded.
 		do
-			if event.is_escape then
+			if a_event.is_escape then
 				collapse
 				Result := True
-			elseif event.is_enter or event.is_space then
+			elseif a_event.is_enter or a_event.is_space then
 				collapse
 				Result := True
-			elseif event.is_up then
+			elseif a_event.is_up then
 				if selected_index > 1 then
 					select_index (selected_index - 1)
 					ensure_visible
 				end
 				Result := True
-			elseif event.is_down then
+			elseif a_event.is_down then
 				if selected_index < items.count then
 					select_index (selected_index + 1)
 					ensure_visible

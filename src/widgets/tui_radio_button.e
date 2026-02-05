@@ -142,61 +142,61 @@ feature -- Modification
 			not_selected: not is_selected
 		end
 
-	set_group (g: detachable TUI_RADIO_GROUP)
+	set_group (a_g: detachable TUI_RADIO_GROUP)
 			-- Set the radio group.
 		do
-			group := g
+			group := a_g
 		ensure
-			group_set: group = g
+			group_set: group = a_g
 		end
 
-	set_selected_char (c: CHARACTER_32)
+	set_selected_char (a_c: CHARACTER_32)
 			-- Set selected character.
 		do
-			selected_char := c
+			selected_char := a_c
 		ensure
-			char_set: selected_char = c
+			char_set: selected_char = a_c
 		end
 
-	set_unselected_char (c: CHARACTER_32)
+	set_unselected_char (a_c: CHARACTER_32)
 			-- Set unselected character.
 		do
-			unselected_char := c
+			unselected_char := a_c
 		ensure
-			char_set: unselected_char = c
+			char_set: unselected_char = a_c
 		end
 
-	set_on_select, set_on_change (handler: PROCEDURE)
+	set_on_select, set_on_change (a_handler: PROCEDURE)
 			-- Set selection handler.
 		do
-			on_select := handler
+			on_select := a_handler
 		ensure
-			handler_set: on_select = handler
+			handler_set: on_select = a_handler
 		end
 
-	set_normal_style (s: TUI_STYLE)
+	set_normal_style (a_s: TUI_STYLE)
 			-- Set normal style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_style := s
+			normal_style := a_s
 		ensure
-			style_set: normal_style = s
+			style_set: normal_style = a_s
 		end
 
-	set_focused_style (s: TUI_STYLE)
+	set_focused_style (a_s: TUI_STYLE)
 			-- Set focused style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			focused_style := s
+			focused_style := a_s
 		ensure
-			style_set: focused_style = s
+			style_set: focused_style = a_s
 		end
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render radio button to buffer.
 		local
 			ax, ay: INTEGER
@@ -234,27 +234,27 @@ feature -- Rendering
 				display := display.substring (1, width)
 			end
 
-			buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, display, current_style)
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 		do
 			if is_focused then
-				if event.is_enter or event.is_space then
+				if a_event.is_enter or a_event.is_space then
 					select_button
 					Result := True
 				end
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
-				if contains_point (event.mouse_x, event.mouse_y) then
+			if a_event.is_mouse_press and a_event.mouse_button = 1 then
+				if contains_point (a_event.mouse_x, a_event.mouse_y) then
 					select_button
 					Result := True
 				end

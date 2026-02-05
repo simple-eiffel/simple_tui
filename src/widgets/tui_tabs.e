@@ -122,13 +122,13 @@ feature -- Styles
 
 feature -- Modification
 
-	add_tab (title: READABLE_STRING_GENERAL; content: TUI_WIDGET)
+	add_tab (a_title: READABLE_STRING_GENERAL; content: TUI_WIDGET)
 			-- Add a new tab.
 		require
-			title_exists: title /= Void
+			title_exists: a_title /= Void
 			content_exists: content /= Void
 		do
-			tabs.extend ([title.to_string_32, content])
+			tabs.extend ([a_title.to_string_32, content])
 			add_child (content)
 			content.hide  -- Hide initially
 			if tabs.count = 1 then
@@ -138,16 +138,16 @@ feature -- Modification
 			tab_added: tabs.count = old tabs.count + 1
 		end
 
-	remove_tab (index: INTEGER)
+	remove_tab (a_index: INTEGER)
 			-- Remove tab at index.
 		require
-			valid_index: index >= 1 and index <= tabs.count
+			valid_index: a_index >= 1 and a_index <= tabs.count
 		local
 			tab_content: TUI_WIDGET
 		do
-			tab_content := tabs.i_th (index).content
+			tab_content := tabs.i_th (a_index).content
 			remove_child (tab_content)
-			tabs.go_i_th (index)
+			tabs.go_i_th (a_index)
 			tabs.remove
 			if selected_tab > tabs.count then
 				selected_tab := tabs.count
@@ -159,10 +159,10 @@ feature -- Modification
 			tab_removed: tabs.count = old tabs.count - 1
 		end
 
-	select_tab, set_selected_tab (idx: INTEGER)
+	select_tab, set_selected_tab (a_idx: INTEGER)
 			-- Select tab at index.
 		require
-			valid_index: idx >= 1 and idx <= tabs.count
+			valid_index: a_idx >= 1 and a_idx <= tabs.count
 		local
 			i: INTEGER
 		do
@@ -172,12 +172,12 @@ feature -- Modification
 				i := i + 1
 			end
 			-- Show selected
-			selected_tab := idx
-			tabs.i_th (idx).content.show
+			selected_tab := a_idx
+			tabs.i_th (a_idx).content.show
 			layout
 			notify_change
 		ensure
-			tab_set: selected_tab = idx
+			tab_set: selected_tab = a_idx
 		end
 
 	select_next_tab
@@ -196,42 +196,42 @@ feature -- Modification
 			end
 		end
 
-	set_tab_bar_height (h: INTEGER)
+	set_tab_bar_height (a_h: INTEGER)
 			-- Set tab bar height.
 		require
-			valid: h >= 1
+			valid: a_h >= 1
 		do
-			tab_bar_height := h
+			tab_bar_height := a_h
 		ensure
-			height_set: tab_bar_height = h
+			height_set: tab_bar_height = a_h
 		end
 
-	set_on_tab_change, set_on_change (handler: PROCEDURE [INTEGER])
+	set_on_tab_change, set_on_change (a_handler: PROCEDURE [INTEGER])
 			-- Set tab change handler (clears previous handlers).
 			-- For multiple handlers, use tab_change_actions.extend directly.
 		do
 			tab_change_actions.wipe_out
-			tab_change_actions.extend (handler)
+			tab_change_actions.extend (a_handler)
 		end
 
-	set_normal_tab_style (s: TUI_STYLE)
+	set_normal_tab_style (a_s: TUI_STYLE)
 			-- Set normal tab style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			normal_tab_style := s
+			normal_tab_style := a_s
 		ensure
-			style_set: normal_tab_style = s
+			style_set: normal_tab_style = a_s
 		end
 
-	set_selected_tab_style (s: TUI_STYLE)
+	set_selected_tab_style (a_s: TUI_STYLE)
 			-- Set selected tab style.
 		require
-			s_exists: s /= Void
+			s_exists: a_s /= Void
 		do
-			selected_tab_style := s
+			selected_tab_style := a_s
 		ensure
-			style_set: selected_tab_style = s
+			style_set: selected_tab_style = a_s
 		end
 
 feature -- Focus
@@ -298,7 +298,7 @@ feature -- Layout
 
 feature -- Rendering
 
-	render (buffer: TUI_BUFFER)
+	render (a_buffer: TUI_BUFFER)
 			-- Render tabs to buffer.
 		local
 			ax, ay: INTEGER
@@ -307,37 +307,37 @@ feature -- Rendering
 			ay := absolute_y
 
 			-- Render tab bar
-			render_tab_bar (buffer, ax, ay)
+			render_tab_bar (a_buffer, ax, ay)
 
 			-- Render selected content
 			if attached selected_content as content then
 				if content.is_visible then
-					content.render (buffer)
+					content.render (a_buffer)
 				end
 			end
 		end
 
 feature -- Event Handling
 
-	handle_key (event: TUI_EVENT): BOOLEAN
+	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
 			-- Tab cycles through tabs, then escapes to next widget.
 		do
 			if is_focused then
-				if event.is_left then
+				if a_event.is_left then
 					select_previous_tab
 					Result := True
-				elseif event.is_right then
+				elseif a_event.is_right then
 					select_next_tab
 					Result := True
-				elseif event.is_tab and event.has_shift then
+				elseif a_event.is_tab and a_event.has_shift then
 					-- Shift+Tab: only consume if not on first tab
 					if selected_tab > 1 then
 						select_previous_tab
 						Result := True
 					end
 					-- else: let Tab escape to previous widget
-				elseif event.is_tab then
+				elseif a_event.is_tab then
 					-- Tab: only consume if not on last tab
 					if selected_tab < tabs.count then
 						select_next_tab
@@ -348,14 +348,14 @@ feature -- Event Handling
 			end
 		end
 
-	handle_mouse (event: TUI_EVENT): BOOLEAN
+	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
 			mx, clicked_tab: INTEGER
 		do
-			if event.is_mouse_press and event.mouse_button = 1 then
-				mx := event.mouse_x - absolute_x
-				if event.mouse_y = absolute_y then
+			if a_event.is_mouse_press and a_event.mouse_button = 1 then
+				mx := a_event.mouse_x - absolute_x
+				if a_event.mouse_y = absolute_y then
 					-- Click on tab bar
 					clicked_tab := tab_at_position (mx)
 					if clicked_tab > 0 then
@@ -368,7 +368,7 @@ feature -- Event Handling
 
 feature {NONE} -- Implementation
 
-	render_tab_bar (buffer: TUI_BUFFER; tx, ty: INTEGER)
+	render_tab_bar (a_buffer: TUI_BUFFER; tx, ty: INTEGER)
 			-- Render the tab bar.
 		local
 			i, tab_x: INTEGER
@@ -384,10 +384,10 @@ feature {NONE} -- Implementation
 				end
 
 				-- Draw tab: [ Title ]
-				buffer.put_char (tab_x, ty, '[', tab_style)
+				a_buffer.put_char (tab_x, ty, '[', tab_style)
 				tab_title := tabs.i_th (i).title
-				buffer.put_string (tab_x + 1, ty, tab_title, tab_style)
-				buffer.put_char (tab_x + 1 + tab_title.count, ty, ']', tab_style)
+				a_buffer.put_string (tab_x + 1, ty, tab_title, tab_style)
+				a_buffer.put_char (tab_x + 1 + tab_title.count, ty, ']', tab_style)
 
 				tab_x := tab_x + tab_title.count + 3
 				i := i + 1
@@ -395,12 +395,12 @@ feature {NONE} -- Implementation
 
 			-- Fill rest of tab bar with spaces
 			from until tab_x >= tx + width loop
-				buffer.put_char (tab_x, ty, ' ', normal_tab_style)
+				a_buffer.put_char (tab_x, ty, ' ', normal_tab_style)
 				tab_x := tab_x + 1
 			end
 		end
 
-	tab_at_position (mx: INTEGER): INTEGER
+	tab_at_position (a_mx: INTEGER): INTEGER
 			-- Return tab index at x position, 0 if none.
 		local
 			i, tab_x, tab_width: INTEGER
@@ -408,7 +408,7 @@ feature {NONE} -- Implementation
 			tab_x := 0
 			from i := 1 until i > tabs.count or Result > 0 loop
 				tab_width := tabs.i_th (i).title.count + 3
-				if mx >= tab_x and mx < tab_x + tab_width then
+				if a_mx >= tab_x and a_mx < tab_x + tab_width then
 					Result := i
 				end
 				tab_x := tab_x + tab_width
