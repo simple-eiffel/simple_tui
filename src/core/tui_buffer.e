@@ -111,7 +111,7 @@ feature -- Modification
 			valid_y: y >= 1 and y <= height
 			s_exists: s /= Void
 		local
-			cell: TUI_CELL
+			l_cell: TUI_CELL
 		do
 			create cell.make_with_styled_char (c, s.twin_style)
 			next_buffer.put (cell, index_for (x, y))
@@ -127,7 +127,7 @@ feature -- Modification
 		local
 			i, col: INTEGER
 			c: CHARACTER_32
-			cell: TUI_CELL
+			l_cell: TUI_CELL
 		do
 			col := x
 			from i := 1 until i > str.count or col > width loop
@@ -146,7 +146,7 @@ feature -- Modification
 			s_exists: s /= Void
 		local
 			row, col: INTEGER
-			cell: TUI_CELL
+			l_cell: TUI_CELL
 		do
 			from row := y1 until row > y2 loop
 				from col := x1 until col > x2 loop
@@ -175,7 +175,7 @@ feature -- Modification
 			s_exists: a_s /= Void
 		local
 			i: INTEGER
-			cell: TUI_CELL
+			l_cell: TUI_CELL
 		do
 			from i := 1 until i > width * height loop
 				create cell.make_with_styled_char (' ', a_s.twin_style)

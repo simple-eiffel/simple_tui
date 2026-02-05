@@ -137,8 +137,8 @@ feature -- Modification
 		local
 			i: INTEGER
 			c: CHARACTER_32
-			found_shortcut: BOOLEAN
-			display_pos: INTEGER
+			l_found_shortcut: BOOLEAN
+			l_display_pos: INTEGER
 		do
 			label := a_label.to_string_32
 			-- Find shortcut key
@@ -249,7 +249,7 @@ feature -- Rendering
 			ax, ay, i, pos_x: INTEGER
 			current_style, hotkey_merged: TUI_STYLE
 			c: CHARACTER_32
-			disp: STRING_32
+			l_disp: STRING_32
 		do
 			ax := absolute_x
 			ay := absolute_y

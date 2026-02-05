@@ -354,7 +354,7 @@ feature -- Navigation
 	page_up
 			-- Move selection up by page.
 		local
-			new_index: INTEGER
+			l_new_index: INTEGER
 		do
 			new_index := (selected_index - height).max (1)
 			if new_index /= selected_index then
@@ -367,7 +367,7 @@ feature -- Navigation
 	page_down
 			-- Move selection down by page.
 		local
-			new_index: INTEGER
+			l_new_index: INTEGER
 		do
 			new_index := (selected_index + height).min (items.count)
 			if new_index /= selected_index then
@@ -384,10 +384,10 @@ feature -- Rendering
 		local
 			ax, ay: INTEGER
 			i, draw_y: INTEGER
-			item_text: STRING_32
-			item_style: TUI_STYLE
-			display_width: INTEGER
-			needs_scrollbar: BOOLEAN
+			l_item_text: STRING_32
+			l_item_style: TUI_STYLE
+			l_display_width: INTEGER
+			l_needs_scrollbar: BOOLEAN
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -476,8 +476,8 @@ feature -- Event Handling
 	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
-			my: INTEGER
-			clicked_index: INTEGER
+			l_my: INTEGER
+			l_clicked_index: INTEGER
 		do
 			if contains_point (a_event.mouse_x, a_event.mouse_y) then
 				if a_event.is_mouse_press and a_event.mouse_button = 1 then
@@ -570,8 +570,8 @@ feature {NONE} -- Implementation
 		local
 			i: INTEGER
 			thumb_pos, thumb_size: INTEGER
-			scrollable_range: INTEGER
-			char: CHARACTER_32
+			l_scrollable_range: INTEGER
+			l_char: CHARACTER_32
 		do
 			scrollable_range := items.count - height
 			if scrollable_range > 0 then

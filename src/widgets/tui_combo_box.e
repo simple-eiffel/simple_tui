@@ -290,8 +290,8 @@ feature -- Rendering
 			-- Render combo box to buffer.
 		local
 			ax, ay: INTEGER
-			current_style: TUI_STYLE
-			display: STRING_32
+			l_current_style: TUI_STYLE
+			l_display: STRING_32
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -305,7 +305,7 @@ feature -- Rendering
 
 			-- Build display: [Selected Item   v]
 			create display.make (width)
-			if attached selected_text as sel then
+			if attached selected_text as al_sel then
 				display.append (sel)
 			else
 				display.append ("-")
@@ -415,8 +415,8 @@ feature {NONE} -- Implementation
 			-- Render dropdown list.
 		local
 			i, draw_y: INTEGER
-			item_text: STRING_32
-			item_style: TUI_STYLE
+			l_item_text: STRING_32
+			l_item_style: TUI_STYLE
 		do
 			draw_y := 0
 			from i := dropdown_scroll + 1 until draw_y >= visible_item_count or i > items.count loop

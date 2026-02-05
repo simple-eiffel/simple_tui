@@ -60,8 +60,8 @@ feature {NONE} -- Database
 	cleanup
 			-- Close database.
 		do
-			if attached db as d then
-				d.close
+			if attached db as al_d then
+				al_d.close
 			end
 		end
 
@@ -100,7 +100,7 @@ feature {NONE} -- UI
 	create_ui
 			-- Build the user interface.
 		local
-			q: TUI_QUICK
+			l_q: TUI_QUICK
 		do
 			current_filter := 0
 			editing_task_id := 0
@@ -165,7 +165,7 @@ feature {NONE} -- UI
 	create_task_dialog
 			-- Create the task creation/edit dialog.
 		local
-			dlg: TUI_INPUT_DIALOG
+			l_dlg: TUI_INPUT_DIALOG
 			priority_opts, context_opts, energy_opts: ARRAY [STRING_8]
 		do
 			create dlg.make ("New Task")
@@ -188,12 +188,12 @@ feature {NONE} -- Data Loading
 	load_tasks
 			-- Load tasks from database into list.
 		local
-			items: ARRAYED_LIST [TODO_ITEM]
-			display_text: STRING_32
-			status_char: STRING_32
+			l_items: ARRAYED_LIST [TODO_ITEM]
+			l_display_text: STRING_32
+			l_status_char: STRING_32
 		do
-			if attached repo as r and attached tui.list_named ("task_list") as task_list then
-				task_list.clear_items
+			if attached repo as r and attached tui.list_named ("task_list") as al_task_list then
+				al_task_list.clear_items
 
 				-- Get items based on filter
 				inspect current_filter
@@ -250,7 +250,7 @@ feature {NONE} -- Data Loading
 					end
 
 					-- Due date
-					if attached ic.due_date as dd then
+					if attached ic.due_date as al_dd then
 						display_text.append (" [")
 						display_text.append_string_general (dd)
 						display_text.append ("]")
@@ -273,22 +273,22 @@ feature {NONE} -- Data Loading
 	update_count_label (a_count: INTEGER)
 			-- Update the task count label.
 		local
-			text: STRING_32
+			l_text: STRING_32
 		do
-			if attached {TUI_LABEL} tui.widget ("count_label") as lbl then
+			if attached {TUI_LABEL} tui.widget ("count_label") as al_lbl then
 				create text.make (20)
 				text.append ("Tasks: ")
 				text.append_integer (a_count)
-				lbl.set_text (text)
+				al_lbl.set_text (text)
 			end
 		end
 
 	update_filter_label
 			-- Update the filter label.
 		local
-			text: STRING_32
+			l_text: STRING_32
 		do
-			if attached {TUI_LABEL} tui.widget ("filter_label") as lbl then
+			if attached {TUI_LABEL} tui.widget ("filter_label") as al_lbl then
 				inspect current_filter
 				when 0 then text := "All Tasks"
 				when 1 then text := "Pending Only"
@@ -308,16 +308,16 @@ feature {NONE} -- Menu Handlers
 			-- Show dialog to create a new task.
 		do
 			editing_task_id := 0
-			if attached task_dialog as dlg then
-				dlg.set_title ("New Task")
+			if attached task_dialog as al_dlg then
+				al_dlg.set_title ("New Task")
 				-- Reset fields
-				dlg.set_field_value ("title", "")
-				dlg.set_field_value ("description", "")
-				dlg.set_field_value ("priority", "3 - Medium")
-				dlg.set_field_value ("due_date", "")
-				dlg.set_field_value ("context", "")
-				dlg.set_field_value ("energy", "2 - Medium")
-				dlg.show_centered (tui.screen_width, tui.screen_height)
+				al_dlg.set_field_value ("title", "")
+				al_dlg.set_field_value ("description", "")
+				al_dlg.set_field_value ("priority", "3 - Medium")
+				al_dlg.set_field_value ("due_date", "")
+				al_dlg.set_field_value ("context", "")
+				al_dlg.set_field_value ("energy", "2 - Medium")
+				al_dlg.show_centered (tui.screen_width, tui.screen_height)
 				tui.set_modal (dlg)
 			end
 		end
@@ -325,21 +325,21 @@ feature {NONE} -- Menu Handlers
 	on_edit_task
 			-- Show dialog to edit the selected task.
 		local
-			item: TODO_ITEM
+			l_item: TODO_ITEM
 		do
-			if attached get_selected_task as sel_item then
+			if attached get_selected_task as al_sel_item then
 				item := sel_item
 				editing_task_id := item.id
-				if attached task_dialog as dlg then
+				if attached task_dialog as al_dlg then
 					dlg.set_title ("Edit Task")
 					dlg.set_field_value ("title", item.title)
-					if attached item.description as desc then
+					if attached item.description as al_desc then
 						dlg.set_field_value ("description", desc)
 					else
 						dlg.set_field_value ("description", "")
 					end
 					dlg.set_field_value ("priority", priority_to_display (item.priority))
-					if attached item.due_date as dd then
+					if attached item.due_date as al_dd then
 						dlg.set_field_value ("due_date", dd)
 					else
 						dlg.set_field_value ("due_date", "")
@@ -357,8 +357,8 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as item and attached repo as r then
-				l_ok := r.set_status (item.id, "in_progress")
+			if attached get_selected_task as item and attached repo as al_r then
+				l_ok := al_r.set_status (item.id, "in_progress")
 				load_tasks
 			end
 		end
@@ -368,8 +368,8 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as item and attached repo as r then
-				l_ok := r.set_status (item.id, "completed")
+			if attached get_selected_task as item and attached repo as al_r then
+				l_ok := al_r.set_status (item.id, "completed")
 				load_tasks
 			end
 		end
@@ -379,11 +379,11 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as item and attached repo as r then
+			if attached get_selected_task as item and attached repo as al_r then
 				if item.is_completed then
-					l_ok := r.set_status (item.id, "pending")
+					l_ok := al_r.set_status (item.id, "pending")
 				else
-					l_ok := r.set_status (item.id, "completed")
+					l_ok := al_r.set_status (item.id, "completed")
 				end
 				load_tasks
 			end
@@ -394,8 +394,8 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as item and attached repo as r then
-				l_ok := r.delete (item.id)
+			if attached get_selected_task as item and attached repo as al_r then
+				l_ok := al_r.delete (item.id)
 				load_tasks
 			end
 		end
@@ -405,8 +405,8 @@ feature {NONE} -- Menu Handlers
 		local
 			l_count: INTEGER
 		do
-			if attached repo as r then
-				l_count := r.delete_completed
+			if attached repo as al_r then
+				l_count := al_r.delete_completed
 				load_tasks
 			end
 		end
@@ -491,7 +491,7 @@ feature {NONE} -- AI Handlers
 	on_ai_create_from_text
 			-- Create task from natural language input.
 		local
-			dlg: TUI_INPUT_DIALOG
+			l_dlg: TUI_INPUT_DIALOG
 		do
 			create dlg.make ("AI: Create from Text")
 			dlg.add_text_field ("text", "Describe your task:", 50)
@@ -510,19 +510,19 @@ feature {NONE} -- AI Handlers
 		do
 			tui.clear_modal
 
-			if attached a_values.item ("text") as v then
-				l_text := v.to_string_8
+			if attached a_values.item ("text") as al_v then
+				l_text := al_v.to_string_8
 			else
 				l_text := ""
 			end
 
 			if not l_text.is_empty then
-				if attached ai_router as router then
-					l_item := router.parse_task (l_text)
-					if attached l_item as item and attached repo as r then
+				if attached ai_router as al_router then
+					l_item := al_router.parse_task (l_text)
+					if attached l_item as item and attached repo as al_r then
 						l_id := r.insert (item)
 						load_tasks
-						if router.is_ai_available then
+						if al_router.is_ai_available then
 							tui.show_message ("AI Task Created", "Created: " + item.title)
 						else
 							tui.show_message ("Task Created", "Created (no AI): " + item.title + "%N%N(AI not configured - used keyword parsing)")
@@ -537,12 +537,12 @@ feature {NONE} -- AI Handlers
 	on_ai_suggest_subtasks
 			-- Suggest subtasks for selected task using AI.
 		local
-			subtasks: ARRAYED_LIST [TODO_ITEM]
-			msg: STRING_32
+			l_subtasks: ARRAYED_LIST [TODO_ITEM]
+			l_msg: STRING_32
 			l_id: INTEGER_64
 		do
-			if attached get_selected_task as item then
-				if attached ai_router as router then
+			if attached get_selected_task as al_item then
+				if attached ai_router as al_router then
 					subtasks := router.suggest_subtasks (item, Void)
 					if subtasks.is_empty then
 						if router.is_ai_available then
@@ -573,7 +573,7 @@ feature {NONE} -- AI Handlers
 		local
 			l_id: INTEGER_64
 		do
-			if a_confirmed and attached repo as r then
+			if a_confirmed and attached repo as al_r then
 				across a_subtasks as s loop
 					s.set_parent_id (a_parent_id)
 					l_id := r.insert (s)
@@ -586,12 +586,12 @@ feature {NONE} -- AI Handlers
 	on_ai_help_block
 			-- Get AI help for a blocked task.
 		local
-			resolution: detachable TASK_BLOCK_RESOLUTION
-			blockers: ARRAYED_LIST [TODO_ITEM]
+			l_resolution: detachable TASK_BLOCK_RESOLUTION
+			l_blockers: ARRAYED_LIST [TODO_ITEM]
 		do
-			if attached get_selected_task as item then
-				if item.is_waiting then
-					if attached ai_router as router and attached repo as r then
+			if attached get_selected_task as al_item then
+				if al_item.is_waiting then
+					if attached ai_router as router and attached repo as al_r then
 						-- Find potential blockers (tasks in progress or pending)
 						blockers := r.find_in_progress
 						if blockers.is_empty then
@@ -599,8 +599,8 @@ feature {NONE} -- AI Handlers
 						end
 
 						resolution := router.resolve_block (item, blockers, r.find_all)
-						if attached resolution as res then
-							tui.show_message ("AI Block Resolution", res.full_description)
+						if attached resolution as al_res then
+							tui.show_message ("AI Block Resolution", al_res.full_description)
 						else
 							tui.show_message ("No Suggestions", "AI couldn't suggest a resolution.")
 						end
@@ -616,7 +616,7 @@ feature {NONE} -- AI Handlers
 	on_ai_status
 			-- Show AI configuration status.
 		local
-			msg: STRING_32
+			l_msg: STRING_32
 		do
 			create msg.make (200)
 			msg.append ("AI Provider Status%N%N")
@@ -626,7 +626,7 @@ feature {NONE} -- AI Handlers
 				msg.append ("Provider: ")
 				msg.append_string_general (ai_config.active_provider)
 				msg.append ("%N")
-				if attached ai_config.current_model as m then
+				if attached ai_config.current_model as al_m then
 					msg.append ("Model: ")
 					msg.append_string_general (m)
 					msg.append ("%N")
@@ -652,7 +652,7 @@ feature {NONE} -- Dialog Handlers
 	on_task_dialog_submit (a_values: HASH_TABLE [STRING_32, STRING_32])
 			-- Handle task dialog submission.
 		local
-			new_item: TODO_ITEM
+			l_new_item: TODO_ITEM
 			l_id: INTEGER_64
 			l_title, l_desc, l_due, l_context: STRING_8
 			l_priority, l_energy: INTEGER
@@ -661,8 +661,8 @@ feature {NONE} -- Dialog Handlers
 			tui.clear_modal
 
 			-- Extract values with safe handling of Void
-			if attached a_values.item ("title") as v then
-				l_title := v.to_string_8
+			if attached a_values.item ("title") as al_v then
+				l_title := al_v.to_string_8
 			else
 				l_title := ""
 			end
@@ -670,36 +670,36 @@ feature {NONE} -- Dialog Handlers
 				l_title := "Untitled Task"
 			end
 
-			if attached a_values.item ("description") as v then
-				l_desc := v.to_string_8
+			if attached a_values.item ("description") as al_v then
+				l_desc := al_v.to_string_8
 			else
 				l_desc := ""
 			end
-			if attached a_values.item ("priority") as v then
+			if attached a_values.item ("priority") as al_v then
 				l_priority := extract_number (v, 3)
 			else
 				l_priority := 3
 			end
-			if attached a_values.item ("due_date") as v then
-				l_due := v.to_string_8
+			if attached a_values.item ("due_date") as al_v then
+				l_due := al_v.to_string_8
 			else
 				l_due := ""
 			end
-			if attached a_values.item ("context") as v then
-				l_context := v.to_string_8
+			if attached a_values.item ("context") as al_v then
+				l_context := al_v.to_string_8
 			else
 				l_context := ""
 			end
-			if attached a_values.item ("energy") as v then
+			if attached a_values.item ("energy") as al_v then
 				l_energy := extract_number (v, 2)
 			else
 				l_energy := 2
 			end
 
-			if attached repo as r then
+			if attached repo as al_r then
 				if editing_task_id > 0 then
 					-- Update existing task
-					if attached r.find_by_id (editing_task_id) as existing then
+					if attached al_r.find_by_id (editing_task_id) as al_existing then
 						existing.set_title (l_title)
 						if l_desc.is_empty then
 							existing.set_description (Void)
@@ -744,10 +744,10 @@ feature {NONE} -- Helpers
 	get_selected_task: detachable TODO_ITEM
 			-- Get the currently selected task.
 		do
-			if attached tui.list_named ("task_list") as task_list then
-				if attached current_items as items then
-					if task_list.selected_index > 0 and task_list.selected_index <= items.count then
-						Result := items.i_th (task_list.selected_index)
+			if attached tui.list_named ("task_list") as al_task_list then
+				if attached current_items as al_items then
+					if al_task_list.selected_index > 0 and al_task_list.selected_index <= items.count then
+						Result := items.i_th (al_task_list.selected_index)
 					end
 				end
 			end

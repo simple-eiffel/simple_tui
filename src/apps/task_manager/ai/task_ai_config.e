@@ -100,7 +100,7 @@ feature -- Status
 			else
 				Result.append ("AI: ")
 				Result.append_string_general (active_provider)
-				if attached current_model as m then
+				if attached current_model as al_m then
 					Result.append (" (")
 					Result.append_string_general (m)
 					Result.append (")")
@@ -233,7 +233,7 @@ feature -- Persistence
 			l_json: STRING_8
 			l_file: PLAIN_TEXT_FILE
 		do
-			if attached config_path as p then
+			if attached config_path as al_p then
 				l_json := to_json
 				create l_file.make_create_read_write (p)
 				l_file.put_string (l_json)
@@ -247,7 +247,7 @@ feature -- Persistence
 			l_file: PLAIN_TEXT_FILE
 			l_content: STRING_8
 		do
-			if attached config_path as p then
+			if attached config_path as al_p then
 				create l_file.make_with_name (p)
 				if l_file.exists and then l_file.is_readable then
 					l_file.open_read
@@ -313,25 +313,25 @@ feature -- JSON Serialization
 		do
 			create l_parser.make_with_string (a_json)
 			l_parser.parse_content
-			if l_parser.is_valid and then attached {JSON_OBJECT} l_parser.parsed_json_object as jo then
+			if l_parser.is_valid and then attached {JSON_OBJECT} l_parser.parsed_json_object as al_jo then
 				l_obj := jo
-				if attached {JSON_STRING} l_obj.item ("provider") as p then
-					if is_valid_provider (p.item) then
-						active_provider := p.item
+				if attached {JSON_STRING} l_obj.item ("provider") as al_p then
+					if is_valid_provider (al_p.item) then
+						active_provider := al_p.item
 					end
 				end
-				if attached {JSON_OBJECT} l_obj.item ("api_keys") as keys then
+				if attached {JSON_OBJECT} l_obj.item ("api_keys") as al_keys then
 					l_keys := keys
 					across l_keys as k loop
-						if attached {JSON_STRING} k as v then
+						if attached {JSON_STRING} k as al_v then
 							api_keys.force (v.item, @k.key.item)
 						end
 					end
 				end
-				if attached {JSON_OBJECT} l_obj.item ("models") as mods then
+				if attached {JSON_OBJECT} l_obj.item ("models") as al_mods then
 					l_mods := mods
 					across l_mods as m loop
-						if attached {JSON_STRING} m as v then
+						if attached {JSON_STRING} m as al_v then
 							models.force (v.item, @m.key.item)
 						end
 					end

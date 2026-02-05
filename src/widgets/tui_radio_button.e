@@ -123,8 +123,8 @@ feature -- Modification
 			-- Will deselect others in the group.
 		do
 			if not is_selected then
-				if attached group as g then
-					g.select_button (Current)
+				if attached group as al_g then
+					al_g.select_button (Current)
 				else
 					is_selected := True
 					notify_select
@@ -200,9 +200,9 @@ feature -- Rendering
 			-- Render radio button to buffer.
 		local
 			ax, ay: INTEGER
-			current_style: TUI_STYLE
-			display: STRING_32
-			radio_char: CHARACTER_32
+			l_current_style: TUI_STYLE
+			l_display: STRING_32
+			l_radio_char: CHARACTER_32
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -289,8 +289,8 @@ feature {NONE} -- Implementation
 	notify_select
 			-- Notify selection handler.
 		do
-			if attached on_select as handler then
-				handler.call (Void)
+			if attached on_select as al_handler then
+				al_handler.call (Void)
 			end
 		end
 

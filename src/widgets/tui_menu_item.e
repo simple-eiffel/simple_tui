@@ -134,8 +134,8 @@ feature -- Modification
 		local
 			i: INTEGER
 			c: CHARACTER_32
-			found_shortcut: BOOLEAN
-			display_pos: INTEGER
+			l_found_shortcut: BOOLEAN
+			l_display_pos: INTEGER
 		do
 			text := a_text.to_string_32
 			-- Find shortcut key
@@ -186,7 +186,7 @@ feature -- Action
 	execute
 			-- Execute the item's action if sensitive.
 		do
-			if is_sensitive and then attached on_select as action then
+			if is_sensitive and then attached on_select as al_action then
 				action.call (Void)
 			end
 		end

@@ -66,9 +66,9 @@ feature -- Layout
 	layout
 			-- Arrange children vertically, then recursively layout each child.
 		local
-			current_y: INTEGER
-			child_x: INTEGER
-			iw: INTEGER
+			l_current_y: INTEGER
+			l_child_x: INTEGER
+			l_iw: INTEGER
 			i: INTEGER
 		do
 			logger.debug_log ("VBOX.layout: children=" + children.count.out + " abs_x=" + absolute_x.out + " abs_y=" + absolute_y.out + " w=" + width.out + " h=" + height.out)

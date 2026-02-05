@@ -108,8 +108,8 @@ feature -- Rendering
 			-- Render label to buffer.
 		local
 			ax, ay: INTEGER
-			lines: LIST [STRING_32]
-			line: STRING_32
+			l_lines: LIST [STRING_32]
+			l_line: STRING_32
 			draw_x, row, i: INTEGER
 		do
 			ax := absolute_x
@@ -177,7 +177,7 @@ feature {NONE} -- Implementation
 		local
 			l_converter: UTF_CONVERTER
 		do
-			if attached {READABLE_STRING_8} a_s as s8 then
+			if attached {READABLE_STRING_8} a_s as al_s8 then
 				create l_converter
 				Result := l_converter.utf_8_string_8_to_string_32 (s8)
 			else
@@ -188,9 +188,9 @@ feature {NONE} -- Implementation
 	wrapped_lines: ARRAYED_LIST [STRING_32]
 			-- Break text into lines that fit within width.
 		local
-			words: LIST [STRING_32]
-			current_line: STRING_32
-			word: STRING_32
+			l_words: LIST [STRING_32]
+			l_current_line: STRING_32
+			l_word: STRING_32
 			i: INTEGER
 		do
 			create Result.make (5)

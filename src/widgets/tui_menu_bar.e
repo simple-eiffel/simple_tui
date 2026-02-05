@@ -193,8 +193,8 @@ feature -- Menu Control
 		require
 			valid_index: a_index >= 1 and a_index <= menus.count
 		local
-			menu: TUI_MENU
-			menu_x: INTEGER
+			l_menu: TUI_MENU
+			l_menu_x: INTEGER
 		do
 			-- Close any open menu first
 			close_menu
@@ -214,7 +214,7 @@ feature -- Menu Control
 	close_menu
 			-- Close currently open menu.
 		do
-			if is_menu_open and then attached current_menu as menu then
+			if is_menu_open and then attached current_menu as al_menu then
 				menu.hide
 			end
 			is_menu_open := False
@@ -286,9 +286,9 @@ feature -- Event Handling
 			if not Result and (is_focused or is_menu_open) then
 				if is_menu_open then
 					-- Let open menu handle keys first
-					if attached current_menu as menu then
+					if attached current_menu as al_menu then
 						log_debug ("Delegating key to open menu")
-						Result := menu.handle_key (a_event)
+						Result := al_menu.handle_key (a_event)
 						if Result then
 							log_debug ("Open menu handled key")
 						end
@@ -356,7 +356,7 @@ feature -- Event Handling
 			mx, clicked_menu: INTEGER
 		do
 			-- Pass mouse events to open menu dropdown first
-			if is_menu_open and attached current_menu as menu then
+			if is_menu_open and attached current_menu as al_menu then
 				Result := menu.handle_mouse (a_event)
 			end
 
@@ -391,7 +391,7 @@ feature -- Rendering
 		local
 			ax, ay, i, menu_x: INTEGER
 			l_menu: TUI_MENU
-			title_style: TUI_STYLE
+			l_title_style: TUI_STYLE
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -446,7 +446,7 @@ feature -- Queries
 	preferred_height: INTEGER
 			-- Height is always 1 for bar, plus open menu if any.
 		do
-			if is_menu_open and then attached current_menu as menu then
+			if is_menu_open and then attached current_menu as al_menu then
 				Result := 1 + menu.preferred_height
 			else
 				Result := 1
@@ -487,9 +487,9 @@ feature {NONE} -- Implementation
 			-- Try Alt+key shortcut to open menu.
 		local
 			i: INTEGER
-			menu: TUI_MENU
-			key_lower: CHARACTER_32
-			title_shortcut: CHARACTER_32
+			l_menu: TUI_MENU
+			l_key_lower: CHARACTER_32
+			l_title_shortcut: CHARACTER_32
 		do
 			if a_event.has_alt then
 				key_lower := a_event.char.as_lower
@@ -532,7 +532,7 @@ feature {NONE} -- Implementation
 		local
 			i, pos_x: INTEGER
 			c: CHARACTER_32
-			merged_style: TUI_STYLE
+			l_merged_style: TUI_STYLE
 		do
 			pos_x := start_x
 			from i := 1 until i > text.count loop

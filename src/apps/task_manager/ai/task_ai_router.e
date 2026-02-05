@@ -76,15 +76,15 @@ feature -- Parse Natural Language
 			last_error.wipe_out
 			if is_ai_available then
 				l_client := create_ai_client
-				if attached l_client as client then
-					l_response := client.ask_with_system (
+				if attached l_client as al_client then
+					l_response := al_client.ask_with_system (
 						prompts.parse_task_system (ai_config.active_provider).to_string_32,
 						prompts.parse_task_user (a_input).to_string_32
 					)
 					if l_response.is_success then
 						Result := parse_task_response (l_response.text)
 					else
-						if attached l_response.error_message as e then
+						if attached l_response.error_message as al_e then
 							last_error := e
 						end
 					end
@@ -141,16 +141,16 @@ feature -- Subtask Suggestions
 
 			if is_ai_available then
 				l_client := create_ai_client
-				if attached l_client as client then
+				if attached l_client as al_client then
 					-- Build similar task context
 					create l_similar_titles.make (5)
-					if attached a_similar as similar then
+					if attached a_similar as al_similar then
 						across similar as s loop
 							l_similar_titles.extend (s.title)
 						end
 					end
 					-- Get description or empty string
-					if attached a_task.description as d then
+					if attached a_task.description as al_d then
 						l_desc := d
 					else
 						l_desc := ""
@@ -162,7 +162,7 @@ feature -- Subtask Suggestions
 					if l_response.is_success then
 						Result := parse_subtasks_response (l_response.text, a_task.id)
 					else
-						if attached l_response.error_message as e then
+						if attached l_response.error_message as al_e then
 							last_error := e
 						end
 					end
@@ -187,7 +187,7 @@ feature -- Block Resolution
 
 			if is_ai_available and then not a_blockers.is_empty then
 				l_client := create_ai_client
-				if attached l_client as client then
+				if attached l_client as al_client then
 					-- Build blockers description
 					create l_blockers_text.make (200)
 					across a_blockers as b loop
@@ -203,7 +203,7 @@ feature -- Block Resolution
 					if l_response.is_success then
 						Result := parse_block_resolution (l_response.text, a_all_tasks)
 					else
-						if attached l_response.error_message as e then
+						if attached l_response.error_message as al_e then
 							last_error := e
 						end
 					end
@@ -257,8 +257,8 @@ feature -- Task Splitting
 
 			if is_ai_available then
 				l_client := create_ai_client
-				if attached l_client as client then
-					if attached a_task.description as d then
+				if attached l_client as al_client then
+					if attached a_task.description as al_d then
 						l_desc := d
 					else
 						l_desc := ""
@@ -270,7 +270,7 @@ feature -- Task Splitting
 					if l_response.is_success then
 						Result := parse_subtasks_response (l_response.text, a_task.id)
 					else
-						if attached l_response.error_message as e then
+						if attached l_response.error_message as al_e then
 							last_error := e
 						end
 					end
@@ -286,17 +286,17 @@ feature {NONE} -- AI Client Creation
 			-- Create appropriate AI client based on config.
 		do
 			if ai_config.active_provider.same_string ("claude") then
-				if attached ai_config.provider_api_key ("claude") as k then
+				if attached ai_config.provider_api_key ("claude") as al_k then
 					create {CLAUDE_CLIENT} Result.make_with_api_key (k)
 				end
 			elseif ai_config.active_provider.same_string ("grok") then
-				if attached ai_config.provider_api_key ("grok") as k then
+				if attached ai_config.provider_api_key ("grok") as al_k then
 					create {GROK_CLIENT} Result.make_with_api_key (k)
 				end
 			elseif ai_config.active_provider.same_string ("ollama") then
 				create {OLLAMA_CLIENT} Result.make
-				if attached ai_config.current_model as m and then attached {OLLAMA_CLIENT} Result as oc then
-					oc.set_model (m.to_string_32)
+				if attached ai_config.current_model as m and then attached {OLLAMA_CLIENT} Result as al_oc then
+					al_oc.set_model (m.to_string_32)
 				end
 			end
 		end

@@ -216,7 +216,7 @@ feature -- Queries
 	percentage: REAL_64
 			-- Current value as percentage (0-100).
 		local
-			range: REAL_64
+			l_range: REAL_64
 		do
 			range := max_value - min_value
 			if range > 0 then
@@ -246,11 +246,11 @@ feature -- Rendering
 			-- Render progress bar to buffer.
 		local
 			ax, ay: INTEGER
-			bar_width: INTEGER
-			filled_count: INTEGER
+			l_bar_width: INTEGER
+			l_filled_count: INTEGER
 			i: INTEGER
-			pct_str: STRING_32
-			pct_width: INTEGER
+			l_pct_str: STRING_32
+			l_pct_width: INTEGER
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -295,7 +295,7 @@ feature {NONE} -- Implementation
 			-- Render indeterminate progress bar.
 		local
 			i: INTEGER
-			indicator_width: INTEGER
+			l_indicator_width: INTEGER
 			start_pos, end_pos: INTEGER
 		do
 			indicator_width := (bar_width // 5).max (3)  -- Indicator is 1/5 of bar width
@@ -318,7 +318,7 @@ feature {NONE} -- Implementation
 	formatted_percentage: STRING_32
 			-- Percentage formatted as string.
 		local
-			pct: INTEGER
+			l_pct: INTEGER
 		do
 			pct := percentage.truncated_to_integer
 			create Result.make (5)

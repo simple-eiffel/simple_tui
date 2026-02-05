@@ -261,11 +261,11 @@ feature -- Rendering
 			-- Render text field to buffer.
 		local
 			ax, ay: INTEGER
-			current_style: TUI_STYLE
-			display: STRING_32
-			visible_width: INTEGER
+			l_current_style: TUI_STYLE
+			l_display: STRING_32
+			l_visible_width: INTEGER
 			i: INTEGER
-			char: CHARACTER_32
+			l_char: CHARACTER_32
 		do
 			ax := absolute_x
 			ay := absolute_y
@@ -339,8 +339,8 @@ feature -- Event Handling
 					backspace
 					Result := True
 				elseif a_event.is_enter then
-					if attached on_submit as handler then
-						handler.call ([text])
+					if attached on_submit as al_handler then
+						al_handler.call ([text])
 					end
 					Result := True
 				elseif a_event.is_left then
@@ -371,8 +371,8 @@ feature -- Event Handling
 	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event.
 		local
-			mx: INTEGER
-			click_pos: INTEGER
+			l_mx: INTEGER
+			l_click_pos: INTEGER
 		do
 			if a_event.is_mouse_press and a_event.mouse_button = 1 then
 				if contains_point (a_event.mouse_x, a_event.mouse_y) then
@@ -404,7 +404,7 @@ feature {NONE} -- Implementation
 	adjust_scroll
 			-- Adjust scroll offset to keep cursor visible.
 		local
-			visible_width: INTEGER
+			l_visible_width: INTEGER
 		do
 			visible_width := width - 1  -- Leave room for cursor at end
 
@@ -420,8 +420,8 @@ feature {NONE} -- Implementation
 	notify_change
 			-- Notify change handler.
 		do
-			if attached on_change as handler then
-				handler.call ([text])
+			if attached on_change as al_handler then
+				al_handler.call ([text])
 			end
 		end
 

@@ -132,7 +132,7 @@ feature -- Modification
 	add_separator
 			-- Add separator line.
 		local
-			sep: TUI_MENU_ITEM
+			l_sep: TUI_MENU_ITEM
 		do
 			create sep.make_separator
 			add_item (sep)
@@ -231,8 +231,8 @@ feature -- Display
 		do
 			hide
 			selected_index := 0
-			if attached on_close as handler then
-				handler.call (Void)
+			if attached on_close as al_handler then
+				al_handler.call (Void)
 			end
 		ensure
 			hidden: not is_visible
@@ -302,8 +302,8 @@ feature -- Navigation
 	execute_selected
 			-- Execute selected item's action.
 		do
-			if attached selected_item as item then
-				item.execute
+			if attached selected_item as al_item then
+				al_item.execute
 				close
 			end
 		end
@@ -389,8 +389,8 @@ feature -- Rendering
 			-- Render menu to buffer with border box.
 		local
 			ax, ay, i, j, item_y: INTEGER
-			item: TUI_MENU_ITEM
-			item_style: TUI_STYLE
+			l_item: TUI_MENU_ITEM
+			l_item_style: TUI_STYLE
 			menu_width, inner_width: INTEGER
 			top_border, bottom_border, sep_line: STRING_32
 		do
@@ -503,8 +503,8 @@ feature {NONE} -- Implementation
 		local
 			i, pos_x, remaining: INTEGER
 			c: CHARACTER_32
-			disp: STRING_32
-			hotkey_merged: TUI_STYLE
+			l_disp: STRING_32
+			l_hotkey_merged: TUI_STYLE
 		do
 			disp := item.display_text
 			pos_x := start_x
@@ -542,8 +542,8 @@ feature {NONE} -- Implementation
 			-- Only matches actual letter/number shortcuts, not null character.
 		local
 			i: INTEGER
-			item: TUI_MENU_ITEM
-			key_lower: CHARACTER_32
+			l_item: TUI_MENU_ITEM
+			l_key_lower: CHARACTER_32
 		do
 			-- Ignore null character (from key release events)
 			if a_c /= '%U' then

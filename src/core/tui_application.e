@@ -151,27 +151,27 @@ feature -- Keyboard Shortcuts
 			-- Register a global keyboard shortcut.
 			-- Example: register_shortcut ('s', True, False, False, agent on_save) for Ctrl+S
 		local
-			shortcut_key: STRING_32
+			l_shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
-			shortcuts.force (handler, shortcut_key)
+			l_shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
+			shortcuts.force (handler, l_shortcut_key)
 		end
 
 	unregister_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN)
 			-- Remove a registered shortcut.
 		local
-			shortcut_key: STRING_32
+			l_shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
+			l_shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
 			shortcuts.remove (shortcut_key)
 		end
 
 	has_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): BOOLEAN
 			-- Is shortcut registered?
 		local
-			shortcut_key: STRING_32
+			l_shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
+			l_shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
 			Result := shortcuts.has (shortcut_key)
 		end
 
@@ -181,13 +181,13 @@ feature -- Focus Management
 			-- Move focus to next focusable widget.
 		do
 			if not focusable_widgets.is_empty then
-				if attached focused_widget as fw then
-					fw.unfocus
+				if attached focused_widget as al_fw then
+					al_fw.unfocus
 				end
 				focused_widget_index := ((focused_widget_index) \\ focusable_widgets.count) + 1
 				focused_widget := focusable_widgets.i_th (focused_widget_index)
-				if attached focused_widget as fw then
-					fw.focus_from_next
+				if attached focused_widget as al_fw then
+					al_fw.focus_from_next
 				end
 			end
 		end
@@ -196,16 +196,16 @@ feature -- Focus Management
 			-- Move focus to previous focusable widget.
 		do
 			if not focusable_widgets.is_empty then
-				if attached focused_widget as fw then
-					fw.unfocus
+				if attached focused_widget as al_fw then
+					al_fw.unfocus
 				end
 				focused_widget_index := focused_widget_index - 1
 				if focused_widget_index < 1 then
 					focused_widget_index := focusable_widgets.count
 				end
 				focused_widget := focusable_widgets.i_th (focused_widget_index)
-				if attached focused_widget as fw then
-					fw.focus_from_previous
+				if attached focused_widget as al_fw then
+					al_fw.focus_from_previous
 				end
 			end
 		end
@@ -218,8 +218,8 @@ feature -- Focus Management
 		local
 			i: INTEGER
 		do
-			if attached focused_widget as fw then
-				fw.unfocus
+			if attached focused_widget as al_fw then
+				al_fw.unfocus
 			end
 
 			-- Find widget in focusable list
@@ -244,23 +244,23 @@ feature -- Lifecycle
 			-- Initialize terminal and prepare for running.
 		do
 			create {TUI_BACKEND_WINDOWS} backend.make
-			if attached backend as b then
-				b.initialize
-				create buffer.make (b.width, b.height)
+			if attached backend as al_b then
+				al_b.initialize
+				create buffer.make (al_b.width, al_b.height)
 			end
 
 			-- Position menu bar if present
-			if attached menu_bar as mb and attached backend as b then
-				mb.set_position (1, 1)
-				mb.set_size (b.width, 1)
+			if attached menu_bar as al_mb and attached backend as al_b then
+				al_mb.set_position (1, 1)
+				al_mb.set_size (al_b.width, 1)
 			end
 
 			-- Layout root widget (below menu bar if present)
-			if attached root as r and attached backend as b then
+			if attached root as al_r and attached backend as al_b then
 				if attached menu_bar then
-					r.set_bounds (1, 2, b.width, b.height - 1)
+					al_r.set_bounds (1, 2, al_b.width, al_b.height - 1)
 				else
-					r.set_bounds (1, 1, b.width, b.height)
+					al_r.set_bounds (1, 1, al_b.width, al_b.height)
 				end
 				r.layout
 			end
@@ -269,8 +269,8 @@ feature -- Lifecycle
 			if not focusable_widgets.is_empty then
 				focused_widget_index := 1
 				focused_widget := focusable_widgets.first
-				if attached focused_widget as fw then
-					fw.focus
+				if attached focused_widget as al_fw then
+					al_fw.focus
 				end
 			end
 		ensure
@@ -301,11 +301,11 @@ feature -- Lifecycle
 	shutdown
 			-- Clean up terminal.
 		do
-			if attached on_quit as handler then
-				handler.call (Void)
+			if attached on_quit as al_handler then
+				al_handler.call (Void)
 			end
-			if attached backend as b then
-				b.shutdown
+			if attached backend as al_b then
+				al_b.shutdown
 			end
 		end
 
@@ -314,23 +314,23 @@ feature {NONE} -- Event Loop
 	event_loop
 			-- Main event loop.
 		local
-			event: detachable TUI_EVENT
-			frame_time_ms: INTEGER
+			l_event: detachable TUI_EVENT
+			l_frame_time_ms: INTEGER
 		do
 			frame_time_ms := 1000 // target_fps
 
 			from until not is_running loop
 				-- Process events
-				if attached backend as b then
-					event := b.poll_event
+				if attached backend as al_b then
+					event := al_b.poll_event
 					if event /= Void then
 						handle_event (event)
 					end
 				end
 
 				-- Tick callback
-				if attached on_tick as handler then
-					handler.call (Void)
+				if attached on_tick as al_handler then
+					al_handler.call (Void)
 				end
 
 				-- Render
@@ -343,7 +343,7 @@ feature {NONE} -- Event Loop
 		require
 			event_exists: a_event /= Void
 		local
-			handled: BOOLEAN
+			l_handled: BOOLEAN
 		do
 			if a_event.is_resize_event then
 				handle_resize (a_event)
@@ -360,7 +360,7 @@ feature {NONE} -- Event Loop
 			-- Log key event details to file.
 		local
 			l_file: PLAIN_TEXT_FILE
-			msg: STRING
+			l_msg: STRING
 		do
 			create msg.make (150)
 			msg.append ("KEY: ")
@@ -409,7 +409,7 @@ feature {NONE} -- Event Loop
 			-- Log mouse event details to file.
 		local
 			l_file: PLAIN_TEXT_FILE
-			msg: STRING
+			l_msg: STRING
 		do
 			create msg.make (100)
 			msg.append ("MOUSE: x=")
@@ -441,7 +441,7 @@ feature {NONE} -- Event Loop
 			end
 
 			-- Modal widget captures all input when visible
-			if not Result and attached modal_widget as mw then
+			if not Result and attached modal_widget as al_mw then
 				if mw.is_visible then
 					Result := mw.handle_key (a_event)
 					-- Modal consumes all key events
@@ -456,14 +456,14 @@ feature {NONE} -- Event Loop
 				end
 
 				-- Let menu bar handle if open
-				if not Result and attached menu_bar as mb then
+				if not Result and attached menu_bar as al_mb then
 					if mb.is_menu_open then
 						Result := mb.handle_key (a_event)
 					end
 				end
 
 				-- Check Alt+key for menu shortcuts
-				if not Result and a_event.has_alt and attached menu_bar as mb then
+				if not Result and a_event.has_alt and attached menu_bar as al_mb then
 					Result := mb.handle_key (a_event)
 				end
 
@@ -473,7 +473,7 @@ feature {NONE} -- Event Loop
 				end
 
 				-- Dispatch to focused widget FIRST (widgets may handle Tab internally)
-				if not Result and attached focused_widget as fw then
+				if not Result and attached focused_widget as al_fw then
 					Result := fw.handle_key (a_event)
 				end
 
@@ -492,12 +492,12 @@ feature {NONE} -- Event Loop
 	handle_mouse (a_event: TUI_EVENT): BOOLEAN
 			-- Handle mouse event. Return True if handled.
 		local
-			target: detachable TUI_WIDGET
+			l_target: detachable TUI_WIDGET
 		do
 			-- Modal widget captures all mouse input when visible
-			if attached modal_widget as mw then
-				if mw.is_visible then
-					Result := mw.handle_mouse (a_event)
+			if attached modal_widget as al_mw then
+				if al_mw.is_visible then
+					Result := al_mw.handle_mouse (a_event)
 					-- Modal consumes all mouse events
 					Result := True
 				end
@@ -505,19 +505,19 @@ feature {NONE} -- Event Loop
 
 			if not Result then
 				-- Check menu bar first
-				if attached menu_bar as mb then
-					if a_event.mouse_y = 1 or mb.is_menu_open then
-						Result := mb.handle_mouse (a_event)
+				if attached menu_bar as al_mb then
+					if a_event.mouse_y = 1 or al_mb.is_menu_open then
+						Result := al_mb.handle_mouse (a_event)
 					end
 				end
 
 				-- Find widget under mouse
-				if not Result and attached root as r then
+				if not Result and attached root as al_r then
 					target := r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
-					if attached target as t then
+					if attached target as al_t then
 						-- Focus clicked widget if focusable
 						if a_event.is_mouse_press and a_event.mouse_button = 1 then
-							if t.is_focusable and t /= focused_widget then
+							if al_t.is_focusable and t /= focused_widget then
 								set_focus (t)
 							end
 						end
@@ -530,18 +530,18 @@ feature {NONE} -- Event Loop
 	handle_resize (a_event: TUI_EVENT)
 			-- Handle terminal resize.
 		do
-			if attached backend as b and attached buffer as buf then
-				buf.resize (a_event.resize_width, a_event.resize_height)
+			if attached backend as al_b and attached buffer as al_buf then
+				al_buf.resize (a_event.resize_width, a_event.resize_height)
 
 				-- Resize root widget
-				if attached root as r then
+				if attached root as al_r then
 					r.set_size (a_event.resize_width, a_event.resize_height)
 					r.layout
 				end
 
 				-- Notify handler
-				if attached on_resize as handler then
-					handler.call ([a_event.resize_width, a_event.resize_height])
+				if attached on_resize as al_handler then
+					al_handler.call ([a_event.resize_width, a_event.resize_height])
 				end
 			end
 		end
@@ -549,37 +549,37 @@ feature {NONE} -- Event Loop
 	render_frame
 			-- Render one frame.
 		local
-			changed: LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]]
+			l_changed: LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]]
 			i: INTEGER
 			l_tuple: TUPLE [x, y: INTEGER; cell: TUI_CELL]
 		do
-			if attached buffer as buf and attached backend as b then
+			if attached buffer as buf and attached backend as al_b then
 				-- Clear next buffer
 				buf.clear
 
 				-- Render menu bar
-				if attached menu_bar as mb then
+				if attached menu_bar as al_mb then
 					mb.render (buf)
 				end
 
 				-- Render widget tree
-				if attached root as r then
-					if r.is_visible then
-						r.render (buf)
+				if attached root as al_r then
+					if al_r.is_visible then
+						al_r.render (buf)
 					end
 				end
 
 				-- Render open menu dropdown LAST (on top of everything)
-				if attached menu_bar as mb and then mb.is_menu_open then
-					if attached mb.current_menu as dropdown then
-						dropdown.render (buf)
+				if attached menu_bar as al_mb and then mb.is_menu_open then
+					if attached al_mb.current_menu as al_dropdown then
+						al_dropdown.render (buf)
 					end
 				end
 
 				-- Render modal widget on top of everything
-				if attached modal_widget as mw then
-					if mw.is_visible then
-						mw.render (buf)
+				if attached modal_widget as al_mw then
+					if al_mw.is_visible then
+						al_mw.render (buf)
 					end
 				end
 
@@ -627,12 +627,12 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 	try_shortcut (a_event: TUI_EVENT): BOOLEAN
 			-- Try to execute registered shortcut. Return True if found and executed.
 		local
-			shortcut_key: STRING_32
+			l_shortcut_key: STRING_32
 		do
-			shortcut_key := make_shortcut_key (a_event.char, a_event.has_ctrl, a_event.has_alt, a_event.has_shift)
+			l_shortcut_key := make_shortcut_key (a_event.char, a_event.has_ctrl, a_event.has_alt, a_event.has_shift)
 			if shortcuts.has (shortcut_key) then
-				if attached shortcuts.item (shortcut_key) as handler then
-					handler.call (Void)
+				if attached shortcuts.item (shortcut_key) as al_handler then
+					al_handler.call (Void)
 					Result := True
 				end
 			end
@@ -642,10 +642,10 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			-- Try to activate a widget via Alt+key hotkey.
 			-- Searches widget tree for buttons with matching shortcut_key.
 		local
-			key_lower: CHARACTER_32
+			l_key_lower: CHARACTER_32
 		do
 			key_lower := a_event.char.as_lower
-			if attached root as r then
+			if attached root as al_r then
 				Result := try_hotkey_in_widget (r, key_lower)
 			end
 		end
@@ -656,9 +656,9 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			i: INTEGER
 		do
 			-- Check if this widget is a TUI_BUTTON with matching shortcut
-			if attached {TUI_BUTTON} a_widget as btn then
-				if btn.is_visible and btn.shortcut_key.as_lower = key_lower then
-					btn.click
+			if attached {TUI_BUTTON} a_widget as al_btn then
+				if al_btn.is_visible and al_btn.shortcut_key.as_lower = key_lower then
+					al_btn.click
 					Result := True
 				end
 			end
@@ -676,7 +676,7 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			-- Collect all focusable widgets from root.
 		do
 			focusable_widgets.wipe_out
-			if attached root as r then
+			if attached root as al_r then
 				collect_from_widget (r)
 			end
 		end

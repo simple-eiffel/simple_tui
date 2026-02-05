@@ -228,7 +228,7 @@ feature -- Modification
 		require
 			name_exists: a_name /= Void
 		do
-			if attached field_values.item (a_name.to_string_32) as v then
+			if attached field_values.item (a_name.to_string_32) as al_v then
 				Result := v
 			else
 				create Result.make_empty
@@ -424,9 +424,9 @@ feature -- Rendering
 			-- Render dialog to buffer.
 		local
 			ax, ay, i, row: INTEGER
-			line: STRING_32
+			l_line: STRING_32
 			j: INTEGER
-			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
+			l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
 		do
 			if is_visible then
 				ax := absolute_x
@@ -498,7 +498,7 @@ feature {NONE} -- Implementation
 			-- Update dialog size based on content.
 		local
 			min_width, max_label, max_field: INTEGER
-			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
+			l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
 			i: INTEGER
 		do
 			-- Calculate label width
@@ -549,7 +549,7 @@ feature {NONE} -- Implementation
 	handle_field_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key when focus is on a field.
 		local
-			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
+			l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
 		do
 			if focused_field > 0 and focused_field <= fields.count then
 				f := fields.i_th (focused_field)
@@ -567,7 +567,7 @@ feature {NONE} -- Implementation
 			l_val: STRING_32
 			l_char: CHARACTER_32
 		do
-			if attached field_values.item (f.name) as current_val then
+			if attached field_values.item (f.name) as al_current_val then
 				l_val := current_val
 			else
 				create l_val.make_empty
@@ -641,8 +641,8 @@ feature {NONE} -- Implementation
 			-- Render a field row.
 		local
 			line, field_display: STRING_32
-			current_style: TUI_STYLE
-			field_x: INTEGER
+			l_current_style: TUI_STYLE
+			l_field_x: INTEGER
 		do
 			-- Left border and label
 			create line.make (width)
@@ -655,8 +655,8 @@ feature {NONE} -- Implementation
 			end
 
 			-- Get field value
-			if attached field_values.item (f.name) as v then
-				field_display := v.twin
+			if attached field_values.item (f.name) as al_v then
+				field_display := al_v.twin
 			else
 				create field_display.make_empty
 			end
@@ -701,7 +701,7 @@ feature {NONE} -- Implementation
 	render_empty_row (a_buffer: TUI_BUFFER; ax, ay: INTEGER)
 			-- Render an empty row.
 		local
-			line: STRING_32
+			l_line: STRING_32
 			j: INTEGER
 		do
 			create line.make (width)

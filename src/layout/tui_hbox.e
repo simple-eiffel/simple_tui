@@ -66,9 +66,9 @@ feature -- Layout
 	layout
 			-- Arrange children horizontally, then recursively layout each child.
 		local
-			current_x: INTEGER
-			child_y: INTEGER
-			ih: INTEGER
+			l_current_x: INTEGER
+			l_child_y: INTEGER
+			l_ih: INTEGER
 			i: INTEGER
 		do
 			ih := inner_height

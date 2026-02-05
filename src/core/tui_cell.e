@@ -162,7 +162,7 @@ feature {NONE} -- Implementation
 			-- Compute display width of character.
 			-- Returns 2 for wide characters (CJK, emoji), 1 otherwise.
 		local
-			code: NATURAL_32
+			l_code: NATURAL_32
 		do
 			code := a_c.natural_32_code
 

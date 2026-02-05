@@ -221,7 +221,7 @@ feature -- Rendering
 			-- Render box to buffer.
 		local
 			ax, ay, i: INTEGER
-			chars: TUPLE [tl, tr, bl, br, h, v: CHARACTER_32]
+			l_chars: TUPLE [tl, tr, bl, br, h, v: CHARACTER_32]
 			l_border_style, l_title_style: TUI_STYLE
 		do
 			ax := absolute_x
@@ -232,12 +232,12 @@ feature -- Rendering
 				chars := border_chars (border_style)
 
 				-- Resolve styles
-				if attached border_color_style as bs then
+				if attached border_color_style as al_bs then
 					l_border_style := bs
 				else
 					l_border_style := style
 				end
-				if attached title_color_style as ts then
+				if attached title_color_style as al_ts then
 					l_title_style := ts
 				else
 					l_title_style := l_border_style

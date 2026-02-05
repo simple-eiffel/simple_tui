@@ -117,8 +117,8 @@ feature -- Geometry
 	absolute_x: INTEGER
 			-- Absolute X position (relative to screen).
 		do
-			if attached parent as p then
-				Result := p.content_origin_x + x - 1
+			if attached parent as al_p then
+				Result := al_p.content_origin_x + x - 1
 			else
 				Result := x
 			end
@@ -127,8 +127,8 @@ feature -- Geometry
 	absolute_y: INTEGER
 			-- Absolute Y position (relative to screen).
 		do
-			if attached parent as p then
-				Result := p.content_origin_y + y - 1
+			if attached parent as al_p then
+				Result := al_p.content_origin_y + y - 1
 			else
 				Result := y
 			end
@@ -332,7 +332,7 @@ feature -- Queries
 	find_widget_at (px, py: INTEGER): detachable TUI_WIDGET
 			-- Find deepest widget containing point (absolute coords).
 		local
-			found: detachable TUI_WIDGET
+			l_found: detachable TUI_WIDGET
 		do
 			if contains_point (px, py) and is_visible then
 				Result := Current

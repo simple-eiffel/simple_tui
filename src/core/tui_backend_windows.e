@@ -172,8 +172,8 @@ feature -- Output
 			-- Write multiple cells (optimized batch).
 		local
 			last_x, last_y, i: INTEGER
-			t: TUPLE [x, y: INTEGER; cell: TUI_CELL]
-			prev_style: detachable TUI_STYLE
+			l_t: TUPLE [x, y: INTEGER; cell: TUI_CELL]
+			l_prev_style: detachable TUI_STYLE
 		do
 			last_x := -1
 			last_y := -1
@@ -199,7 +199,7 @@ feature -- Output
 			-- Append CHARACTER_32 to wide output buffer (direct UTF-16).
 			-- Also maintains UTF-8 buffer for backward compatibility with tests.
 		local
-			code: NATURAL_32
+			l_code: NATURAL_32
 		do
 			-- Append to wide buffer (primary output)
 			wide_output_buffer.append_character (a_c)
@@ -367,7 +367,7 @@ feature {NONE} -- Implementation
 		require
 			sequence_not_empty: a_seq /= Void and then not a_seq.is_empty
 		local
-			full_seq: STRING_32
+			l_full_seq: STRING_32
 			i: INTEGER
 		do
 			create full_seq.make (a_seq.count + 1)
@@ -386,7 +386,7 @@ feature {NONE} -- Implementation
 		require
 			style_exists: a_s /= Void
 		local
-			codes: STRING
+			l_codes: STRING
 		do
 			create codes.make_empty
 
@@ -435,9 +435,9 @@ feature {NONE} -- Implementation
 			-- Read and parse input event.
 		local
 			key_code, char_code, ctrl_keys: INTEGER
-			event_type: INTEGER
+			l_event_type: INTEGER
 			x, y, button_state, event_flags: INTEGER
-			mouse_type: INTEGER
+			l_mouse_type: INTEGER
 		do
 			c_read_console_input (stdin_handle, $event_type, $key_code, $char_code, $ctrl_keys, $x, $y, $button_state, $event_flags)
 

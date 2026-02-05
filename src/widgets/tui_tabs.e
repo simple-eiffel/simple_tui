@@ -143,7 +143,7 @@ feature -- Modification
 		require
 			valid_index: a_index >= 1 and a_index <= tabs.count
 		local
-			tab_content: TUI_WIDGET
+			l_tab_content: TUI_WIDGET
 		do
 			tab_content := tabs.i_th (a_index).content
 			remove_child (tab_content)
@@ -310,9 +310,9 @@ feature -- Rendering
 			render_tab_bar (a_buffer, ax, ay)
 
 			-- Render selected content
-			if attached selected_content as content then
-				if content.is_visible then
-					content.render (a_buffer)
+			if attached selected_content as al_content then
+				if al_content.is_visible then
+					al_content.render (a_buffer)
 				end
 			end
 		end
@@ -372,8 +372,8 @@ feature {NONE} -- Implementation
 			-- Render the tab bar.
 		local
 			i, tab_x: INTEGER
-			tab_title: STRING_32
-			tab_style: TUI_STYLE
+			l_tab_title: STRING_32
+			l_tab_style: TUI_STYLE
 		do
 			tab_x := tx
 			from i := 1 until i > tabs.count loop

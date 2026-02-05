@@ -207,9 +207,9 @@ feature -- Rendering
 			-- Render checkbox to buffer.
 		local
 			ax, ay: INTEGER
-			current_style: TUI_STYLE
-			display: STRING_32
-			check_char: CHARACTER_32
+			l_current_style: TUI_STYLE
+			l_display: STRING_32
+			l_check_char: CHARACTER_32
 		do
 			ax := absolute_x
 			ay := absolute_y

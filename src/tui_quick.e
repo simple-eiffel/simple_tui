@@ -96,7 +96,7 @@ feature -- Widget Access
 	text_field_named (a_name: READABLE_STRING_GENERAL): detachable TUI_TEXT_FIELD
 			-- Get text field by name.
 		do
-			if attached {TUI_TEXT_FIELD} widget (a_name) as tf then
+			if attached {TUI_TEXT_FIELD} widget (a_name) as al_tf then
 				Result := tf
 			end
 		end
@@ -104,7 +104,7 @@ feature -- Widget Access
 	list_named (a_name: READABLE_STRING_GENERAL): detachable TUI_LIST
 			-- Get list by name.
 		do
-			if attached {TUI_LIST} widget (a_name) as l then
+			if attached {TUI_LIST} widget (a_name) as al_l then
 				Result := l
 			end
 		end
@@ -157,10 +157,10 @@ feature -- Menu Building
 		local
 			l_item: TUI_MENU_ITEM
 		do
-			if attached current_menu as m then
+			if attached current_menu as al_m then
 				create l_item.make_with_text (a_label)
 				l_item.set_on_select (a_action)
-				m.add_item (l_item)
+				al_m.add_item (l_item)
 			end
 			Result := Current
 		ensure
@@ -170,8 +170,8 @@ feature -- Menu Building
 	separator: TUI_QUICK
 			-- Add separator to current menu.
 		do
-			if attached current_menu as m then
-				m.add_separator
+			if attached current_menu as al_m then
+				al_m.add_separator
 			end
 			Result := Current
 		ensure
@@ -183,7 +183,7 @@ feature -- Layout Building
 	vbox: TUI_QUICK
 			-- Start a vertical box container.
 		local
-			box: TUI_VBOX
+			l_box: TUI_VBOX
 		do
 			create box.make (80, 25)
 			box.set_gap (1)
@@ -199,7 +199,7 @@ feature -- Layout Building
 	hbox: TUI_QUICK
 			-- Start a horizontal box container.
 		local
-			box: TUI_HBOX
+			l_box: TUI_HBOX
 		do
 			create box.make (80, 1)
 			box.set_gap (2)
@@ -219,10 +219,10 @@ feature -- Layout Building
 				container_stack.finish
 				container_stack.remove
 				container_stack.finish
-				if attached {TUI_VBOX} container_stack.item as v then
+				if attached {TUI_VBOX} container_stack.item as al_v then
 					current_vbox := v
 					current_hbox := Void
-				elseif attached {TUI_HBOX} container_stack.item as h then
+				elseif attached {TUI_HBOX} container_stack.item as al_h then
 					current_hbox := h
 					current_vbox := Void
 				end
@@ -235,10 +235,10 @@ feature -- Layout Building
 	gap (a_size: INTEGER): TUI_QUICK
 			-- Set gap for current container.
 		do
-			if attached current_vbox as box then
-				box.set_gap (a_size)
-			elseif attached current_hbox as box then
-				box.set_gap (a_size)
+			if attached current_vbox as al_box then
+				al_box.set_gap (a_size)
+			elseif attached current_hbox as al_box then
+				al_box.set_gap (a_size)
 			end
 			Result := Current
 		ensure
@@ -250,7 +250,7 @@ feature -- Widget Factory
 	label (a_text: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a label widget.
 		local
-			l: TUI_LABEL
+			l_l: TUI_LABEL
 		do
 			create l.make_with_text (a_text)
 			add_to_current (l)
@@ -264,7 +264,7 @@ feature -- Widget Factory
 	button (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): TUI_QUICK
 			-- Add a button widget.
 		local
-			b: TUI_BUTTON
+			l_b: TUI_BUTTON
 		do
 			create b.make (a_label)
 			b.click_actions.extend (a_action)
@@ -279,7 +279,7 @@ feature -- Widget Factory
 	text_field (a_placeholder: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a text field widget.
 		local
-			tf: TUI_TEXT_FIELD
+			l_tf: TUI_TEXT_FIELD
 		do
 			create tf.make (20)
 			-- placeholder could be shown when empty
@@ -294,7 +294,7 @@ feature -- Widget Factory
 	password_field (a_placeholder: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a password field widget.
 		local
-			tf: TUI_TEXT_FIELD
+			l_tf: TUI_TEXT_FIELD
 		do
 			create tf.make (20)
 			tf.set_password (True)
@@ -309,7 +309,7 @@ feature -- Widget Factory
 	checkbox (a_label: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a checkbox widget.
 		local
-			cb: TUI_CHECKBOX
+			l_cb: TUI_CHECKBOX
 		do
 			create cb.make (a_label)
 			add_to_current (cb)
@@ -323,7 +323,7 @@ feature -- Widget Factory
 	list_box (a_height: INTEGER): TUI_QUICK
 			-- Add a list widget.
 		local
-			l: TUI_LIST
+			l_l: TUI_LIST
 		do
 			create l.make (30, a_height)
 			add_to_current (l)
@@ -337,7 +337,7 @@ feature -- Widget Factory
 	progress_bar (a_width: INTEGER): TUI_QUICK
 			-- Add a progress bar widget.
 		local
-			p: TUI_PROGRESS
+			l_p: TUI_PROGRESS
 		do
 			create p.make (a_width)
 			add_to_current (p)
@@ -353,7 +353,7 @@ feature -- Naming
 	named (a_name: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Name the last created widget for later retrieval.
 		do
-			if attached last_widget as w then
+			if attached last_widget as al_w then
 				named_widgets.force (w, a_name.to_string_32)
 			end
 			Result := Current
@@ -366,8 +366,8 @@ feature -- Screen Info
 	screen_width: INTEGER
 			-- Current screen width.
 		do
-			if attached app.backend as b then
-				Result := b.width
+			if attached app.backend as al_b then
+				Result := al_b.width
 			else
 				Result := 80
 			end
@@ -376,8 +376,8 @@ feature -- Screen Info
 	screen_height: INTEGER
 			-- Current screen height.
 		do
-			if attached app.backend as b then
-				Result := b.height
+			if attached app.backend as al_b then
+				Result := al_b.height
 			else
 				Result := 25
 			end
@@ -402,11 +402,11 @@ feature -- Modal Dialogs
 	show_message (a_title, a_message: READABLE_STRING_GENERAL)
 			-- Show a message box with OK button.
 		local
-			msg: TUI_MESSAGE_BOX
+			l_msg: TUI_MESSAGE_BOX
 		do
 			create msg.make_ok (a_title, a_message)
-			if attached app.backend as b then
-				msg.show_centered (b.width, b.height)
+			if attached app.backend as al_b then
+				msg.show_centered (al_b.width, al_b.height)
 			end
 			app.set_modal (msg)
 			-- Note: Modal will be cleared when message box closes
@@ -416,11 +416,11 @@ feature -- Modal Dialogs
 	show_confirm (a_title, a_message: READABLE_STRING_GENERAL; a_on_result: PROCEDURE [BOOLEAN])
 			-- Show a Yes/No confirmation dialog.
 		local
-			msg: TUI_MESSAGE_BOX
+			l_msg: TUI_MESSAGE_BOX
 		do
 			create msg.make_yes_no (a_title, a_message)
-			if attached app.backend as b then
-				msg.show_centered (b.width, b.height)
+			if attached app.backend as al_b then
+				msg.show_centered (al_b.width, al_b.height)
 			end
 			app.set_modal (msg)
 			msg.set_on_close (agent on_confirm_closed (?, a_on_result))
@@ -446,10 +446,10 @@ feature {NONE} -- Implementation
 	add_to_current (a_w: TUI_WIDGET)
 			-- Add widget to current container.
 		do
-			if attached current_vbox as box then
-				box.add_child (a_w)
-			elseif attached current_hbox as box then
-				box.add_child (a_w)
+			if attached current_vbox as al_box then
+				al_box.add_child (a_w)
+			elseif attached current_hbox as al_box then
+				al_box.add_child (a_w)
 			end
 		end
 

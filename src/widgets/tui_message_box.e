@@ -384,7 +384,7 @@ feature -- Rendering
 			-- Render message box to buffer.
 		local
 			ax, ay, i, j, inner_width, bx, btn_width: INTEGER
-			line: STRING_32
+			l_line: STRING_32
 		do
 			if is_visible then
 				ax := absolute_x
@@ -479,7 +479,7 @@ feature {NONE} -- Implementation
 	update_size
 			-- Update width based on title, message, and buttons.
 		local
-			min_width: INTEGER
+			l_min_width: INTEGER
 		do
 			-- Minimum width for title (+ borders + padding)
 			min_width := title.count + 6
@@ -508,8 +508,8 @@ feature {NONE} -- Implementation
 	render_button (a_buffer: TUI_BUFFER; bx, by, index: INTEGER)
 			-- Render button at position.
 		local
-			btn_text: STRING_32
-			btn_style: TUI_STYLE
+			l_btn_text: STRING_32
+			l_btn_style: TUI_STYLE
 		do
 			create btn_text.make (10)
 			btn_text.append ("[ ")

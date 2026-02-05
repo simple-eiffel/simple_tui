@@ -128,7 +128,7 @@ feature -- Modification
 			button_exists: a_button /= Void
 			in_group: buttons.has (a_button)
 		local
-			idx: INTEGER
+			l_idx: INTEGER
 		do
 			idx := buttons.index_of (a_button, 1)
 			buttons.prune_all (a_button)
@@ -210,7 +210,7 @@ feature -- Layout
 			-- Position buttons vertically or horizontally.
 		local
 			i, pos: INTEGER
-			btn: TUI_RADIO_BUTTON
+			l_btn: TUI_RADIO_BUTTON
 		do
 			pos := 1
 			from i := 1 until i > buttons.count loop
