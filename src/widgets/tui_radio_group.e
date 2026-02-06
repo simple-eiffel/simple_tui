@@ -130,14 +130,14 @@ feature -- Modification
 		local
 			l_idx: INTEGER
 		do
-			idx := buttons.index_of (a_button, 1)
+			l_idx := buttons.index_of (a_button, 1)
 			buttons.prune_all (a_button)
 			a_button.set_group (Void)
 			remove_child (a_button)
 			-- Adjust selection
-			if selected_index = idx then
+			if selected_index = l_idx then
 				selected_index := 0
-			elseif selected_index > idx then
+			elseif selected_index > l_idx then
 				selected_index := selected_index - 1
 			end
 		ensure
@@ -214,12 +214,12 @@ feature -- Layout
 		do
 			pos := 1
 			from i := 1 until i > buttons.count loop
-				btn := buttons.i_th (i)
+				l_btn := buttons.i_th (i)
 				if is_horizontal then
-					btn.set_position (pos, 1)
-					pos := pos + btn.preferred_width + gap
+					l_btn.set_position (pos, 1)
+					pos := pos + l_btn.preferred_width + gap
 				else
-					btn.set_position (1, pos)
+					l_btn.set_position (1, pos)
 					pos := pos + 1 + gap
 				end
 				i := i + 1

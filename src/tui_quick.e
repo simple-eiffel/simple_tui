@@ -97,7 +97,7 @@ feature -- Widget Access
 			-- Get text field by name.
 		do
 			if attached {TUI_TEXT_FIELD} widget (a_name) as al_tf then
-				Result := tf
+				Result := l_tf
 			end
 		end
 
@@ -105,7 +105,7 @@ feature -- Widget Access
 			-- Get list by name.
 		do
 			if attached {TUI_LIST} widget (a_name) as al_l then
-				Result := l
+				Result := l_l
 			end
 		end
 
@@ -139,7 +139,7 @@ feature -- Application
 
 feature -- Menu Building
 
-	menu (a_title: READABLE_STRING_GENERAL): TUI_QUICK
+	l_menu (a_title: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a menu to the menu bar.
 		local
 			l_menu: TUI_MENU
@@ -152,7 +152,7 @@ feature -- Menu Building
 			result_is_current: Result = Current
 		end
 
-	item (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): TUI_QUICK
+	l_item (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): TUI_QUICK
 			-- Add item to current menu.
 		local
 			l_item: TUI_MENU_ITEM
@@ -185,11 +185,11 @@ feature -- Layout Building
 		local
 			l_box: TUI_VBOX
 		do
-			create box.make (80, 25)
-			box.set_gap (1)
-			add_to_current (box)
-			container_stack.extend (box)
-			current_vbox := box
+			create l_box.make (80, 25)
+			l_box.set_gap (1)
+			add_to_current (l_box)
+			container_stack.extend (l_box)
+			current_vbox := l_box
 			current_hbox := Void
 			Result := Current
 		ensure
@@ -201,11 +201,11 @@ feature -- Layout Building
 		local
 			l_box: TUI_HBOX
 		do
-			create box.make (80, 1)
-			box.set_gap (2)
-			add_to_current (box)
-			container_stack.extend (box)
-			current_hbox := box
+			create l_box.make (80, 1)
+			l_box.set_gap (2)
+			add_to_current (l_box)
+			container_stack.extend (l_box)
+			current_hbox := l_box
 			current_vbox := Void
 			Result := Current
 		ensure
@@ -252,10 +252,10 @@ feature -- Widget Factory
 		local
 			l_l: TUI_LABEL
 		do
-			create l.make_with_text (a_text)
-			add_to_current (l)
-			last_widget := l
-			last_label := l
+			create l_l.make_with_text (a_text)
+			add_to_current (l_l)
+			last_widget := l_l
+			last_label := l_l
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -266,11 +266,11 @@ feature -- Widget Factory
 		local
 			l_b: TUI_BUTTON
 		do
-			create b.make (a_label)
-			b.click_actions.extend (a_action)
-			add_to_current (b)
-			last_widget := b
-			last_button := b
+			create l_b.make (a_label)
+			l_b.click_actions.extend (a_action)
+			add_to_current (l_b)
+			last_widget := l_b
+			last_button := l_b
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -281,11 +281,11 @@ feature -- Widget Factory
 		local
 			l_tf: TUI_TEXT_FIELD
 		do
-			create tf.make (20)
+			create l_tf.make (20)
 			-- placeholder could be shown when empty
-			add_to_current (tf)
-			last_widget := tf
-			last_text_field := tf
+			add_to_current (l_tf)
+			last_widget := l_tf
+			last_text_field := l_tf
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -296,11 +296,11 @@ feature -- Widget Factory
 		local
 			l_tf: TUI_TEXT_FIELD
 		do
-			create tf.make (20)
-			tf.set_password (True)
-			add_to_current (tf)
-			last_widget := tf
-			last_text_field := tf
+			create l_tf.make (20)
+			l_tf.set_password (True)
+			add_to_current (l_tf)
+			last_widget := l_tf
+			last_text_field := l_tf
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -311,10 +311,10 @@ feature -- Widget Factory
 		local
 			l_cb: TUI_CHECKBOX
 		do
-			create cb.make (a_label)
-			add_to_current (cb)
-			last_widget := cb
-			last_checkbox := cb
+			create l_cb.make (a_label)
+			add_to_current (l_cb)
+			last_widget := l_cb
+			last_checkbox := l_cb
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -325,10 +325,10 @@ feature -- Widget Factory
 		local
 			l_l: TUI_LIST
 		do
-			create l.make (30, a_height)
-			add_to_current (l)
-			last_widget := l
-			last_list := l
+			create l_l.make (30, a_height)
+			add_to_current (l_l)
+			last_widget := l_l
+			last_list := l_l
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -339,10 +339,10 @@ feature -- Widget Factory
 		local
 			l_p: TUI_PROGRESS
 		do
-			create p.make (a_width)
-			add_to_current (p)
-			last_widget := p
-			last_progress := p
+			create l_p.make (a_width)
+			add_to_current (l_p)
+			last_widget := l_p
+			last_progress := l_p
 			Result := Current
 		ensure
 			result_is_current: Result = Current
@@ -404,13 +404,13 @@ feature -- Modal Dialogs
 		local
 			l_msg: TUI_MESSAGE_BOX
 		do
-			create msg.make_ok (a_title, a_message)
+			create l_msg.make_ok (a_title, a_message)
 			if attached app.backend as al_b then
-				msg.show_centered (al_b.width, al_b.height)
+				l_msg.show_centered (al_b.width, al_b.height)
 			end
-			app.set_modal (msg)
+			app.set_modal (l_msg)
 			-- Note: Modal will be cleared when message box closes
-			msg.set_on_close (agent on_message_closed)
+			l_msg.set_on_close (agent on_message_closed)
 		end
 
 	show_confirm (a_title, a_message: READABLE_STRING_GENERAL; a_on_result: PROCEDURE [BOOLEAN])
@@ -418,12 +418,12 @@ feature -- Modal Dialogs
 		local
 			l_msg: TUI_MESSAGE_BOX
 		do
-			create msg.make_yes_no (a_title, a_message)
+			create l_msg.make_yes_no (a_title, a_message)
 			if attached app.backend as al_b then
-				msg.show_centered (al_b.width, al_b.height)
+				l_msg.show_centered (al_b.width, al_b.height)
 			end
-			app.set_modal (msg)
-			msg.set_on_close (agent on_confirm_closed (?, a_on_result))
+			app.set_modal (l_msg)
+			l_msg.set_on_close (agent on_confirm_closed (?, a_on_result))
 		end
 
 feature {NONE} -- Implementation

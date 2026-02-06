@@ -216,34 +216,34 @@ feature -- Rendering
 
 			-- Choose style
 			if is_focused then
-				current_style := focused_style
+				l_current_style := focused_style
 			else
-				current_style := normal_style
+				l_current_style := normal_style
 			end
 
 			-- Determine check character
 			if is_indeterminate then
-				check_char := indeterminate_char
+				l_check_char := indeterminate_char
 			elseif is_checked then
-				check_char := checked_char
+				l_check_char := checked_char
 			else
-				check_char := unchecked_char
+				l_check_char := unchecked_char
 			end
 
 			-- Build display string: [x] Label
-			create display.make (width)
-			display.append_character ('[')
-			display.append_character (check_char)
-			display.append_character (']')
-			display.append_character (' ')
-			display.append (label)
+			create l_display.make (width)
+			l_display.append_character ('[')
+			l_display.append_character (l_check_char)
+			l_display.append_character (']')
+			l_display.append_character (' ')
+			l_display.append (label)
 
 			-- Truncate if needed
-			if display.count > width then
-				display := display.substring (1, width)
+			if l_display.count > width then
+				l_display := l_display.substring (1, width)
 			end
 
-			a_buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, l_display, l_current_style)
 		end
 
 feature -- Event Handling

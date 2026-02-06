@@ -72,25 +72,25 @@ feature -- Layout
 			i: INTEGER
 		do
 			logger.debug_log ("VBOX.layout: children=" + children.count.out + " abs_x=" + absolute_x.out + " abs_y=" + absolute_y.out + " w=" + width.out + " h=" + height.out)
-			iw := inner_width
-			current_y := 1
+			l_iw := inner_width
+			l_current_y := 1
 
 			from i := 1 until i > children.count loop
 				-- Calculate X based on alignment
 				inspect align
 				when Align_left then
-					child_x := 1
+					l_child_x := 1
 				when Align_center then
-					child_x := ((iw - children.i_th (i).width) // 2) + 1
+					l_child_x := ((l_iw - children.i_th (i).width) // 2) + 1
 				when Align_right then
-					child_x := iw - children.i_th (i).width + 1
+					l_child_x := l_iw - children.i_th (i).width + 1
 				end
 
-				children.i_th (i).set_position (child_x.max (1), current_y)
-				logger.debug_log ("  child[" + i.out + "] pos=(" + child_x.max (1).out + "," + current_y.out + ") abs=(" + children.i_th (i).absolute_x.out + "," + children.i_th (i).absolute_y.out + ") h=" + children.i_th (i).height.out)
+				children.i_th (i).set_position (l_child_x.max (1), l_current_y)
+				logger.debug_log ("  child[" + i.out + "] pos=(" + l_child_x.max (1).out + "," + l_current_y.out + ") abs=(" + children.i_th (i).absolute_x.out + "," + children.i_th (i).absolute_y.out + ") h=" + children.i_th (i).height.out)
 				-- Recursively layout child
 				children.i_th (i).layout
-				current_y := current_y + children.i_th (i).height + gap
+				l_current_y := l_current_y + children.i_th (i).height + gap
 				i := i + 1
 			end
 		end

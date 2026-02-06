@@ -209,32 +209,32 @@ feature -- Rendering
 
 			-- Choose style
 			if is_focused then
-				current_style := focused_style
+				l_current_style := focused_style
 			else
-				current_style := normal_style
+				l_current_style := normal_style
 			end
 
 			-- Determine radio character
 			if is_selected then
-				radio_char := selected_char
+				l_radio_char := selected_char
 			else
-				radio_char := unselected_char
+				l_radio_char := unselected_char
 			end
 
 			-- Build display string: (o) Label
-			create display.make (width)
-			display.append_character ('(')
-			display.append_character (radio_char)
-			display.append_character (')')
-			display.append_character (' ')
-			display.append (label)
+			create l_display.make (width)
+			l_display.append_character ('(')
+			l_display.append_character (l_radio_char)
+			l_display.append_character (')')
+			l_display.append_character (' ')
+			l_display.append (label)
 
 			-- Truncate if needed
-			if display.count > width then
-				display := display.substring (1, width)
+			if l_display.count > width then
+				l_display := l_display.substring (1, width)
 			end
 
-			a_buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, l_display, l_current_style)
 		end
 
 feature -- Event Handling

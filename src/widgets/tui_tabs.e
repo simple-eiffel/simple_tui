@@ -145,8 +145,8 @@ feature -- Modification
 		local
 			l_tab_content: TUI_WIDGET
 		do
-			tab_content := tabs.i_th (a_index).content
-			remove_child (tab_content)
+			l_tab_content := tabs.i_th (a_index).content
+			remove_child (l_tab_content)
 			tabs.go_i_th (a_index)
 			tabs.remove
 			if selected_tab > tabs.count then
@@ -378,18 +378,18 @@ feature {NONE} -- Implementation
 			tab_x := tx
 			from i := 1 until i > tabs.count loop
 				if i = selected_tab then
-					tab_style := selected_tab_style
+					l_tab_style := selected_tab_style
 				else
-					tab_style := normal_tab_style
+					l_tab_style := normal_tab_style
 				end
 
 				-- Draw tab: [ Title ]
-				a_buffer.put_char (tab_x, ty, '[', tab_style)
-				tab_title := tabs.i_th (i).title
-				a_buffer.put_string (tab_x + 1, ty, tab_title, tab_style)
-				a_buffer.put_char (tab_x + 1 + tab_title.count, ty, ']', tab_style)
+				a_buffer.put_char (tab_x, ty, '[', l_tab_style)
+				l_tab_title := tabs.i_th (i).title
+				a_buffer.put_string (tab_x + 1, ty, l_tab_title, l_tab_style)
+				a_buffer.put_char (tab_x + 1 + l_tab_title.count, ty, ']', l_tab_style)
 
-				tab_x := tab_x + tab_title.count + 3
+				tab_x := tab_x + l_tab_title.count + 3
 				i := i + 1
 			end
 

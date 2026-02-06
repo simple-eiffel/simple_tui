@@ -3,7 +3,7 @@ note
 		TUI_LABEL - Static text display widget
 
 		Features:
-		- Single or multi-line text
+		- Single or multi-l_line text
 		- Text alignment (left, center, right)
 		- Word wrapping (optional)
 	]"
@@ -117,32 +117,32 @@ feature -- Rendering
 			logger.debug_log ("LABEL.render: text=%"" + {UTF_CONVERTER}.utf_32_string_to_utf_8_string_8 (text) + "%" ax=" + ax.out + " ay=" + ay.out + " buf_h=" + a_buffer.height.out)
 
 			if wrap then
-				lines := wrapped_lines
+				l_lines := wrapped_lines
 			else
-				create {ARRAYED_LIST [STRING_32]} lines.make (1)
-				lines.extend (text)
+				create {ARRAYED_LIST [STRING_32]} l_lines.make (1)
+				l_lines.extend (text)
 			end
 
 			row := 0
-			from i := 1 until i > lines.count loop
+			from i := 1 until i > l_lines.count loop
 				if row < height then
-					line := lines.i_th (i)
+					l_line := l_lines.i_th (i)
 
 					-- Calculate X based on alignment
 					inspect align
 					when Align_left then
 						draw_x := ax
 					when Align_center then
-						draw_x := ax + ((width - line.count) // 2).max (0)
+						draw_x := ax + ((width - l_line.count) // 2).max (0)
 					when Align_right then
-						draw_x := ax + (width - line.count).max (0)
+						draw_x := ax + (width - l_line.count).max (0)
 					end
 
 					-- Draw line (truncate if needed)
-					if line.count > width then
-						line := line.substring (1, width)
+					if l_line.count > width then
+						l_line := l_line.substring (1, width)
 					end
-					a_buffer.put_string (draw_x, ay + row, line, style)
+					a_buffer.put_string (draw_x, ay + row, l_line, style)
 
 					row := row + 1
 				end
@@ -179,7 +179,7 @@ feature {NONE} -- Implementation
 		do
 			if attached {READABLE_STRING_8} a_s as al_s8 then
 				create l_converter
-				Result := l_converter.utf_8_string_8_to_string_32 (s8)
+				Result := l_converter.utf_8_string_8_to_string_32 (al_s8)
 			else
 				Result := a_s.to_string_32
 			end
@@ -198,26 +198,26 @@ feature {NONE} -- Implementation
 			if width <= 0 then
 				Result.extend (text)
 			else
-				words := text.split (' ')
-				create current_line.make_empty
+				l_words := text.split (' ')
+				create l_current_line.make_empty
 
-				from i := 1 until i > words.count loop
-					word := words.i_th (i)
+				from i := 1 until i > l_words.count loop
+					l_word := l_words.i_th (i)
 
-					if current_line.is_empty then
-						current_line := word.twin
-					elseif current_line.count + 1 + word.count <= width then
-						current_line.append_character (' ')
-						current_line.append (word)
+					if l_current_line.is_empty then
+						l_current_line := l_word.twin
+					elseif l_current_line.count + 1 + l_word.count <= width then
+						l_current_line.append_character (' ')
+						l_current_line.append (l_word)
 					else
-						Result.extend (current_line)
-						current_line := word.twin
+						Result.extend (l_current_line)
+						l_current_line := l_word.twin
 					end
 					i := i + 1
 				end
 
-				if not current_line.is_empty then
-					Result.extend (current_line)
+				if not l_current_line.is_empty then
+					Result.extend (l_current_line)
 				end
 			end
 

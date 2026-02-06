@@ -1,6 +1,6 @@
 note
 	description: "[
-		TASK_AI_ROUTER - AI Router for Task Manager with RAG pattern.
+		TASK_AI_ROUTER - AI Router for Task Manager with RAG l_pattern.
 
 		Provides AI-enhanced features with graceful degradation:
 		- Parse natural language into tasks
@@ -9,7 +9,7 @@ note
 		- Resolve blocked tasks
 		- All features work without AI (manual fallback)
 
-		Based on 4-phase RAG pattern from simple_kb:
+		Based on 4-phase RAG l_pattern from simple_kb:
 		Phase 1: Extract keywords/intent from query
 		Phase 2: Search for similar past tasks
 		Phase 3: If found, synthesize from context
@@ -145,8 +145,8 @@ feature -- Subtask Suggestions
 					-- Build similar task context
 					create l_similar_titles.make (5)
 					if attached a_similar as al_similar then
-						across similar as s loop
-							l_similar_titles.extend (s.title)
+						across similar as l_s loop
+							l_similar_titles.extend (l_s.title)
 						end
 					end
 					-- Get description or empty string
@@ -155,7 +155,7 @@ feature -- Subtask Suggestions
 					else
 						l_desc := ""
 					end
-					l_response := client.ask_with_system (
+					l_response := l_client.ask_with_system (
 						prompts.suggest_subtasks_system (ai_config.active_provider).to_string_32,
 						prompts.suggest_subtasks_user (a_task.title, l_desc, l_similar_titles).to_string_32
 					)
@@ -196,7 +196,7 @@ feature -- Block Resolution
 						l_blockers_text.append ("%N")
 					end
 
-					l_response := client.ask_with_system (
+					l_response := l_client.ask_with_system (
 						prompts.resolve_block_system (ai_config.active_provider).to_string_32,
 						prompts.resolve_block_user (a_blocked.title, l_blockers_text).to_string_32
 					)
@@ -263,7 +263,7 @@ feature -- Task Splitting
 					else
 						l_desc := ""
 					end
-					l_response := client.ask_with_system (
+					l_response := l_client.ask_with_system (
 						prompts.split_task_system (ai_config.active_provider).to_string_32,
 						prompts.split_task_user (a_task.title, l_desc).to_string_32
 					)
@@ -314,8 +314,8 @@ feature {NONE} -- Response Parsing
 			l_title := ""
 			l_priority := 3
 			l_lines := a_response.split ('%N')
-			across l_lines as line loop
-				l_line := line.twin
+			across l_lines as l_line loop
+				l_line := l_line.twin
 				l_line.left_adjust
 				if l_line.as_upper.starts_with ("TITLE:") then
 					l_title := l_line.substring (7, l_line.count)
@@ -348,8 +348,8 @@ feature {NONE} -- Response Parsing
 		do
 			create Result.make (5)
 			l_lines := a_response.split ('%N')
-			across l_lines as line loop
-				l_line := line.twin
+			across l_lines as l_line loop
+				l_line := l_line.twin
 				l_line.left_adjust
 				-- Match numbered items: "1. Do something" or "1) Do something"
 				if l_line.count > 2 then
@@ -382,8 +382,8 @@ feature {NONE} -- Response Parsing
 		do
 			create Result.make
 			l_lines := a_response.split ('%N')
-			across l_lines as line loop
-				l_line := line.twin
+			across l_lines as l_line loop
+				l_line := l_line.twin
 				l_line.left_adjust
 				if l_line.as_upper.starts_with ("WORK_ON:") then
 					Result.set_recommendation ("work_around")

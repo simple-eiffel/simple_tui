@@ -298,34 +298,34 @@ feature -- Rendering
 
 			-- Choose style
 			if is_focused then
-				current_style := focused_style
+				l_current_style := focused_style
 			else
-				current_style := normal_style
+				l_current_style := normal_style
 			end
 
 			-- Build display: [Selected Item   v]
-			create display.make (width)
+			create l_display.make (width)
 			if attached selected_text as al_sel then
-				display.append (sel)
+				l_display.append (sel)
 			else
-				display.append ("-")
+				l_display.append ("-")
 			end
 
 			-- Pad and add dropdown indicator
-			from until display.count >= width - 2 loop
-				display.append_character (' ')
+			from until l_display.count >= width - 2 loop
+				l_display.append_character (' ')
 			end
-			if display.count > width - 2 then
-				display := display.substring (1, width - 2)
+			if l_display.count > width - 2 then
+				l_display := l_display.substring (1, width - 2)
 			end
-			display.append_character (' ')
+			l_display.append_character (' ')
 			if is_expanded then
-				display.append_character ('%/0x25B2/')  -- Up arrow
+				l_display.append_character ('%/0x25B2/')  -- Up arrow
 			else
-				display.append_character ('%/0x25BC/')  -- Down arrow
+				l_display.append_character ('%/0x25BC/')  -- Down arrow
 			end
 
-			a_buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, l_display, l_current_style)
 
 			-- Render dropdown if expanded
 			if is_expanded then
@@ -420,25 +420,25 @@ feature {NONE} -- Implementation
 		do
 			draw_y := 0
 			from i := dropdown_scroll + 1 until draw_y >= visible_item_count or i > items.count loop
-				item_text := items.i_th (i)
+				l_item_text := items.i_th (i)
 
 				-- Pad to width
-				create item_text.make_from_string (item_text)
-				from until item_text.count >= width loop
-					item_text.append_character (' ')
+				create l_item_text.make_from_string (l_item_text)
+				from until l_item_text.count >= width loop
+					l_item_text.append_character (' ')
 				end
-				if item_text.count > width then
-					item_text := item_text.substring (1, width)
+				if l_item_text.count > width then
+					l_item_text := l_item_text.substring (1, width)
 				end
 
 				-- Choose style
 				if i = selected_index then
-					item_style := selected_item_style
+					l_item_style := selected_item_style
 				else
-					item_style := dropdown_style
+					l_item_style := dropdown_style
 				end
 
-				a_buffer.put_string (dx, dy + draw_y, item_text, item_style)
+				a_buffer.put_string (dx, dy + draw_y, l_item_text, l_item_style)
 				draw_y := draw_y + 1
 				i := i + 1
 			end

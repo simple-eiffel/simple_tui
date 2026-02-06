@@ -79,7 +79,7 @@ feature -- Access
 	title: STRING_32
 			-- Dialog title.
 
-	fields: ARRAYED_LIST [TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]]
+	fields: ARRAYED_LIST [TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; l_options: detachable ARRAYED_LIST [STRING_32]]]
 			-- Field definitions.
 
 	field_values: HASH_TABLE [STRING_32, STRING_32]
@@ -269,7 +269,7 @@ feature -- Display
 		local
 			cx, cy: INTEGER
 		do
-			cx := (screen_width - width) // 2 + 1
+			cx := (screen_width - l_width) // 2 + 1
 			cy := (screen_height - height) // 2 + 1
 			-- Clamp to valid position (at least 1)
 			cx := cx.max (1)
@@ -398,7 +398,7 @@ feature -- Event Handling
 					-- Check button clicks
 					button_row := ay + height - 2
 					if a_event.mouse_y = button_row then
-						bx := ax + (width - 20) // 2  -- Approximate button area
+						bx := ax + (l_width - 20) // 2  -- Approximate button area
 						button_focused := True
 						if a_event.mouse_x < bx + 8 then
 							selected_button := 1
@@ -433,24 +433,24 @@ feature -- Rendering
 				ay := absolute_y
 
 				-- Top border with title
-				create line.make (width)
-				line.append_character ('%/0x250C/')  -- ┌
-				line.append_character ('%/0x2500/')  -- ─
-				line.append_character (' ')
-				line.append (title)
-				line.append_character (' ')
-				from j := line.count until j >= width - 1 loop
-					line.append_character ('%/0x2500/')  -- ─
+				create l_line.make (l_width)
+				l_line.append_character ('%/0x250C/')  -- ┌
+				l_line.append_character ('%/0x2500/')  -- ─
+				l_line.append_character (' ')
+				l_line.append (title)
+				l_line.append_character (' ')
+				from j := l_line.count until j >= l_width - 1 loop
+					l_line.append_character ('%/0x2500/')  -- ─
 					j := j + 1
 				end
-				line.append_character ('%/0x2510/')  -- ┐
-				a_buffer.put_string (ax, ay, line, border_style)
+				l_line.append_character ('%/0x2510/')  -- ┐
+				a_buffer.put_string (ax, ay, l_line, border_style)
 
 				-- Render each field
 				row := 1
 				from i := 1 until i > fields.count loop
-					f := fields.i_th (i)
-					render_field_row (a_buffer, ax, ay + row, i, f)
+					l_f := fields.i_th (i)
+					render_field_row (a_buffer, ax, ay + row, i, l_f)
 					row := row + 1
 					i := i + 1
 				end
@@ -464,14 +464,14 @@ feature -- Rendering
 				row := row + 1
 
 				-- Bottom border
-				create line.make (width)
-				line.append_character ('%/0x2514/')  -- └
-				from j := 1 until j >= width - 1 loop
-					line.append_character ('%/0x2500/')  -- ─
+				create l_line.make (l_width)
+				l_line.append_character ('%/0x2514/')  -- └
+				from j := 1 until j >= l_width - 1 loop
+					l_line.append_character ('%/0x2500/')  -- ─
 					j := j + 1
 				end
-				line.append_character ('%/0x2518/')  -- ┘
-				a_buffer.put_string (ax, ay + row, line, border_style)
+				l_line.append_character ('%/0x2518/')  -- ┘
+				a_buffer.put_string (ax, ay + row, l_line, border_style)
 			end
 		end
 
@@ -480,7 +480,7 @@ feature -- Queries
 	preferred_width: INTEGER
 			-- Preferred width based on content.
 		do
-			Result := width
+			Result := l_width
 		end
 
 	preferred_height: INTEGER
@@ -505,9 +505,9 @@ feature {NONE} -- Implementation
 			max_label := 0
 			max_field := 0
 			from i := 1 until i > fields.count loop
-				f := fields.i_th (i)
-				max_label := max_label.max (f.label.count)
-				max_field := max_field.max (f.field_width)
+				l_f := fields.i_th (i)
+				max_label := max_label.max (l_f.label.count)
+				max_field := max_field.max (l_f.field_width)
 				i := i + 1
 			end
 			label_width := max_label + 2  -- Label + ": "
@@ -521,7 +521,7 @@ feature {NONE} -- Implementation
 			-- Width for buttons ([ OK ] [ Cancel ])
 			min_width := min_width.max (24)
 
-			width := min_width.max (30)
+			l_width := min_width.max (30)
 
 			-- Height: border + fields + empty + buttons + border
 			height := 2 + fields.count + 2
@@ -552,22 +552,22 @@ feature {NONE} -- Implementation
 			l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]
 		do
 			if focused_field > 0 and focused_field <= fields.count then
-				f := fields.i_th (focused_field)
-				if f.field_type = Field_type_combo then
-					Result := handle_combo_key (a_event, f)
+				l_f := fields.i_th (focused_field)
+				if l_f.field_type = Field_type_combo then
+					Result := handle_combo_key (a_event, l_f)
 				else
-					Result := handle_text_key (a_event, f)
+					Result := handle_text_key (a_event, l_f)
 				end
 			end
 		end
 
-	handle_text_key (a_event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
+	handle_text_key (a_event: TUI_EVENT; l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; l_options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
 			-- Handle key for text field.
 		local
 			l_val: STRING_32
 			l_char: CHARACTER_32
 		do
-			if attached field_values.item (f.name) as al_current_val then
+			if attached field_values.item (l_f.name) as al_current_val then
 				l_val := current_val
 			else
 				create l_val.make_empty
@@ -576,7 +576,7 @@ feature {NONE} -- Implementation
 			if a_event.is_backspace then
 				if not l_val.is_empty then
 					l_val.remove_tail (1)
-					field_values.force (l_val, f.name)
+					field_values.force (l_val, l_f.name)
 				end
 				Result := True
 			elseif a_event.is_enter then
@@ -588,28 +588,28 @@ feature {NONE} -- Implementation
 				-- Only accept printable characters
 				if l_char.natural_32_code >= 32 then
 					-- For number fields, only accept digits
-					if f.field_type = Field_type_number then
+					if l_f.field_type = Field_type_number then
 						if l_char.is_digit then
 							l_val.append_character (l_char)
-							field_values.force (l_val, f.name)
+							field_values.force (l_val, l_f.name)
 						end
 					else
 						l_val.append_character (l_char)
-						field_values.force (l_val, f.name)
+						field_values.force (l_val, l_f.name)
 					end
 				end
 				Result := True
 			end
 		end
 
-	handle_combo_key (a_event: TUI_EVENT; f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
+	handle_combo_key (a_event: TUI_EVENT; l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; l_options: detachable ARRAYED_LIST [STRING_32]]): BOOLEAN
 			-- Handle key for combo box field.
 		local
 			l_current: STRING_32
 			l_index, l_new_index: INTEGER
 		do
-			if attached f.options as opts and then not opts.is_empty then
-				l_current := get_field_value (f.name)
+			if attached l_f.options as opts and then not opts.is_empty then
+				l_current := get_field_value (l_f.name)
 				l_index := opts.index_of (l_current, 1)
 				if l_index = 0 then
 					l_index := 1
@@ -620,14 +620,14 @@ feature {NONE} -- Implementation
 					if l_new_index < 1 then
 						l_new_index := opts.count
 					end
-					field_values.force (opts.i_th (l_new_index), f.name)
+					field_values.force (opts.i_th (l_new_index), l_f.name)
 					Result := True
 				elseif a_event.is_down or a_event.is_right or a_event.is_space then
 					l_new_index := l_index + 1
 					if l_new_index > opts.count then
 						l_new_index := 1
 					end
-					field_values.force (opts.i_th (l_new_index), f.name)
+					field_values.force (opts.i_th (l_new_index), l_f.name)
 					Result := True
 				elseif a_event.is_enter then
 					submit
@@ -636,8 +636,8 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	render_field_row (a_buffer: TUI_BUFFER; ax, ay, index: INTEGER;
-			f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; options: detachable ARRAYED_LIST [STRING_32]])
+	render_field_row (a_buffer: TUI_BUFFER; ax, ay, l_index: INTEGER;
+			l_f: TUPLE [name: STRING_32; label: STRING_32; field_type: INTEGER; field_width: INTEGER; l_options: detachable ARRAYED_LIST [STRING_32]])
 			-- Render a field row.
 		local
 			line, field_display: STRING_32
@@ -645,57 +645,57 @@ feature {NONE} -- Implementation
 			l_field_x: INTEGER
 		do
 			-- Left border and label
-			create line.make (width)
-			line.append_character ('%/0x2502/')  -- │
-			line.append_character (' ')
-			line.append (f.label)
+			create l_line.make (l_width)
+			l_line.append_character ('%/0x2502/')  -- │
+			l_line.append_character (' ')
+			l_line.append (l_f.label)
 			-- Pad label to label_width
-			from until line.count >= label_width + 1 loop
-				line.append_character (' ')
+			from until l_line.count >= label_width + 1 loop
+				l_line.append_character (' ')
 			end
 
 			-- Get field value
-			if attached field_values.item (f.name) as al_v then
+			if attached field_values.item (l_f.name) as al_v then
 				field_display := al_v.twin
 			else
 				create field_display.make_empty
 			end
 
 			-- Pad/truncate field display
-			from until field_display.count >= f.field_width loop
+			from until field_display.count >= l_f.field_width loop
 				field_display.append_character (' ')
 			end
-			if field_display.count > f.field_width then
-				field_display := field_display.substring (1, f.field_width)
+			if field_display.count > l_f.field_width then
+				field_display := field_display.substring (1, l_f.field_width)
 			end
 
 			-- Add combo indicator if combo
-			if f.field_type = Field_type_combo then
+			if l_f.field_type = Field_type_combo then
 				field_display.append (" v")
 			end
 
 			-- Pad rest of line
-			field_x := line.count
-			line.append (field_display)
-			from until line.count >= width - 1 loop
-				line.append_character (' ')
+			l_field_x := l_line.count
+			l_line.append (field_display)
+			from until l_line.count >= l_width - 1 loop
+				l_line.append_character (' ')
 			end
-			line.append_character ('%/0x2502/')  -- │
+			l_line.append_character ('%/0x2502/')  -- │
 
 			-- Render line with label style
-			a_buffer.put_string (ax, ay, line, label_style)
+			a_buffer.put_string (ax, ay, l_line, label_style)
 
 			-- Render borders
 			a_buffer.put_char (ax, ay, '%/0x2502/', border_style)
-			a_buffer.put_char (ax + width - 1, ay, '%/0x2502/', border_style)
+			a_buffer.put_char (ax + l_width - 1, ay, '%/0x2502/', border_style)
 
 			-- Render field value with field style
-			if not button_focused and index = focused_field then
-				current_style := field_focused_style
+			if not button_focused and l_index = focused_field then
+				l_current_style := field_focused_style
 			else
-				current_style := field_style
+				l_current_style := field_style
 			end
-			a_buffer.put_string (ax + field_x, ay, field_display, current_style)
+			a_buffer.put_string (ax + l_field_x, ay, field_display, l_current_style)
 		end
 
 	render_empty_row (a_buffer: TUI_BUFFER; ax, ay: INTEGER)
@@ -704,14 +704,14 @@ feature {NONE} -- Implementation
 			l_line: STRING_32
 			j: INTEGER
 		do
-			create line.make (width)
-			line.append_character ('%/0x2502/')  -- │
-			from j := 1 until j >= width - 1 loop
-				line.append_character (' ')
+			create l_line.make (l_width)
+			l_line.append_character ('%/0x2502/')  -- │
+			from j := 1 until j >= l_width - 1 loop
+				l_line.append_character (' ')
 				j := j + 1
 			end
-			line.append_character ('%/0x2502/')  -- │
-			a_buffer.put_string (ax, ay, line, border_style)
+			l_line.append_character ('%/0x2502/')  -- │
+			a_buffer.put_string (ax, ay, l_line, border_style)
 		end
 
 	render_button_row (a_buffer: TUI_BUFFER; ax, ay: INTEGER)
@@ -740,17 +740,17 @@ feature {NONE} -- Implementation
 			end
 
 			-- Render empty row first
-			create line.make (width)
-			line.append_character ('%/0x2502/')  -- │
-			from j := 1 until j >= width - 1 loop
-				line.append_character (' ')
+			create l_line.make (l_width)
+			l_line.append_character ('%/0x2502/')  -- │
+			from j := 1 until j >= l_width - 1 loop
+				l_line.append_character (' ')
 				j := j + 1
 			end
-			line.append_character ('%/0x2502/')  -- │
-			a_buffer.put_string (ax, ay, line, border_style)
+			l_line.append_character ('%/0x2502/')  -- │
+			a_buffer.put_string (ax, ay, l_line, border_style)
 
 			-- Center buttons
-			btn_start := ax + (width - ok_btn.count - cancel_btn.count - 3) // 2
+			btn_start := ax + (l_width - ok_btn.count - cancel_btn.count - 3) // 2
 			a_buffer.put_string (btn_start, ay, ok_btn, ok_style)
 			a_buffer.put_string (btn_start + ok_btn.count + 2, ay, cancel_btn, cancel_style)
 		end

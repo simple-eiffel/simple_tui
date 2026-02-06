@@ -2,9 +2,9 @@ note
 	description: "[
 		TASK_AI_CONFIG - AI provider configuration for Task Manager.
 
-		Manages AI provider selection and API keys:
+		Manages AI provider selection and API l_keys:
 		- Supports Claude, Grok, Ollama, and no-AI mode
-		- Persists configuration to JSON file
+		- Persists configuration to JSON l_file
 		- Provides is_ready check for graceful degradation
 
 		The app works fully without AI - this is optional enhancement.
@@ -321,7 +321,7 @@ feature -- JSON Serialization
 					end
 				end
 				if attached {JSON_OBJECT} l_obj.item ("api_keys") as al_keys then
-					l_keys := keys
+					l_keys := l_keys
 					across l_keys as k loop
 						if attached {JSON_STRING} k as al_v then
 							api_keys.force (v.item, @k.key.item)
@@ -329,7 +329,7 @@ feature -- JSON Serialization
 					end
 				end
 				if attached {JSON_OBJECT} l_obj.item ("models") as al_mods then
-					l_mods := mods
+					l_mods := l_mods
 					across l_mods as m loop
 						if attached {JSON_STRING} m as al_v then
 							models.force (v.item, @m.key.item)

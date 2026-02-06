@@ -163,7 +163,7 @@ feature -- Keyboard Shortcuts
 			l_shortcut_key: STRING_32
 		do
 			l_shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
-			shortcuts.remove (shortcut_key)
+			shortcuts.remove (l_shortcut_key)
 		end
 
 	has_shortcut (a_key: CHARACTER_32; ctrl, alt, shift: BOOLEAN): BOOLEAN
@@ -172,7 +172,7 @@ feature -- Keyboard Shortcuts
 			l_shortcut_key: STRING_32
 		do
 			l_shortcut_key := make_shortcut_key (a_key, ctrl, alt, shift)
-			Result := shortcuts.has (shortcut_key)
+			Result := shortcuts.has (l_shortcut_key)
 		end
 
 feature -- Focus Management
@@ -317,14 +317,14 @@ feature {NONE} -- Event Loop
 			l_event: detachable TUI_EVENT
 			l_frame_time_ms: INTEGER
 		do
-			frame_time_ms := 1000 // target_fps
+			l_frame_time_ms := 1000 // target_fps
 
 			from until not is_running loop
 				-- Process events
 				if attached backend as al_b then
-					event := al_b.poll_event
-					if event /= Void then
-						handle_event (event)
+					l_event := al_b.poll_event
+					if l_event /= Void then
+						handle_event (l_event)
 					end
 				end
 
@@ -349,10 +349,10 @@ feature {NONE} -- Event Loop
 				handle_resize (a_event)
 			elseif a_event.is_key_event or a_event.is_char_event then
 				log_key_event (a_event)
-				handled := handle_key (a_event)
+				l_handled := handle_key (a_event)
 			elseif a_event.is_mouse_event then
 				log_mouse_event (a_event)
-				handled := handle_mouse (a_event)
+				l_handled := handle_mouse (a_event)
 			end
 		end
 
@@ -362,44 +362,44 @@ feature {NONE} -- Event Loop
 			l_file: PLAIN_TEXT_FILE
 			l_msg: STRING
 		do
-			create msg.make (150)
-			msg.append ("KEY: ")
+			create l_msg.make (150)
+			l_msg.append ("KEY: ")
 
 			-- Describe the key
 			if a_event.is_key_event then
-				msg.append ("keycode=")
-				msg.append (a_event.key.out)
-				if a_event.key = 18 then msg.append ("(Alt)") end
-				if a_event.key = 16 then msg.append ("(Shift)") end
-				if a_event.key = 17 then msg.append ("(Ctrl)") end
+				l_msg.append ("keycode=")
+				l_msg.append (a_event.key.out)
+				if a_event.key = 18 then l_msg.append ("(Alt)") end
+				if a_event.key = 16 then l_msg.append ("(Shift)") end
+				if a_event.key = 17 then l_msg.append ("(Ctrl)") end
 			else
-				msg.append ("char='")
+				l_msg.append ("char='")
 				if a_event.char >= '%/32/' and a_event.char <= '%/126/' then
-					msg.append_character (a_event.char.to_character_8)
+					l_msg.append_character (a_event.char.to_character_8)
 				else
-					msg.append ("\")
-					msg.append (a_event.char.natural_32_code.out)
+					l_msg.append ("\")
+					l_msg.append (a_event.char.natural_32_code.out)
 				end
-				msg.append ("'")
+				l_msg.append ("'")
 			end
 
 			-- Modifiers
-			if a_event.has_shift then msg.append (" +SHIFT") end
-			if a_event.has_ctrl then msg.append (" +CTRL") end
-			if a_event.has_alt then msg.append (" +ALT") end
+			if a_event.has_shift then l_msg.append (" +SHIFT") end
+			if a_event.has_ctrl then l_msg.append (" +CTRL") end
+			if a_event.has_alt then l_msg.append (" +ALT") end
 
 			-- Special key detection
-			if a_event.is_enter then msg.append (" [ENTER]") end
-			if a_event.is_escape then msg.append (" [ESC]") end
-			if a_event.is_tab then msg.append (" [TAB]") end
-			if a_event.is_up then msg.append (" [UP]") end
-			if a_event.is_down then msg.append (" [DOWN]") end
-			if a_event.is_left then msg.append (" [LEFT]") end
-			if a_event.is_right then msg.append (" [RIGHT]") end
+			if a_event.is_enter then l_msg.append (" [ENTER]") end
+			if a_event.is_escape then l_msg.append (" [ESC]") end
+			if a_event.is_tab then l_msg.append (" [TAB]") end
+			if a_event.is_up then l_msg.append (" [UP]") end
+			if a_event.is_down then l_msg.append (" [DOWN]") end
+			if a_event.is_left then l_msg.append (" [LEFT]") end
+			if a_event.is_right then l_msg.append (" [RIGHT]") end
 
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
-				l_file.put_string (msg)
+				l_file.put_string (l_msg)
 				l_file.put_new_line
 				l_file.close
 			end
@@ -411,19 +411,19 @@ feature {NONE} -- Event Loop
 			l_file: PLAIN_TEXT_FILE
 			l_msg: STRING
 		do
-			create msg.make (100)
-			msg.append ("MOUSE: x=")
-			msg.append (a_event.mouse_x.out)
-			msg.append (" y=")
-			msg.append (a_event.mouse_y.out)
-			msg.append (" btn=")
-			msg.append (a_event.mouse_button.out)
-			if a_event.is_mouse_press then msg.append (" PRESS") end
-			if a_event.is_mouse_release then msg.append (" RELEASE") end
+			create l_msg.make (100)
+			l_msg.append ("MOUSE: x=")
+			l_msg.append (a_event.mouse_x.out)
+			l_msg.append (" y=")
+			l_msg.append (a_event.mouse_y.out)
+			l_msg.append (" btn=")
+			l_msg.append (a_event.mouse_button.out)
+			if a_event.is_mouse_press then l_msg.append (" PRESS") end
+			if a_event.is_mouse_release then l_msg.append (" RELEASE") end
 
 			create l_file.make_open_append ("tui_demo.log")
 			if l_file.is_open_write then
-				l_file.put_string (msg)
+				l_file.put_string (l_msg)
 				l_file.put_new_line
 				l_file.close
 			end
@@ -513,8 +513,8 @@ feature {NONE} -- Event Loop
 
 				-- Find widget under mouse
 				if not Result and attached root as al_r then
-					target := r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
-					if attached target as al_t then
+					l_target := r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
+					if attached l_target as al_t then
 						-- Focus clicked widget if focusable
 						if a_event.is_mouse_press and a_event.mouse_button = 1 then
 							if al_t.is_focusable and t /= focused_widget then
@@ -584,11 +584,11 @@ feature {NONE} -- Event Loop
 				end
 
 				-- Get changed cells
-				changed := buf.changed_cells
+				l_changed := buf.changed_cells
 
 				-- Write changes to terminal
-				from i := 1 until i > changed.count loop
-					l_tuple := changed.i_th (i)
+				from i := 1 until i > l_changed.count loop
+					l_tuple := l_changed.i_th (i)
 					b.write_cell (l_tuple.x, l_tuple.y, l_tuple.cell)
 					i := i + 1
 				end
@@ -630,8 +630,8 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			l_shortcut_key: STRING_32
 		do
 			l_shortcut_key := make_shortcut_key (a_event.char, a_event.has_ctrl, a_event.has_alt, a_event.has_shift)
-			if shortcuts.has (shortcut_key) then
-				if attached shortcuts.item (shortcut_key) as al_handler then
+			if shortcuts.has (l_shortcut_key) then
+				if attached shortcuts.item (l_shortcut_key) as al_handler then
 					al_handler.call (Void)
 					Result := True
 				end
@@ -644,20 +644,20 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 		local
 			l_key_lower: CHARACTER_32
 		do
-			key_lower := a_event.char.as_lower
+			l_key_lower := a_event.char.as_lower
 			if attached root as al_r then
-				Result := try_hotkey_in_widget (r, key_lower)
+				Result := try_hotkey_in_widget (r, l_key_lower)
 			end
 		end
 
-	try_hotkey_in_widget (a_widget: TUI_WIDGET; key_lower: CHARACTER_32): BOOLEAN
+	try_hotkey_in_widget (a_widget: TUI_WIDGET; l_key_lower: CHARACTER_32): BOOLEAN
 			-- Recursively search for button with matching hotkey.
 		local
 			i: INTEGER
 		do
 			-- Check if this widget is a TUI_BUTTON with matching shortcut
 			if attached {TUI_BUTTON} a_widget as al_btn then
-				if al_btn.is_visible and al_btn.shortcut_key.as_lower = key_lower then
+				if al_btn.is_visible and al_btn.shortcut_key.as_lower = l_key_lower then
 					al_btn.click
 					Result := True
 				end
@@ -666,7 +666,7 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 			-- Recurse into children if not found
 			if not Result then
 				from i := 1 until i > a_widget.children.count or Result loop
-					Result := try_hotkey_in_widget (a_widget.children.i_th (i), key_lower)
+					Result := try_hotkey_in_widget (a_widget.children.i_th (i), l_key_lower)
 					i := i + 1
 				end
 			end

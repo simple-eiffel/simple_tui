@@ -71,24 +71,24 @@ feature -- Layout
 			l_ih: INTEGER
 			i: INTEGER
 		do
-			ih := inner_height
-			current_x := 1
+			l_ih := inner_height
+			l_current_x := 1
 
 			from i := 1 until i > children.count loop
 				-- Calculate Y based on alignment
 				inspect valign
 				when Align_top then
-					child_y := 1
+					l_child_y := 1
 				when Align_middle then
-					child_y := ((ih - children.i_th (i).height) // 2) + 1
+					l_child_y := ((l_ih - children.i_th (i).height) // 2) + 1
 				when Align_bottom then
-					child_y := ih - children.i_th (i).height + 1
+					l_child_y := l_ih - children.i_th (i).height + 1
 				end
 
-				children.i_th (i).set_position (current_x, child_y.max (1))
+				children.i_th (i).set_position (l_current_x, l_child_y.max (1))
 				-- Recursively layout child
 				children.i_th (i).layout
-				current_x := current_x + children.i_th (i).width + gap
+				l_current_x := l_current_x + children.i_th (i).width + gap
 				i := i + 1
 			end
 		end

@@ -272,55 +272,55 @@ feature -- Rendering
 
 			-- Choose style
 			if is_focused then
-				current_style := focused_style
+				l_current_style := focused_style
 			else
-				current_style := normal_style
+				l_current_style := normal_style
 			end
 
-			visible_width := width
-			create display.make (visible_width)
+			l_visible_width := width
+			create l_display.make (l_visible_width)
 
 			if text.is_empty and not placeholder.is_empty and not is_focused then
 				-- Show placeholder
-				display.append (placeholder)
+				l_display.append (placeholder)
 			else
 				-- Show text (or masked)
-				from i := scroll_offset + 1 until i > text.count or display.count >= visible_width loop
+				from i := scroll_offset + 1 until i > text.count or l_display.count >= l_visible_width loop
 					if is_password then
-						char := '%/0x25CF/'  -- Black circle (bullet)
+						l_char := '%/0x25CF/'  -- Black circle (bullet)
 					else
-						char := text.item (i)
+						l_char := text.item (i)
 					end
-					display.append_character (char)
+					l_display.append_character (l_char)
 					i := i + 1
 				end
 			end
 
 			-- Pad with spaces to fill width
-			from until display.count >= visible_width loop
-				display.append_character (' ')
+			from until l_display.count >= l_visible_width loop
+				l_display.append_character (' ')
 			end
 
 			-- Truncate if needed
-			if display.count > visible_width then
-				display := display.substring (1, visible_width)
+			if l_display.count > l_visible_width then
+				l_display := l_display.substring (1, l_visible_width)
 			end
 
-			a_buffer.put_string (ax, ay, display, current_style)
+			a_buffer.put_string (ax, ay, l_display, l_current_style)
 
 			-- Draw cursor (if focused)
 			if is_focused then
 				-- Cursor position relative to visible area
 				i := cursor_position - scroll_offset
-				if i >= 0 and i < visible_width then
+				if i >= 0 and i < l_visible_width then
 					-- Use underline or block cursor
-					if i < display.count then
-						char := display.item (i + 1)
+					if i < l_display.count then
+						l_char := l_display.item (i + 1)
 					else
-						char := ' '
+						l_char := ' '
 					end
 					-- Draw inverted cursor
-					a_buffer.put_char (ax + i, ay, char, current_style.inverted)
+					a_buffer.put_char (ax + i, ay, l_char, l_current_style.inverted)
 				end
 			end
 		end
@@ -377,9 +377,9 @@ feature -- Event Handling
 			if a_event.is_mouse_press and a_event.mouse_button = 1 then
 				if contains_point (a_event.mouse_x, a_event.mouse_y) then
 					-- Calculate cursor position from click
-					mx := a_event.mouse_x - absolute_x
-					click_pos := scroll_offset + mx
-					cursor_position := click_pos.min (text.count).max (0)
+					l_mx := a_event.mouse_x - absolute_x
+					l_click_pos := scroll_offset + l_mx
+					cursor_position := l_click_pos.min (text.count).max (0)
 					Result := True
 				end
 			end
@@ -406,12 +406,12 @@ feature {NONE} -- Implementation
 		local
 			l_visible_width: INTEGER
 		do
-			visible_width := width - 1  -- Leave room for cursor at end
+			l_visible_width := width - 1  -- Leave room for cursor at end
 
 			if cursor_position < scroll_offset then
 				scroll_offset := cursor_position
-			elseif cursor_position > scroll_offset + visible_width then
-				scroll_offset := cursor_position - visible_width
+			elseif cursor_position > scroll_offset + l_visible_width then
+				scroll_offset := cursor_position - l_visible_width
 			end
 
 			scroll_offset := scroll_offset.max (0)

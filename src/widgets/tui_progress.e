@@ -3,7 +3,7 @@ note
 		TUI_PROGRESS - Progress bar widget
 
 		Features:
-		- Value range (min/max)
+		- Value l_range (min/max)
 		- Multiple display styles (bar, blocks, percentage)
 		- Indeterminate mode (spinner)
 		- Custom fill characters
@@ -218,9 +218,9 @@ feature -- Queries
 		local
 			l_range: REAL_64
 		do
-			range := max_value - min_value
-			if range > 0 then
-				Result := ((current_value - min_value) / range) * 100.0
+			l_range := max_value - min_value
+			if l_range > 0 then
+				Result := ((current_value - min_value) / l_range) * 100.0
 			else
 				Result := 0.0
 			end
@@ -257,27 +257,27 @@ feature -- Rendering
 
 			-- Calculate bar width (leave room for percentage if shown)
 			if show_percentage then
-				pct_str := formatted_percentage
-				pct_width := pct_str.count + 1  -- Space + percentage
-				bar_width := (width - pct_width).max (1)
+				l_pct_str := formatted_percentage
+				l_pct_width := l_pct_str.count + 1  -- Space + percentage
+				l_bar_width := (width - l_pct_width).max (1)
 			else
-				bar_width := width
+				l_bar_width := width
 			end
 
 			if is_indeterminate then
-				render_indeterminate (a_buffer, ax, ay, bar_width)
+				render_indeterminate (a_buffer, ax, ay, l_bar_width)
 			else
 				-- Calculate filled portion
-				filled_count := (bar_width * (percentage / 100.0)).truncated_to_integer
+				l_filled_count := (l_bar_width * (percentage / 100.0)).truncated_to_integer
 
 				-- Draw filled portion
-				from i := 0 until i >= filled_count loop
+				from i := 0 until i >= l_filled_count loop
 					a_buffer.put_char (ax + i, ay, fill_char, fill_style)
 					i := i + 1
 				end
 
 				-- Draw empty portion
-				from until i >= bar_width loop
+				from until i >= l_bar_width loop
 					a_buffer.put_char (ax + i, ay, empty_char, empty_style)
 					i := i + 1
 				end
@@ -285,27 +285,27 @@ feature -- Rendering
 
 			-- Draw percentage
 			if show_percentage then
-				a_buffer.put_string (ax + bar_width + 1, ay, formatted_percentage, bar_style)
+				a_buffer.put_string (ax + l_bar_width + 1, ay, formatted_percentage, bar_style)
 			end
 		end
 
 feature {NONE} -- Implementation
 
-	render_indeterminate (a_buffer: TUI_BUFFER; ax, ay, bar_width: INTEGER)
+	render_indeterminate (a_buffer: TUI_BUFFER; ax, ay, l_bar_width: INTEGER)
 			-- Render indeterminate progress bar.
 		local
 			i: INTEGER
 			l_indicator_width: INTEGER
 			start_pos, end_pos: INTEGER
 		do
-			indicator_width := (bar_width // 5).max (3)  -- Indicator is 1/5 of bar width
+			l_indicator_width := (l_bar_width // 5).max (3)  -- Indicator is 1/5 of bar width
 			start_pos := indeterminate_position
-			end_pos := start_pos + indicator_width
+			end_pos := start_pos + l_indicator_width
 
-			from i := 0 until i >= bar_width loop
+			from i := 0 until i >= l_bar_width loop
 				if i >= start_pos and i < end_pos then
 					a_buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
-				elseif i >= (start_pos - bar_width) and i < (end_pos - bar_width) then
+				elseif i >= (start_pos - l_bar_width) and i < (end_pos - l_bar_width) then
 					-- Wrap around
 					a_buffer.put_char (ax + i, ay, indeterminate_char, fill_style)
 				else
@@ -320,15 +320,15 @@ feature {NONE} -- Implementation
 		local
 			l_pct: INTEGER
 		do
-			pct := percentage.truncated_to_integer
+			l_pct := percentage.truncated_to_integer
 			create Result.make (5)
-			if pct < 10 then
+			if l_pct < 10 then
 				Result.append_character (' ')
 				Result.append_character (' ')
-			elseif pct < 100 then
+			elseif l_pct < 100 then
 				Result.append_character (' ')
 			end
-			Result.append_integer (pct)
+			Result.append_integer (l_pct)
 			Result.append_character ('%%')
 		end
 

@@ -144,15 +144,15 @@ feature -- Modification
 			-- Find shortcut key
 			shortcut_key := '%U'
 			shortcut_position := 0
-			display_pos := 0
-			from i := 1 until i > label.count or found_shortcut loop
+			l_display_pos := 0
+			from i := 1 until i > label.count or l_found_shortcut loop
 				c := label.item (i)
 				if c = '&' and i < label.count then
 					shortcut_key := label.item (i + 1).as_lower
-					shortcut_position := display_pos + 1
-					found_shortcut := True
+					shortcut_position := l_display_pos + 1
+					l_found_shortcut := True
 				else
-					display_pos := display_pos + 1
+					l_display_pos := l_display_pos + 1
 				end
 				i := i + 1
 			end
@@ -270,10 +270,10 @@ feature -- Rendering
 			a_buffer.put_char (ax + 1, ay, ' ', current_style)
 
 			-- Draw label with hotkey underlining
-			disp := display_label
+			l_disp := display_label
 			pos_x := ax + 2
-			from i := 1 until i > disp.count loop
-				c := disp.item (i)
+			from i := 1 until i > l_disp.count loop
+				c := l_disp.item (i)
 				if i = shortcut_position then
 					-- This is the hotkey character - underline it
 					hotkey_merged := current_style.twin_style

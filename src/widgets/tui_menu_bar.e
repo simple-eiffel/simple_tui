@@ -201,11 +201,11 @@ feature -- Menu Control
 
 			selected_menu := a_index
 			is_menu_open := True
-			menu := menus.i_th (a_index)
+			l_menu := menus.i_th (a_index)
 
 			-- Position menu below its title
-			menu_x := menu_position_x (a_index)
-			menu.show_at (menu_x, absolute_y + 1)
+			l_menu_x := menu_position_x (a_index)
+			l_menu.show_at (l_menu_x, absolute_y + 1)
 		ensure
 			menu_open: is_menu_open
 			menu_selected: selected_menu = a_index
@@ -215,7 +215,7 @@ feature -- Menu Control
 			-- Close currently open menu.
 		do
 			if is_menu_open and then attached current_menu as al_menu then
-				menu.hide
+				al_menu.hide
 			end
 			is_menu_open := False
 		ensure
@@ -357,7 +357,7 @@ feature -- Event Handling
 		do
 			-- Pass mouse events to open menu dropdown first
 			if is_menu_open and attached current_menu as al_menu then
-				Result := menu.handle_mouse (a_event)
+				Result := al_menu.handle_mouse (a_event)
 			end
 
 			if not Result then
@@ -389,7 +389,7 @@ feature -- Rendering
 	render (a_buffer: TUI_BUFFER)
 			-- Render menu bar to buffer.
 		local
-			ax, ay, i, menu_x: INTEGER
+			ax, ay, i, l_menu_x: INTEGER
 			l_menu: TUI_MENU
 			l_title_style: TUI_STYLE
 		do
@@ -400,26 +400,26 @@ feature -- Rendering
 			a_buffer.put_string (ax, ay, create {STRING_32}.make_filled (' ', width), normal_style)
 
 			-- Draw menu titles
-			menu_x := ax
+			l_menu_x := ax
 			from i := 1 until i > menus.count loop
 				l_menu := menus.i_th (i)
 
 				-- Choose style
 				if i = selected_menu then
 					if is_menu_open then
-						title_style := open_style
+						l_title_style := open_style
 					else
-						title_style := selected_style
+						l_title_style := selected_style
 					end
 				else
-					title_style := normal_style
+					l_title_style := normal_style
 				end
 
 				-- Draw title with hotkey underlining
-				a_buffer.put_char (menu_x, ay, ' ', title_style)
-				render_with_hotkey (a_buffer, menu_x + 1, ay, l_menu.title, title_style)
-				a_buffer.put_char (menu_x + 1 + display_width (l_menu.title), ay, ' ', title_style)
-				menu_x := menu_x + display_width (l_menu.title) + 2
+				a_buffer.put_char (l_menu_x, ay, ' ', l_title_style)
+				render_with_hotkey (a_buffer, l_menu_x + 1, ay, l_menu.title, l_title_style)
+				a_buffer.put_char (l_menu_x + 1 + display_width (l_menu.title), ay, ' ', l_title_style)
+				l_menu_x := l_menu_x + display_width (l_menu.title) + 2
 
 				i := i + 1
 			end
@@ -447,7 +447,7 @@ feature -- Queries
 			-- Height is always 1 for bar, plus open menu if any.
 		do
 			if is_menu_open and then attached current_menu as al_menu then
-				Result := 1 + menu.preferred_height
+				Result := 1 + al_menu.preferred_height
 			else
 				Result := 1
 			end
@@ -492,11 +492,11 @@ feature {NONE} -- Implementation
 			l_title_shortcut: CHARACTER_32
 		do
 			if a_event.has_alt then
-				key_lower := a_event.char.as_lower
+				l_key_lower := a_event.char.as_lower
 				from i := 1 until i > menus.count or Result loop
-					menu := menus.i_th (i)
-					title_shortcut := extract_shortcut (menu.title)
-					if title_shortcut /= '%U' and then title_shortcut.as_lower = key_lower then
+					l_menu := menus.i_th (i)
+					l_title_shortcut := extract_shortcut (l_menu.title)
+					if l_title_shortcut /= '%U' and then l_title_shortcut.as_lower = l_key_lower then
 						open_menu (i)
 						Result := True
 					end
@@ -541,9 +541,9 @@ feature {NONE} -- Implementation
 					-- Next character is the hotkey - render with underline added
 					i := i + 1
 					c := text.item (i)
-					merged_style := base_style.twin_style
-					merged_style.set_underline (True)
-					a_buffer.put_char (pos_x, start_y, c, merged_style)
+					l_merged_style := base_style.twin_style
+					l_merged_style.set_underline (True)
+					a_buffer.put_char (pos_x, start_y, c, l_merged_style)
 					pos_x := pos_x + 1
 				else
 					a_buffer.put_char (pos_x, start_y, c, base_style)

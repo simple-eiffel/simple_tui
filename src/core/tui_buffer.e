@@ -2,7 +2,7 @@ note
 	description: "[
 		TUI_BUFFER - Double-buffered terminal screen
 
-		Maintains two cell grids:
+		Maintains two l_cell grids:
 		- Current buffer: what's currently on screen
 		- Next buffer: what we're drawing to
 
@@ -94,14 +94,14 @@ feature -- Access
 
 feature -- Modification
 
-	set_cell (x, y: INTEGER; cell: TUI_CELL)
+	set_cell (x, y: INTEGER; l_cell: TUI_CELL)
 			-- Set cell at position.
 		require
 			valid_x: x >= 1 and x <= width
 			valid_y: y >= 1 and y <= height
-			cell_exists: cell /= Void
+			cell_exists: l_cell /= Void
 		do
-			next_buffer.put (cell.twin_cell, index_for (x, y))
+			next_buffer.put (l_cell.twin_cell, index_for (x, y))
 		end
 
 	put_char (x, y: INTEGER; c: CHARACTER_32; s: TUI_STYLE)
@@ -113,8 +113,8 @@ feature -- Modification
 		local
 			l_cell: TUI_CELL
 		do
-			create cell.make_with_styled_char (c, s.twin_style)
-			next_buffer.put (cell, index_for (x, y))
+			create l_cell.make_with_styled_char (c, s.twin_style)
+			next_buffer.put (l_cell, index_for (x, y))
 		end
 
 	put_string (x, y: INTEGER; str: READABLE_STRING_GENERAL; s: TUI_STYLE)
@@ -132,9 +132,9 @@ feature -- Modification
 			col := x
 			from i := 1 until i > str.count or col > width loop
 				c := str.item (i)
-				create cell.make_with_styled_char (c, s.twin_style)
-				next_buffer.put (cell, index_for (col, y))
-				col := col + cell.width
+				create l_cell.make_with_styled_char (c, s.twin_style)
+				next_buffer.put (l_cell, index_for (col, y))
+				col := col + l_cell.width
 				i := i + 1
 			end
 		end
@@ -150,8 +150,8 @@ feature -- Modification
 		do
 			from row := y1 until row > y2 loop
 				from col := x1 until col > x2 loop
-					create cell.make_with_styled_char (c, s.twin_style)
-					next_buffer.put (cell, index_for (col, row))
+					create l_cell.make_with_styled_char (c, s.twin_style)
+					next_buffer.put (l_cell, index_for (col, row))
 					col := col + 1
 				end
 				row := row + 1
@@ -178,8 +178,8 @@ feature -- Modification
 			l_cell: TUI_CELL
 		do
 			from i := 1 until i > width * height loop
-				create cell.make_with_styled_char (' ', a_s.twin_style)
-				next_buffer.put (cell, i)
+				create l_cell.make_with_styled_char (' ', a_s.twin_style)
+				next_buffer.put (l_cell, i)
 				i := i + 1
 			end
 		end
@@ -270,7 +270,7 @@ feature -- Resize
 
 feature -- Diff
 
-	changed_cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; cell: TUI_CELL]]
+	changed_cells: ARRAYED_LIST [TUPLE [x, y: INTEGER; l_cell: TUI_CELL]]
 			-- List of cells that differ between current and next buffer.
 		local
 			x, y, idx: INTEGER

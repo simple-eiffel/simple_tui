@@ -338,9 +338,9 @@ feature -- Queries
 				Result := Current
 				-- Check children (last child is on top)
 				from children.finish until children.before loop
-					found := children.item.find_widget_at (px, py)
-					if found /= Void then
-						Result := found
+					l_found := children.item.find_widget_at (px, py)
+					if l_found /= Void then
+						Result := l_found
 						children.start -- Exit loop
 					end
 					children.back

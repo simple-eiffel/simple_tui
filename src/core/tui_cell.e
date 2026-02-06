@@ -3,7 +3,7 @@ note
 		TUI_CELL - Single terminal cell
 
 		Represents one character position in the terminal with:
-		- A character (Unicode code point)
+		- A character (Unicode l_code point)
 		- A style (foreground, background, attributes)
 		- Width hint for wide characters (CJK, emoji)
 	]"
@@ -164,31 +164,31 @@ feature {NONE} -- Implementation
 		local
 			l_code: NATURAL_32
 		do
-			code := a_c.natural_32_code
+			l_code := a_c.natural_32_code
 
 			-- CJK ranges (simplified detection)
-			if code >= 0x1100 and code <= 0x115F then
+			if l_code >= 0x1100 and l_code <= 0x115F then
 				-- Hangul Jamo
 				Result := 2
-			elseif code >= 0x2E80 and code <= 0x9FFF then
+			elseif l_code >= 0x2E80 and l_code <= 0x9FFF then
 				-- CJK Radicals, Kangxi, CJK Unified
 				Result := 2
-			elseif code >= 0xAC00 and code <= 0xD7A3 then
+			elseif l_code >= 0xAC00 and l_code <= 0xD7A3 then
 				-- Hangul Syllables
 				Result := 2
-			elseif code >= 0xF900 and code <= 0xFAFF then
+			elseif l_code >= 0xF900 and l_code <= 0xFAFF then
 				-- CJK Compatibility
 				Result := 2
-			elseif code >= 0xFE10 and code <= 0xFE1F then
+			elseif l_code >= 0xFE10 and l_code <= 0xFE1F then
 				-- Vertical Forms
 				Result := 2
-			elseif code >= 0xFF00 and code <= 0xFF60 then
+			elseif l_code >= 0xFF00 and l_code <= 0xFF60 then
 				-- Fullwidth Forms
 				Result := 2
-			elseif code >= 0x1F300 and code <= 0x1F9FF then
+			elseif l_code >= 0x1F300 and l_code <= 0x1F9FF then
 				-- Emoji (common ranges)
 				Result := 2
-			elseif code >= 0x20000 and code <= 0x2FFFF then
+			elseif l_code >= 0x20000 and l_code <= 0x2FFFF then
 				-- CJK Extension B and beyond
 				Result := 2
 			else

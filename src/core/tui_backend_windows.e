@@ -8,7 +8,7 @@ note
 		- ReadConsoleInput
 		- GetConsoleScreenBufferInfo
 
-		Also supports ANSI escape codes via ENABLE_VIRTUAL_TERMINAL_PROCESSING
+		Also supports ANSI escape l_codes via ENABLE_VIRTUAL_TERMINAL_PROCESSING
 		(Windows 10+).
 	]"
 	author: "Larry Rix"
@@ -178,19 +178,19 @@ feature -- Output
 			last_x := -1
 			last_y := -1
 			from i := 1 until i > a_cells.count loop
-				t := a_cells.i_th (i)
+				l_t := a_cells.i_th (i)
 				-- Only move cursor if not sequential
-				if t.y /= last_y or t.x /= last_x + 1 then
-					set_cursor_position (t.x, t.y)
+				if l_t.y /= last_y or l_t.x /= last_x + 1 then
+					set_cursor_position (l_t.x, l_t.y)
 				end
 				-- Only change style if different
-				if prev_style = Void or else not prev_style.same_style (t.cell.style) then
-					apply_style (t.cell.style)
-					prev_style := t.cell.style
+				if l_prev_style = Void or else not l_prev_style.same_style (l_t.cell.style) then
+					apply_style (l_t.cell.style)
+					l_prev_style := l_t.cell.style
 				end
-				wide_output_buffer.append_character (t.cell.character)
-				last_x := t.x
-				last_y := t.y
+				wide_output_buffer.append_character (l_t.cell.character)
+				last_x := l_t.x
+				last_y := l_t.y
 				i := i + 1
 			end
 		end
@@ -205,21 +205,21 @@ feature -- Output
 			wide_output_buffer.append_character (a_c)
 
 			-- Also maintain UTF-8 buffer for test compatibility
-			code := a_c.natural_32_code
-			if code < 0x80 then
-				output_buffer.append_character (code.to_character_8)
-			elseif code < 0x800 then
-				output_buffer.append_character ((0xC0 | (code |>> 6)).to_character_8)
-				output_buffer.append_character ((0x80 | (code & 0x3F)).to_character_8)
-			elseif code < 0x10000 then
-				output_buffer.append_character ((0xE0 | (code |>> 12)).to_character_8)
-				output_buffer.append_character ((0x80 | ((code |>> 6) & 0x3F)).to_character_8)
-				output_buffer.append_character ((0x80 | (code & 0x3F)).to_character_8)
+			l_code := a_c.natural_32_code
+			if l_code < 0x80 then
+				output_buffer.append_character (l_code.to_character_8)
+			elseif l_code < 0x800 then
+				output_buffer.append_character ((0xC0 | (l_code |>> 6)).to_character_8)
+				output_buffer.append_character ((0x80 | (l_code & 0x3F)).to_character_8)
+			elseif l_code < 0x10000 then
+				output_buffer.append_character ((0xE0 | (l_code |>> 12)).to_character_8)
+				output_buffer.append_character ((0x80 | ((l_code |>> 6) & 0x3F)).to_character_8)
+				output_buffer.append_character ((0x80 | (l_code & 0x3F)).to_character_8)
 			else
-				output_buffer.append_character ((0xF0 | (code |>> 18)).to_character_8)
-				output_buffer.append_character ((0x80 | ((code |>> 12) & 0x3F)).to_character_8)
-				output_buffer.append_character ((0x80 | ((code |>> 6) & 0x3F)).to_character_8)
-				output_buffer.append_character ((0x80 | (code & 0x3F)).to_character_8)
+				output_buffer.append_character ((0xF0 | (l_code |>> 18)).to_character_8)
+				output_buffer.append_character ((0x80 | ((l_code |>> 12) & 0x3F)).to_character_8)
+				output_buffer.append_character ((0x80 | ((l_code |>> 6) & 0x3F)).to_character_8)
+				output_buffer.append_character ((0x80 | (l_code & 0x3F)).to_character_8)
 			end
 		ensure
 			wide_buffer_grew: wide_output_buffer.count > old wide_output_buffer.count
@@ -370,13 +370,13 @@ feature {NONE} -- Implementation
 			l_full_seq: STRING_32
 			i: INTEGER
 		do
-			create full_seq.make (a_seq.count + 1)
-			full_seq.append_character ('%/27/')
+			create l_full_seq.make (a_seq.count + 1)
+			l_full_seq.append_character ('%/27/')
 			from i := 1 until i > a_seq.count loop
-				full_seq.append_character (a_seq.item (i))
+				l_full_seq.append_character (a_seq.item (i))
 				i := i + 1
 			end
-			wide_output_buffer.append (full_seq)
+			wide_output_buffer.append (l_full_seq)
 		ensure
 			buffer_grew: wide_output_buffer.count >= old wide_output_buffer.count + a_seq.count + 1
 		end
@@ -388,47 +388,47 @@ feature {NONE} -- Implementation
 		local
 			l_codes: STRING
 		do
-			create codes.make_empty
+			create l_codes.make_empty
 
 			-- Reset first
-			codes.append ("0")
+			l_codes.append ("0")
 
 			-- Attributes
-			if a_s.is_bold then codes.append (";1") end
-			if a_s.is_dim then codes.append (";2") end
-			if a_s.is_italic then codes.append (";3") end
-			if a_s.is_underline then codes.append (";4") end
-			if a_s.is_blink then codes.append (";5") end
-			if a_s.is_reverse then codes.append (";7") end
-			if a_s.is_strikethrough then codes.append (";9") end
+			if a_s.is_bold then l_codes.append (";1") end
+			if a_s.is_dim then l_codes.append (";2") end
+			if a_s.is_italic then l_codes.append (";3") end
+			if a_s.is_underline then l_codes.append (";4") end
+			if a_s.is_blink then l_codes.append (";5") end
+			if a_s.is_reverse then l_codes.append (";7") end
+			if a_s.is_strikethrough then l_codes.append (";9") end
 
 			-- Foreground
 			if a_s.foreground.is_indexed then
 				if a_s.foreground.index < 8 then
-					codes.append (";" + (30 + a_s.foreground.index).out)
+					l_codes.append (";" + (30 + a_s.foreground.index).out)
 				elseif a_s.foreground.index < 16 then
-					codes.append (";" + (90 + a_s.foreground.index - 8).out)
+					l_codes.append (";" + (90 + a_s.foreground.index - 8).out)
 				else
-					codes.append (";38;5;" + a_s.foreground.index.out)
+					l_codes.append (";38;5;" + a_s.foreground.index.out)
 				end
 			elseif a_s.foreground.is_rgb then
-				codes.append (";38;2;" + a_s.foreground.red.out + ";" + a_s.foreground.green.out + ";" + a_s.foreground.blue.out)
+				l_codes.append (";38;2;" + a_s.foreground.red.out + ";" + a_s.foreground.green.out + ";" + a_s.foreground.blue.out)
 			end
 
 			-- Background
 			if a_s.background.is_indexed then
 				if a_s.background.index < 8 then
-					codes.append (";" + (40 + a_s.background.index).out)
+					l_codes.append (";" + (40 + a_s.background.index).out)
 				elseif a_s.background.index < 16 then
-					codes.append (";" + (100 + a_s.background.index - 8).out)
+					l_codes.append (";" + (100 + a_s.background.index - 8).out)
 				else
-					codes.append (";48;5;" + a_s.background.index.out)
+					l_codes.append (";48;5;" + a_s.background.index.out)
 				end
 			elseif a_s.background.is_rgb then
-				codes.append (";48;2;" + a_s.background.red.out + ";" + a_s.background.green.out + ";" + a_s.background.blue.out)
+				l_codes.append (";48;2;" + a_s.background.red.out + ";" + a_s.background.green.out + ";" + a_s.background.blue.out)
 			end
 
-			append_escape ("[" + codes + "m")
+			append_escape ("[" + l_codes + "m")
 		end
 
 	read_event: TUI_EVENT
@@ -439,9 +439,9 @@ feature {NONE} -- Implementation
 			x, y, button_state, event_flags: INTEGER
 			l_mouse_type: INTEGER
 		do
-			c_read_console_input (stdin_handle, $event_type, $key_code, $char_code, $ctrl_keys, $x, $y, $button_state, $event_flags)
+			c_read_console_input (stdin_handle, $l_event_type, $key_code, $char_code, $ctrl_keys, $x, $y, $button_state, $event_flags)
 
-			inspect event_type
+			inspect l_event_type
 			when 1 then -- KEY_EVENT
 				if char_code > 0 then
 					create Result.make_char (char_code.to_character_32, modifiers_from_ctrl_keys (ctrl_keys))
@@ -452,42 +452,42 @@ feature {NONE} -- Implementation
 				-- Determine mouse event type based on button state and flags
 				if (event_flags & 1) /= 0 then
 					-- MOUSE_MOVED flag (0x0001) - mouse move event
-					mouse_type := {TUI_EVENT}.Type_mouse_move
+					l_mouse_type := {TUI_EVENT}.Type_mouse_move
 				elseif button_state /= last_button_state then
 					if button_state /= 0 then
 						-- Button newly pressed - remember which button
-						mouse_type := {TUI_EVENT}.Type_mouse_press
+						l_mouse_type := {TUI_EVENT}.Type_mouse_press
 						last_pressed_button := button_state
 					else
 						-- Button released
-						mouse_type := {TUI_EVENT}.Type_mouse_release
+						l_mouse_type := {TUI_EVENT}.Type_mouse_release
 					end
 					last_button_state := button_state
 				else
 					-- No change in button state, treat as move
-					mouse_type := {TUI_EVENT}.Type_mouse_move
+					l_mouse_type := {TUI_EVENT}.Type_mouse_move
 				end
 				-- Determine which button (1=left, 2=right, 3=middle)
 				-- For release events, use the last pressed button state
-				if mouse_type = {TUI_EVENT}.Type_mouse_release then
+				if l_mouse_type = {TUI_EVENT}.Type_mouse_release then
 					-- Use last_pressed_button to know which was released
 					if (last_pressed_button & 1) /= 0 then
-						create Result.make_mouse (x + 1, y + 1, 1, mouse_type, 0)
+						create Result.make_mouse (x + 1, y + 1, 1, l_mouse_type, 0)
 					elseif (last_pressed_button & 2) /= 0 then
-						create Result.make_mouse (x + 1, y + 1, 2, mouse_type, 0)
+						create Result.make_mouse (x + 1, y + 1, 2, l_mouse_type, 0)
 					elseif (last_pressed_button & 4) /= 0 then
-						create Result.make_mouse (x + 1, y + 1, 3, mouse_type, 0)
+						create Result.make_mouse (x + 1, y + 1, 3, l_mouse_type, 0)
 					else
-						create Result.make_mouse (x + 1, y + 1, 0, mouse_type, 0)
+						create Result.make_mouse (x + 1, y + 1, 0, l_mouse_type, 0)
 					end
 				elseif (button_state & 1) /= 0 then
-					create Result.make_mouse (x + 1, y + 1, 1, mouse_type, 0)
+					create Result.make_mouse (x + 1, y + 1, 1, l_mouse_type, 0)
 				elseif (button_state & 2) /= 0 then
-					create Result.make_mouse (x + 1, y + 1, 2, mouse_type, 0)
+					create Result.make_mouse (x + 1, y + 1, 2, l_mouse_type, 0)
 				elseif (button_state & 4) /= 0 then
-					create Result.make_mouse (x + 1, y + 1, 3, mouse_type, 0)
+					create Result.make_mouse (x + 1, y + 1, 3, l_mouse_type, 0)
 				else
-					create Result.make_mouse (x + 1, y + 1, 0, mouse_type, 0)
+					create Result.make_mouse (x + 1, y + 1, 0, l_mouse_type, 0)
 				end
 			when 4 then -- WINDOW_BUFFER_SIZE_EVENT
 				refresh_size

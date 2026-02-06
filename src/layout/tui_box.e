@@ -41,7 +41,7 @@ feature {NONE} -- Initialization
 			width := a_width
 			height := a_height
 			title := ""
-			border_style := Border_none
+			l_border_style := Border_none
 			padding_left := 0
 			padding_right := 0
 			padding_top := 0
@@ -60,10 +60,10 @@ feature {NONE} -- Initialization
 		do
 			make (a_width, a_height)
 			title := a_title
-			border_style := Border_single
+			l_border_style := Border_single
 		ensure
 			title_set: title = a_title
-			has_border: border_style = Border_single
+			has_border: l_border_style = Border_single
 		end
 
 feature -- Access
@@ -71,7 +71,7 @@ feature -- Access
 	title: STRING
 			-- Box title (shown in border).
 
-	border_style: INTEGER
+	l_border_style: INTEGER
 			-- Border style (none, single, double, rounded).
 
 	padding_left: INTEGER
@@ -109,9 +109,9 @@ feature -- Modification
 		require
 			valid_style: a_bs >= Border_none and a_bs <= Border_rounded
 		do
-			border_style := a_bs
+			l_border_style := a_bs
 		ensure
-			border_set: border_style = a_bs
+			border_set: l_border_style = a_bs
 		end
 
 	set_padding (a_p: INTEGER)
@@ -169,7 +169,7 @@ feature -- Queries
 			-- X position of content area.
 		do
 			Result := absolute_x + padding_left
-			if border_style /= Border_none then
+			if l_border_style /= Border_none then
 				Result := Result + 1
 			end
 		end
@@ -178,7 +178,7 @@ feature -- Queries
 			-- Y position of content area.
 		do
 			Result := absolute_y + padding_top
-			if border_style /= Border_none then
+			if l_border_style /= Border_none then
 				Result := Result + 1
 			end
 		end
@@ -187,7 +187,7 @@ feature -- Queries
 			-- Width of content area.
 		do
 			Result := width - padding_left - padding_right
-			if border_style /= Border_none then
+			if l_border_style /= Border_none then
 				Result := Result - 2
 			end
 			Result := Result.max (0)
@@ -197,7 +197,7 @@ feature -- Queries
 			-- Height of content area.
 		do
 			Result := height - padding_top - padding_bottom
-			if border_style /= Border_none then
+			if l_border_style /= Border_none then
 				Result := Result - 2
 			end
 			Result := Result.max (0)
@@ -222,35 +222,35 @@ feature -- Rendering
 		local
 			ax, ay, i: INTEGER
 			l_chars: TUPLE [tl, tr, bl, br, h, v: CHARACTER_32]
-			l_border_style, l_title_style: TUI_STYLE
+			l_bdr_style, l_title_style: TUI_STYLE
 		do
 			ax := absolute_x
 			ay := absolute_y
 
 			-- Draw border if enabled
-			if border_style /= Border_none then
-				chars := border_chars (border_style)
+			if l_border_style /= Border_none then
+				l_chars := border_chars (l_border_style)
 
 				-- Resolve styles
 				if attached border_color_style as al_bs then
-					l_border_style := bs
+					l_bdr_style := al_bs
 				else
-					l_border_style := style
+					l_bdr_style := style
 				end
 				if attached title_color_style as al_ts then
-					l_title_style := ts
+					l_title_style := al_ts
 				else
-					l_title_style := l_border_style
+					l_title_style := l_bdr_style
 				end
 
 				-- Top border
-				a_buffer.put_char (ax, ay, chars.tl, l_border_style)
+				a_buffer.put_char (ax, ay, l_chars.tl, l_bdr_style)
 				from i := 1 until i >= width - 1 loop
-					a_buffer.put_char (ax + i, ay, chars.h, l_border_style)
+					a_buffer.put_char (ax + i, ay, l_chars.h, l_bdr_style)
 					i := i + 1
 				end
 				if width > 1 then
-					a_buffer.put_char (ax + width - 1, ay, chars.tr, l_border_style)
+					a_buffer.put_char (ax + width - 1, ay, l_chars.tr, l_bdr_style)
 				end
 
 				-- Title (if any)
@@ -260,20 +260,20 @@ feature -- Rendering
 
 				-- Side borders
 				from i := 1 until i >= height - 1 loop
-					a_buffer.put_char (ax, ay + i, chars.v, l_border_style)
-					a_buffer.put_char (ax + width - 1, ay + i, chars.v, l_border_style)
+					a_buffer.put_char (ax, ay + i, l_chars.v, l_bdr_style)
+					a_buffer.put_char (ax + width - 1, ay + i, l_chars.v, l_bdr_style)
 					i := i + 1
 				end
 
 				-- Bottom border
 				if height > 1 then
-					a_buffer.put_char (ax, ay + height - 1, chars.bl, l_border_style)
+					a_buffer.put_char (ax, ay + height - 1, l_chars.bl, l_bdr_style)
 					from i := 1 until i >= width - 1 loop
-						a_buffer.put_char (ax + i, ay + height - 1, chars.h, l_border_style)
+						a_buffer.put_char (ax + i, ay + height - 1, l_chars.h, l_bdr_style)
 						i := i + 1
 					end
 					if width > 1 then
-						a_buffer.put_char (ax + width - 1, ay + height - 1, chars.br, l_border_style)
+						a_buffer.put_char (ax + width - 1, ay + height - 1, l_chars.br, l_bdr_style)
 					end
 				end
 			end
@@ -322,7 +322,7 @@ feature {NONE} -- Implementation
 
 invariant
 	title_exists: title /= Void
-	valid_border: border_style >= Border_none and border_style <= Border_rounded
+	valid_border: l_border_style >= Border_none and l_border_style <= Border_rounded
 	valid_padding: padding_left >= 0 and padding_right >= 0 and padding_top >= 0 and padding_bottom >= 0
 
 end

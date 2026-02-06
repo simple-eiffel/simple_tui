@@ -141,15 +141,15 @@ feature -- Modification
 			-- Find shortcut key
 			shortcut_key := '%U'
 			shortcut_position := 0
-			display_pos := 0
-			from i := 1 until i > text.count or found_shortcut loop
+			l_display_pos := 0
+			from i := 1 until i > text.count or l_found_shortcut loop
 				c := text.item (i)
 				if c = '&' and i < text.count then
 					shortcut_key := text.item (i + 1).as_lower
-					shortcut_position := display_pos + 1
-					found_shortcut := True
+					shortcut_position := l_display_pos + 1
+					l_found_shortcut := True
 				else
-					display_pos := display_pos + 1
+					l_display_pos := l_display_pos + 1
 				end
 				i := i + 1
 			end
@@ -187,7 +187,7 @@ feature -- Action
 			-- Execute the item's action if sensitive.
 		do
 			if is_sensitive and then attached on_select as al_action then
-				action.call (Void)
+				al_action.call (Void)
 			end
 		end
 

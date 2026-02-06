@@ -392,52 +392,52 @@ feature -- Rendering
 				inner_width := width - 2
 
 				-- Top border with title: ┌─ Title ─┐
-				create line.make (width)
-				line.append_character ('%/0x250C/')  -- ┌
-				line.append_character ('%/0x2500/')  -- ─
-				line.append_character (' ')
-				line.append (title)
-				line.append_character (' ')
-				from j := line.count until j >= width - 1 loop
-					line.append_character ('%/0x2500/')  -- ─
+				create l_line.make (width)
+				l_line.append_character ('%/0x250C/')  -- ┌
+				l_line.append_character ('%/0x2500/')  -- ─
+				l_line.append_character (' ')
+				l_line.append (title)
+				l_line.append_character (' ')
+				from j := l_line.count until j >= width - 1 loop
+					l_line.append_character ('%/0x2500/')  -- ─
 					j := j + 1
 				end
-				line.append_character ('%/0x2510/')  -- ┐
-				a_buffer.put_string (ax, ay, line, border_style)
+				l_line.append_character ('%/0x2510/')  -- ┐
+				a_buffer.put_string (ax, ay, l_line, border_style)
 
 				-- Message row(s): │ Message │
-				create line.make (width)
-				line.append_character ('%/0x2502/')  -- │
-				line.append_character (' ')
-				line.append (message)
-				from until line.count >= width - 1 loop
-					line.append_character (' ')
+				create l_line.make (width)
+				l_line.append_character ('%/0x2502/')  -- │
+				l_line.append_character (' ')
+				l_line.append (message)
+				from until l_line.count >= width - 1 loop
+					l_line.append_character (' ')
 				end
-				line.append_character ('%/0x2502/')  -- │
-				a_buffer.put_string (ax, ay + 1, line, message_style)
+				l_line.append_character ('%/0x2502/')  -- │
+				a_buffer.put_string (ax, ay + 1, l_line, message_style)
 				-- Draw left/right borders with message style for content
 				a_buffer.put_char (ax, ay + 1, '%/0x2502/', border_style)
 				a_buffer.put_char (ax + width - 1, ay + 1, '%/0x2502/', border_style)
 
 				-- Empty row before buttons: │         │
-				create line.make (width)
-				line.append_character ('%/0x2502/')  -- │
+				create l_line.make (width)
+				l_line.append_character ('%/0x2502/')  -- │
 				from j := 1 until j >= width - 1 loop
-					line.append_character (' ')
+					l_line.append_character (' ')
 					j := j + 1
 				end
-				line.append_character ('%/0x2502/')  -- │
-				a_buffer.put_string (ax, ay + 2, line, border_style)
+				l_line.append_character ('%/0x2502/')  -- │
+				a_buffer.put_string (ax, ay + 2, l_line, border_style)
 
 				-- Button row: │  [Ok] [Cancel]  │
-				create line.make (width)
-				line.append_character ('%/0x2502/')  -- │
+				create l_line.make (width)
+				l_line.append_character ('%/0x2502/')  -- │
 				from j := 1 until j >= width - 1 loop
-					line.append_character (' ')
+					l_line.append_character (' ')
 					j := j + 1
 				end
-				line.append_character ('%/0x2502/')  -- │
-				a_buffer.put_string (ax, ay + 3, line, border_style)
+				l_line.append_character ('%/0x2502/')  -- │
+				a_buffer.put_string (ax, ay + 3, l_line, border_style)
 
 				-- Render buttons centered
 				bx := ax + (width - total_buttons_width) // 2
@@ -449,14 +449,14 @@ feature -- Rendering
 				end
 
 				-- Bottom border: └───────┘
-				create line.make (width)
-				line.append_character ('%/0x2514/')  -- └
+				create l_line.make (width)
+				l_line.append_character ('%/0x2514/')  -- └
 				from j := 1 until j >= width - 1 loop
-					line.append_character ('%/0x2500/')  -- ─
+					l_line.append_character ('%/0x2500/')  -- ─
 					j := j + 1
 				end
-				line.append_character ('%/0x2518/')  -- ┘
-				a_buffer.put_string (ax, ay + 4, line, border_style)
+				l_line.append_character ('%/0x2518/')  -- ┘
+				a_buffer.put_string (ax, ay + 4, l_line, border_style)
 			end
 		end
 
@@ -482,12 +482,12 @@ feature {NONE} -- Implementation
 			l_min_width: INTEGER
 		do
 			-- Minimum width for title (+ borders + padding)
-			min_width := title.count + 6
+			l_min_width := title.count + 6
 			-- Width for message
-			min_width := min_width.max (message.count + 4)
+			l_min_width := l_min_width.max (message.count + 4)
 			-- Width for buttons
-			min_width := min_width.max (total_buttons_width + 4)
-			width := min_width.max (20)
+			l_min_width := l_min_width.max (total_buttons_width + 4)
+			width := l_min_width.max (20)
 			height := 5
 		end
 
@@ -511,18 +511,18 @@ feature {NONE} -- Implementation
 			l_btn_text: STRING_32
 			l_btn_style: TUI_STYLE
 		do
-			create btn_text.make (10)
-			btn_text.append ("[ ")
-			btn_text.append (buttons.i_th (index).label)
-			btn_text.append (" ]")
+			create l_btn_text.make (10)
+			l_btn_text.append ("[ ")
+			l_btn_text.append (buttons.i_th (index).label)
+			l_btn_text.append (" ]")
 
 			if index = selected_button then
-				btn_style := button_selected_style
+				l_btn_style := button_selected_style
 			else
-				btn_style := button_style
+				l_btn_style := button_style
 			end
 
-			a_buffer.put_string (bx, by, btn_text, btn_style)
+			a_buffer.put_string (bx, by, l_btn_text, l_btn_style)
 		end
 
 invariant

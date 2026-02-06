@@ -356,9 +356,9 @@ feature -- Navigation
 		local
 			l_new_index: INTEGER
 		do
-			new_index := (selected_index - height).max (1)
-			if new_index /= selected_index then
-				selected_index := new_index
+			l_new_index := (selected_index - height).max (1)
+			if l_new_index /= selected_index then
+				selected_index := l_new_index
 				ensure_visible (selected_index)
 				notify_select
 			end
@@ -369,9 +369,9 @@ feature -- Navigation
 		local
 			l_new_index: INTEGER
 		do
-			new_index := (selected_index + height).min (items.count)
-			if new_index /= selected_index then
-				selected_index := new_index
+			l_new_index := (selected_index + height).min (items.count)
+			if l_new_index /= selected_index then
+				selected_index := l_new_index
 				ensure_visible (selected_index)
 				notify_select
 			end
@@ -392,11 +392,11 @@ feature -- Rendering
 			ax := absolute_x
 			ay := absolute_y
 
-			needs_scrollbar := show_scrollbar and items.count > height
-			if needs_scrollbar then
-				display_width := width - 1  -- Reserve space for scrollbar
+			l_needs_scrollbar := show_scrollbar and items.count > height
+			if l_needs_scrollbar then
+				l_display_width := width - 1  -- Reserve space for scrollbar
 			else
-				display_width := width
+				l_display_width := width
 			end
 
 			-- Draw visible items
@@ -406,22 +406,22 @@ feature -- Rendering
 			until
 				draw_y >= height or i > items.count
 			loop
-				item_text := items.i_th (i)
+				l_item_text := items.i_th (i)
 
 				-- Choose style
 				if is_selected (i) then
-					item_style := selected_style
+					l_item_style := selected_style
 					if is_focused then
-						item_style := item_style.merged (focused_style)
+						l_item_style := l_item_style.merged (focused_style)
 					end
 				else
-					item_style := normal_style
+					l_item_style := normal_style
 				end
 
 				-- Prepare display text
-				item_text := padded_text (item_text, display_width)
+				l_item_text := padded_text (l_item_text, l_display_width)
 
-				a_buffer.put_string (ax, ay + draw_y, item_text, item_style)
+				a_buffer.put_string (ax, ay + draw_y, l_item_text, l_item_style)
 
 				draw_y := draw_y + 1
 				i := i + 1
@@ -429,12 +429,12 @@ feature -- Rendering
 
 			-- Fill remaining space
 			from until draw_y >= height loop
-				a_buffer.put_string (ax, ay + draw_y, spaces (display_width), normal_style)
+				a_buffer.put_string (ax, ay + draw_y, spaces (l_display_width), normal_style)
 				draw_y := draw_y + 1
 			end
 
 			-- Draw scrollbar
-			if needs_scrollbar then
+			if l_needs_scrollbar then
 				render_scrollbar (a_buffer, ax + width - 1, ay)
 			end
 		end
@@ -482,14 +482,14 @@ feature -- Event Handling
 			if contains_point (a_event.mouse_x, a_event.mouse_y) then
 				if a_event.is_mouse_press and a_event.mouse_button = 1 then
 					-- Calculate clicked item
-					my := a_event.mouse_y - absolute_y
-					clicked_index := scroll_offset + my + 1
+					l_my := a_event.mouse_y - absolute_y
+					l_clicked_index := scroll_offset + l_my + 1
 
-					if clicked_index >= 1 and clicked_index <= items.count then
+					if l_clicked_index >= 1 and l_clicked_index <= items.count then
 						if is_multi_select then
-							toggle_selection (clicked_index)
+							toggle_selection (l_clicked_index)
 						end
-						set_selected_index (clicked_index)
+						set_selected_index (l_clicked_index)
 						Result := True
 					end
 				elseif a_event.is_mouse_scroll then
@@ -573,10 +573,10 @@ feature {NONE} -- Implementation
 			l_scrollable_range: INTEGER
 			l_char: CHARACTER_32
 		do
-			scrollable_range := items.count - height
-			if scrollable_range > 0 then
+			l_scrollable_range := items.count - height
+			if l_scrollable_range > 0 then
 				thumb_size := (height * height // items.count).max (1)
-				thumb_pos := (scroll_offset * (height - thumb_size)) // scrollable_range
+				thumb_pos := (scroll_offset * (height - thumb_size)) // l_scrollable_range
 			else
 				thumb_size := height
 				thumb_pos := 0
@@ -584,11 +584,11 @@ feature {NONE} -- Implementation
 
 			from i := 0 until i >= height loop
 				if i >= thumb_pos and i < thumb_pos + thumb_size then
-					char := '%/0x2588/'  -- Full block
+					l_char := '%/0x2588/'  -- Full block
 				else
-					char := '%/0x2591/'  -- Light shade
+					l_char := '%/0x2591/'  -- Light shade
 				end
-				a_buffer.put_char (sx, sy + i, char, normal_style)
+				a_buffer.put_char (sx, sy + i, l_char, normal_style)
 				i := i + 1
 			end
 		end

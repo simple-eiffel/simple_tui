@@ -134,8 +134,8 @@ feature -- Modification
 		local
 			l_sep: TUI_MENU_ITEM
 		do
-			create sep.make_separator
-			add_item (sep)
+			create l_sep.make_separator
+			add_item (l_sep)
 		ensure
 			item_added: items.count = old items.count + 1
 		end
@@ -412,10 +412,10 @@ feature -- Rendering
 
 				-- Draw menu items with side borders
 				from i := 1 until i > items.count loop
-					item := items.i_th (i)
+					l_item := items.i_th (i)
 					item_y := ay + i  -- +1 for top border
 
-					if item.is_separator then
+					if l_item.is_separator then
 						-- Draw separator: ├───┤
 						create sep_line.make (menu_width)
 						sep_line.append_character ('%/0x251C/')  -- ├
@@ -427,17 +427,17 @@ feature -- Rendering
 						a_buffer.put_string (ax, item_y, sep_line, border_style)
 					else
 						-- Choose style
-						if not item.is_sensitive then
-							item_style := disabled_style
+						if not l_item.is_sensitive then
+							l_item_style := disabled_style
 						elseif i = selected_index then
-							item_style := selected_style
+							l_item_style := selected_style
 						else
-							item_style := normal_style
+							l_item_style := normal_style
 						end
 
 						-- Draw item with hotkey underlining: │ item │
 						a_buffer.put_char (ax, ay + i, '%/0x2502/', border_style)  -- │
-						render_item_with_hotkey (a_buffer, ax + 1, ay + i, item, inner_width, item_style)
+						render_item_with_hotkey (a_buffer, ax + 1, ay + i, l_item, inner_width, l_item_style)
 						a_buffer.put_char (ax + menu_width - 1, ay + i, '%/0x2502/', border_style)  -- │
 					end
 					i := i + 1
@@ -498,7 +498,7 @@ feature {NONE} -- Implementation
 			end
 		end
 
-	render_item_with_hotkey (a_buffer: TUI_BUFFER; start_x, start_y: INTEGER; item: TUI_MENU_ITEM; w: INTEGER; base_style: TUI_STYLE)
+	render_item_with_hotkey (a_buffer: TUI_BUFFER; start_x, start_y: INTEGER; l_item: TUI_MENU_ITEM; w: INTEGER; base_style: TUI_STYLE)
 			-- Render menu item with hotkey character underlined.
 		local
 			i, pos_x, remaining: INTEGER
@@ -506,7 +506,7 @@ feature {NONE} -- Implementation
 			l_disp: STRING_32
 			l_hotkey_merged: TUI_STYLE
 		do
-			disp := item.display_text
+			l_disp := l_item.display_text
 			pos_x := start_x
 
 			-- Leading space
@@ -514,13 +514,13 @@ feature {NONE} -- Implementation
 			pos_x := pos_x + 1
 
 			-- Render display text with hotkey underlining
-			from i := 1 until i > disp.count loop
-				c := disp.item (i)
-				if i = item.shortcut_position then
+			from i := 1 until i > l_disp.count loop
+				c := l_disp.item (i)
+				if i = l_item.shortcut_position then
 					-- This is the hotkey character - underline it
-					hotkey_merged := base_style.twin_style
-					hotkey_merged.set_underline (True)
-					a_buffer.put_char (pos_x, start_y, c, hotkey_merged)
+					l_hotkey_merged := base_style.twin_style
+					l_hotkey_merged.set_underline (True)
+					a_buffer.put_char (pos_x, start_y, c, l_hotkey_merged)
 				else
 					a_buffer.put_char (pos_x, start_y, c, base_style)
 				end
@@ -529,7 +529,7 @@ feature {NONE} -- Implementation
 			end
 
 			-- Pad remaining width with spaces
-			remaining := w - disp.count - 1  -- -1 for leading space
+			remaining := w - l_disp.count - 1  -- -1 for leading space
 			from i := 1 until i > remaining loop
 				a_buffer.put_char (pos_x, start_y, ' ', base_style)
 				pos_x := pos_x + 1
@@ -547,12 +547,12 @@ feature {NONE} -- Implementation
 		do
 			-- Ignore null character (from key release events)
 			if a_c /= '%U' then
-				key_lower := a_c.as_lower
+				l_key_lower := a_c.as_lower
 				from i := 1 until i > items.count or Result loop
-					item := items.i_th (i)
-					if item.is_sensitive and item.shortcut_key /= '%U' and then item.shortcut_key = key_lower then
-						log_debug ("try_shortcut matched item: " + item.display_text.to_string_8)
-						item.execute
+					l_item := items.i_th (i)
+					if l_item.is_sensitive and l_item.shortcut_key /= '%U' and then l_item.shortcut_key = l_key_lower then
+						log_debug ("try_shortcut matched item: " + l_item.display_text.to_string_8)
+						l_item.execute
 						close
 						Result := True
 					end
