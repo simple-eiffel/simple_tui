@@ -180,9 +180,15 @@ feature -- Focus Management
 	focus_next
 			-- Move focus to next focusable widget.
 		do
+			collect_focusable_widgets
 			if not focusable_widgets.is_empty then
 				if attached focused_widget as al_fw then
 					al_fw.unfocus
+					-- Find current widget in refreshed list
+					focused_widget_index := focusable_widgets.index_of (al_fw, 1)
+					if focused_widget_index = 0 then
+						focused_widget_index := 0
+					end
 				end
 				focused_widget_index := ((focused_widget_index) \\ focusable_widgets.count) + 1
 				focused_widget := focusable_widgets.i_th (focused_widget_index)
@@ -195,9 +201,15 @@ feature -- Focus Management
 	focus_previous
 			-- Move focus to previous focusable widget.
 		do
+			collect_focusable_widgets
 			if not focusable_widgets.is_empty then
 				if attached focused_widget as al_fw then
 					al_fw.unfocus
+					-- Find current widget in refreshed list
+					focused_widget_index := focusable_widgets.index_of (al_fw, 1)
+					if focused_widget_index = 0 then
+						focused_widget_index := 1
+					end
 				end
 				focused_widget_index := focused_widget_index - 1
 				if focused_widget_index < 1 then
@@ -262,7 +274,7 @@ feature -- Lifecycle
 				else
 					al_r.set_bounds (1, 1, al_b.width, al_b.height)
 				end
-				r.layout
+				al_r.layout
 			end
 
 			-- Focus first widget
@@ -442,8 +454,8 @@ feature {NONE} -- Event Loop
 
 			-- Modal widget captures all input when visible
 			if not Result and attached modal_widget as al_mw then
-				if mw.is_visible then
-					Result := mw.handle_key (a_event)
+				if al_mw.is_visible then
+					Result := al_mw.handle_key (a_event)
 					-- Modal consumes all key events
 					Result := True
 				end
@@ -457,14 +469,14 @@ feature {NONE} -- Event Loop
 
 				-- Let menu bar handle if open
 				if not Result and attached menu_bar as al_mb then
-					if mb.is_menu_open then
-						Result := mb.handle_key (a_event)
+					if al_mb.is_menu_open then
+						Result := al_mb.handle_key (a_event)
 					end
 				end
 
 				-- Check Alt+key for menu shortcuts
 				if not Result and a_event.has_alt and attached menu_bar as al_mb then
-					Result := mb.handle_key (a_event)
+					Result := al_mb.handle_key (a_event)
 				end
 
 				-- Check Alt+key for button/widget hotkeys (global activation)
@@ -474,7 +486,7 @@ feature {NONE} -- Event Loop
 
 				-- Dispatch to focused widget FIRST (widgets may handle Tab internally)
 				if not Result and attached focused_widget as al_fw then
-					Result := fw.handle_key (a_event)
+					Result := al_fw.handle_key (a_event)
 				end
 
 				-- Check for Tab (focus cycling) only if widget didn't handle it
@@ -513,15 +525,15 @@ feature {NONE} -- Event Loop
 
 				-- Find widget under mouse
 				if not Result and attached root as al_r then
-					l_target := r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
+					l_target := al_r.find_widget_at (a_event.mouse_x, a_event.mouse_y)
 					if attached l_target as al_t then
 						-- Focus clicked widget if focusable
 						if a_event.is_mouse_press and a_event.mouse_button = 1 then
-							if al_t.is_focusable and t /= focused_widget then
-								set_focus (t)
+							if al_t.is_focusable and al_t /= focused_widget then
+								set_focus (al_t)
 							end
 						end
-						Result := t.handle_mouse (a_event)
+						Result := al_t.handle_mouse (a_event)
 					end
 				end
 			end
@@ -535,8 +547,8 @@ feature {NONE} -- Event Loop
 
 				-- Resize root widget
 				if attached root as al_r then
-					r.set_size (a_event.resize_width, a_event.resize_height)
-					r.layout
+					al_r.set_size (a_event.resize_width, a_event.resize_height)
+					al_r.layout
 				end
 
 				-- Notify handler
@@ -559,7 +571,7 @@ feature {NONE} -- Event Loop
 
 				-- Render menu bar
 				if attached menu_bar as al_mb then
-					mb.render (buf)
+					al_mb.render (buf)
 				end
 
 				-- Render widget tree
@@ -570,7 +582,7 @@ feature {NONE} -- Event Loop
 				end
 
 				-- Render open menu dropdown LAST (on top of everything)
-				if attached menu_bar as al_mb and then mb.is_menu_open then
+				if attached menu_bar as al_mb and then al_mb.is_menu_open then
 					if attached al_mb.current_menu as al_dropdown then
 						al_dropdown.render (buf)
 					end
@@ -589,7 +601,7 @@ feature {NONE} -- Event Loop
 				-- Write changes to terminal
 				from i := 1 until i > l_changed.count loop
 					l_tuple := l_changed.i_th (i)
-					b.write_cell (l_tuple.x, l_tuple.y, l_tuple.cell)
+					al_b.write_cell (l_tuple.x, l_tuple.y, l_tuple.cell)
 					i := i + 1
 				end
 
@@ -597,7 +609,7 @@ feature {NONE} -- Event Loop
 				buf.sync
 
 				-- Flush output
-				b.flush
+				al_b.flush
 			end
 		end
 
@@ -646,7 +658,7 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 		do
 			l_key_lower := a_event.char.as_lower
 			if attached root as al_r then
-				Result := try_hotkey_in_widget (r, l_key_lower)
+				Result := try_hotkey_in_widget (al_r, l_key_lower)
 			end
 		end
 
@@ -677,21 +689,26 @@ feature {NONE} -- Keyboard Shortcuts Implementation
 		do
 			focusable_widgets.wipe_out
 			if attached root as al_r then
-				collect_from_widget (r)
+				collect_from_widget (al_r)
 			end
 		end
 
 	collect_from_widget (a_widget: TUI_WIDGET)
 			-- Recursively collect focusable widgets.
+			-- Skips hidden widgets and their entire subtree.
 		local
 			i: INTEGER
 		do
-			if a_widget.is_focusable then
-				focusable_widgets.extend (a_widget)
-			end
-			from i := 1 until i > a_widget.children.count loop
-				collect_from_widget (a_widget.children.i_th (i))
-				i := i + 1
+			if not a_widget.is_visible then
+				-- Skip hidden widgets and all their children
+			else
+				if a_widget.is_focusable then
+					focusable_widgets.extend (a_widget)
+				end
+				from i := 1 until i > a_widget.children.count loop
+					collect_from_widget (a_widget.children.i_th (i))
+					i := i + 1
+				end
 			end
 		end
 

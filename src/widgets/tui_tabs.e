@@ -321,7 +321,7 @@ feature -- Event Handling
 
 	handle_key (a_event: TUI_EVENT): BOOLEAN
 			-- Handle key event.
-			-- Tab cycles through tabs, then escapes to next widget.
+			-- Left/Right switches tabs. Tab passes through for focus cycling.
 		do
 			if is_focused then
 				if a_event.is_left then
@@ -330,21 +330,8 @@ feature -- Event Handling
 				elseif a_event.is_right then
 					select_next_tab
 					Result := True
-				elseif a_event.is_tab and a_event.has_shift then
-					-- Shift+Tab: only consume if not on first tab
-					if selected_tab > 1 then
-						select_previous_tab
-						Result := True
-					end
-					-- else: let Tab escape to previous widget
-				elseif a_event.is_tab then
-					-- Tab: only consume if not on last tab
-					if selected_tab < tabs.count then
-						select_next_tab
-						Result := True
-					end
-					-- else: let Tab escape to next widget
 				end
+				-- Tab/Shift+Tab: NOT consumed — let app cycle focus into tab content
 			end
 		end
 

@@ -306,7 +306,7 @@ feature -- Rendering
 			-- Build display: [Selected Item   v]
 			create l_display.make (width)
 			if attached selected_text as al_sel then
-				l_display.append (sel)
+				l_display.append (al_sel)
 			else
 				l_display.append ("-")
 			end
