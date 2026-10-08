@@ -2,7 +2,7 @@ note
 	description: "[
 		TUI_BUFFER - Double-buffered terminal screen
 
-		Maintains two l_cell grids:
+		Maintains two cell grids:
 		- Current buffer: what's currently on screen
 		- Next buffer: what we're drawing to
 

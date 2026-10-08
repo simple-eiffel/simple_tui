@@ -1,6 +1,6 @@
 note
 	description: "[
-		TASK_AI_ROUTER - AI Router for Task Manager with RAG l_pattern.
+		TASK_AI_ROUTER - AI Router for Task Manager with RAG pattern.
 
 		Provides AI-enhanced features with graceful degradation:
 		- Parse natural language into tasks
@@ -9,7 +9,7 @@ note
 		- Resolve blocked tasks
 		- All features work without AI (manual fallback)
 
-		Based on 4-phase RAG l_pattern from simple_kb:
+		Based on 4-phase RAG pattern from simple_kb:
 		Phase 1: Extract keywords/intent from query
 		Phase 2: Search for similar past tasks
 		Phase 3: If found, synthesize from context

@@ -3,7 +3,7 @@ note
 		TUI_LABEL - Static text display widget
 
 		Features:
-		- Single or multi-l_line text
+		- Single or multi-line text
 		- Text alignment (left, center, right)
 		- Word wrapping (optional)
 	]"

@@ -8,7 +8,7 @@ note
 		- ReadConsoleInput
 		- GetConsoleScreenBufferInfo
 
-		Also supports ANSI escape l_codes via ENABLE_VIRTUAL_TERMINAL_PROCESSING
+		Also supports ANSI escape codes via ENABLE_VIRTUAL_TERMINAL_PROCESSING
 		(Windows 10+).
 	]"
 	author: "Larry Rix"

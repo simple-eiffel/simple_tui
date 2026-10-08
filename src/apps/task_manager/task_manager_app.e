@@ -3,12 +3,12 @@ note
 		TASK_MANAGER_APP - TUI Task Manager with full task management features.
 
 		Features:
-		- Create tasks with l_title, description, l_priority, l_due date, l_context
+		- Create tasks with title, description, priority, due date, context
 		- Edit existing tasks
 		- Subtask support (parent/child relationships)
-		- Multiple view filters (all, pending, completed, by l_context)
+		- Multiple view filters (all, pending, completed, by context)
 		- Status workflow (pending, in_progress, waiting, completed, archived)
-		- AI assistance (optional) for task parsing, subtask suggestions, block l_resolution
+		- AI assistance (optional) for task parsing, subtask suggestions, block resolution
 	]"
 	author: "Larry Rix"
 	date: "$Date$"

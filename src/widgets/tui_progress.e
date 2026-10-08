@@ -3,7 +3,7 @@ note
 		TUI_PROGRESS - Progress bar widget
 
 		Features:
-		- Value l_range (min/max)
+		- Value range (min/max)
 		- Multiple display styles (bar, blocks, percentage)
 		- Indeterminate mode (spinner)
 		- Custom fill characters

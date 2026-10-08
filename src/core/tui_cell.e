@@ -3,7 +3,7 @@ note
 		TUI_CELL - Single terminal cell
 
 		Represents one character position in the terminal with:
-		- A character (Unicode l_code point)
+		- A character (Unicode code point)
 		- A style (foreground, background, attributes)
 		- Width hint for wide characters (CJK, emoji)
 	]"

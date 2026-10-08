@@ -2,9 +2,9 @@ note
 	description: "[
 		TASK_AI_CONFIG - AI provider configuration for Task Manager.
 
-		Manages AI provider selection and API l_keys:
+		Manages AI provider selection and API keys:
 		- Supports Claude, Grok, Ollama, and no-AI mode
-		- Persists configuration to JSON l_file
+		- Persists configuration to JSON file
 		- Provides is_ready check for graceful degradation
 
 		The app works fully without AI - this is optional enhancement.
