@@ -85,7 +85,7 @@ feature -- Parse Natural Language
 						Result := parse_task_response (l_response.text)
 					else
 						if attached l_response.error_message as al_e then
-							last_error := e
+							last_error := al_e
 						end
 					end
 				else
@@ -145,13 +145,13 @@ feature -- Subtask Suggestions
 					-- Build similar task context
 					create l_similar_titles.make (5)
 					if attached a_similar as al_similar then
-						across similar as l_s loop
-							l_similar_titles.extend (l_s.title)
+						across al_similar as ic_s loop
+							l_similar_titles.extend (ic_s.title)
 						end
 					end
 					-- Get description or empty string
 					if attached a_task.description as al_d then
-						l_desc := d
+						l_desc := al_d
 					else
 						l_desc := ""
 					end
@@ -163,7 +163,7 @@ feature -- Subtask Suggestions
 						Result := parse_subtasks_response (l_response.text, a_task.id)
 					else
 						if attached l_response.error_message as al_e then
-							last_error := e
+							last_error := al_e
 						end
 					end
 				end
@@ -204,7 +204,7 @@ feature -- Block Resolution
 						Result := parse_block_resolution (l_response.text, a_all_tasks)
 					else
 						if attached l_response.error_message as al_e then
-							last_error := e
+							last_error := al_e
 						end
 					end
 				end
@@ -259,7 +259,7 @@ feature -- Task Splitting
 				l_client := create_ai_client
 				if attached l_client as al_client then
 					if attached a_task.description as al_d then
-						l_desc := d
+						l_desc := al_d
 					else
 						l_desc := ""
 					end
@@ -271,7 +271,7 @@ feature -- Task Splitting
 						Result := parse_subtasks_response (l_response.text, a_task.id)
 					else
 						if attached l_response.error_message as al_e then
-							last_error := e
+							last_error := al_e
 						end
 					end
 				end
@@ -287,16 +287,16 @@ feature {NONE} -- AI Client Creation
 		do
 			if ai_config.active_provider.same_string ("claude") then
 				if attached ai_config.provider_api_key ("claude") as al_k then
-					create {CLAUDE_CLIENT} Result.make_with_api_key (k)
+					create {CLAUDE_CLIENT} Result.make_with_api_key (al_k)
 				end
 			elseif ai_config.active_provider.same_string ("grok") then
 				if attached ai_config.provider_api_key ("grok") as al_k then
-					create {GROK_CLIENT} Result.make_with_api_key (k)
+					create {GROK_CLIENT} Result.make_with_api_key (al_k)
 				end
 			elseif ai_config.active_provider.same_string ("ollama") then
 				create {OLLAMA_CLIENT} Result.make
-				if attached ai_config.current_model as m and then attached {OLLAMA_CLIENT} Result as al_oc then
-					al_oc.set_model (m.to_string_32)
+				if attached ai_config.current_model as al_m and then attached {OLLAMA_CLIENT} Result as al_oc then
+					al_oc.set_model (al_m.to_string_32)
 				end
 			end
 		end
@@ -314,8 +314,8 @@ feature {NONE} -- Response Parsing
 			l_title := ""
 			l_priority := 3
 			l_lines := a_response.split ('%N')
-			across l_lines as l_line loop
-				l_line := l_line.twin
+			across l_lines as ic_line loop
+				l_line := ic_line.twin
 				l_line.left_adjust
 				if l_line.as_upper.starts_with ("TITLE:") then
 					l_title := l_line.substring (7, l_line.count)
@@ -348,8 +348,8 @@ feature {NONE} -- Response Parsing
 		do
 			create Result.make (5)
 			l_lines := a_response.split ('%N')
-			across l_lines as l_line loop
-				l_line := l_line.twin
+			across l_lines as ic_line loop
+				l_line := ic_line.twin
 				l_line.left_adjust
 				-- Match numbered items: "1. Do something" or "1) Do something"
 				if l_line.count > 2 then
@@ -382,8 +382,8 @@ feature {NONE} -- Response Parsing
 		do
 			create Result.make
 			l_lines := a_response.split ('%N')
-			across l_lines as l_line loop
-				l_line := l_line.twin
+			across l_lines as ic_line loop
+				l_line := ic_line.twin
 				l_line.left_adjust
 				if l_line.as_upper.starts_with ("WORK_ON:") then
 					Result.set_recommendation ("work_around")

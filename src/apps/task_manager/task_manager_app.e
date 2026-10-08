@@ -35,10 +35,10 @@ feature {NONE} -- Initialization
 
 feature {NONE} -- Database
 
-	l_db: detachable SIMPLE_SQL_DATABASE
+	db: detachable SIMPLE_SQL_DATABASE
 			-- Database connection.
 
-	l_repo: detachable TODO_REPOSITORY
+	repo: detachable TODO_REPOSITORY
 			-- Task repository.
 
 	initialize_database
@@ -48,19 +48,19 @@ feature {NONE} -- Database
 			l_repo: TODO_REPOSITORY
 		do
 			create l_db.make ("tasks.db")
-			l_db := l_db
+			db := l_db
 
 			create l_repo.make (l_db)
 			l_repo.create_table
 			-- Migrate schema for existing databases
 			l_repo.migrate_schema
-			l_repo := l_repo
+			repo := l_repo
 		end
 
 	cleanup
 			-- Close database.
 		do
-			if attached l_db as al_d then
+			if attached db as al_d then
 				al_d.close
 			end
 		end
@@ -192,7 +192,7 @@ feature {NONE} -- Data Loading
 			l_display_text: STRING_32
 			l_status_char: STRING_32
 		do
-			if attached l_repo as r and attached tui.list_named ("task_list") as al_task_list then
+			if attached repo as r and attached tui.list_named ("task_list") as al_task_list then
 				al_task_list.clear_items
 
 				-- Get items based on filter
@@ -252,11 +252,11 @@ feature {NONE} -- Data Loading
 					-- Due date
 					if attached ic.due_date as al_dd then
 						l_display_text.append (" [")
-						l_display_text.append_string_general (dd)
+						l_display_text.append_string_general (al_dd)
 						l_display_text.append ("]")
 					end
 
-					task_list.add_item (l_display_text)
+					al_task_list.add_item (l_display_text)
 				end
 
 				-- Update count label
@@ -298,7 +298,7 @@ feature {NONE} -- Data Loading
 				when 5 then l_text := "Context: Home"
 				else l_text := "All Tasks"
 				end
-				lbl.set_text (l_text)
+				al_lbl.set_text (l_text)
 			end
 		end
 
@@ -318,7 +318,7 @@ feature {NONE} -- Menu Handlers
 				al_dlg.set_field_value ("context", "")
 				al_dlg.set_field_value ("energy", "2 - Medium")
 				al_dlg.show_centered (tui.screen_width, tui.screen_height)
-				tui.set_modal (l_dlg)
+				tui.set_modal (al_dlg)
 			end
 		end
 
@@ -328,26 +328,26 @@ feature {NONE} -- Menu Handlers
 			l_item: TODO_ITEM
 		do
 			if attached get_selected_task as al_sel_item then
-				l_item := sel_item
+				l_item := al_sel_item
 				editing_task_id := l_item.id
 				if attached task_dialog as al_dlg then
-					l_dlg.set_title ("Edit Task")
-					l_dlg.set_field_value ("title", l_item.title)
+					al_dlg.set_title ("Edit Task")
+					al_dlg.set_field_value ("title", l_item.title)
 					if attached l_item.description as al_desc then
-						l_dlg.set_field_value ("description", l_desc)
+						al_dlg.set_field_value ("description", al_desc)
 					else
-						l_dlg.set_field_value ("description", "")
+						al_dlg.set_field_value ("description", "")
 					end
-					l_dlg.set_field_value ("priority", priority_to_display (l_item.priority))
+					al_dlg.set_field_value ("priority", priority_to_display (l_item.priority))
 					if attached l_item.due_date as al_dd then
-						l_dlg.set_field_value ("due_date", dd)
+						al_dlg.set_field_value ("due_date", al_dd)
 					else
-						l_dlg.set_field_value ("due_date", "")
+						al_dlg.set_field_value ("due_date", "")
 					end
-					l_dlg.set_field_value ("context", l_item.context)
-					l_dlg.set_field_value ("energy", energy_to_display (l_item.energy_level))
-					l_dlg.show_centered (tui.screen_width, tui.screen_height)
-					tui.set_modal (l_dlg)
+					al_dlg.set_field_value ("context", l_item.context)
+					al_dlg.set_field_value ("energy", energy_to_display (l_item.energy_level))
+					al_dlg.show_centered (tui.screen_width, tui.screen_height)
+					tui.set_modal (al_dlg)
 				end
 			end
 		end
@@ -357,7 +357,7 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as l_item and attached l_repo as al_r then
+			if attached get_selected_task as l_item and attached repo as al_r then
 				l_ok := al_r.set_status (l_item.id, "in_progress")
 				load_tasks
 			end
@@ -368,7 +368,7 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as l_item and attached l_repo as al_r then
+			if attached get_selected_task as l_item and attached repo as al_r then
 				l_ok := al_r.set_status (l_item.id, "completed")
 				load_tasks
 			end
@@ -379,7 +379,7 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as l_item and attached l_repo as al_r then
+			if attached get_selected_task as l_item and attached repo as al_r then
 				if l_item.is_completed then
 					l_ok := al_r.set_status (l_item.id, "pending")
 				else
@@ -394,7 +394,7 @@ feature {NONE} -- Menu Handlers
 		local
 			l_ok: BOOLEAN
 		do
-			if attached get_selected_task as l_item and attached l_repo as al_r then
+			if attached get_selected_task as l_item and attached repo as al_r then
 				l_ok := al_r.delete (l_item.id)
 				load_tasks
 			end
@@ -405,7 +405,7 @@ feature {NONE} -- Menu Handlers
 		local
 			l_count: INTEGER
 		do
-			if attached l_repo as al_r then
+			if attached repo as al_r then
 				l_count := al_r.delete_completed
 				load_tasks
 			end
@@ -519,16 +519,16 @@ feature {NONE} -- AI Handlers
 			if not l_text.is_empty then
 				if attached ai_router as al_router then
 					l_item := al_router.parse_task (l_text)
-					if attached l_item as l_item and attached l_repo as al_r then
-						l_id := r.insert (l_item)
+					if attached l_item as al_item and attached repo as al_r then
+						l_id := al_r.insert (al_item)
 						load_tasks
 						if al_router.is_ai_available then
-							tui.show_message ("AI Task Created", "Created: " + l_item.title)
+							tui.show_message ("AI Task Created", "Created: " + al_item.title)
 						else
-							tui.show_message ("Task Created", "Created (no AI): " + l_item.title + "%N%N(AI not configured - used keyword parsing)")
+							tui.show_message ("Task Created", "Created (no AI): " + al_item.title + "%N%N(AI not configured - used keyword parsing)")
 						end
-					elseif router.has_error then
-						tui.show_message ("AI Error", router.last_error.to_string_8)
+					elseif al_router.has_error then
+						tui.show_message ("AI Error", al_router.last_error.to_string_8)
 					end
 				end
 			end
@@ -543,9 +543,9 @@ feature {NONE} -- AI Handlers
 		do
 			if attached get_selected_task as al_item then
 				if attached ai_router as al_router then
-					l_subtasks := router.suggest_subtasks (l_item, Void)
+					l_subtasks := al_router.suggest_subtasks (al_item, Void)
 					if l_subtasks.is_empty then
-						if router.is_ai_available then
+						if al_router.is_ai_available then
 							tui.show_message ("No Suggestions", "AI couldn't suggest subtasks for this task.")
 						else
 							tui.show_message ("AI Not Available", "Configure an AI provider to get subtask suggestions.%N%N(Menu: AI > AI Status)")
@@ -560,7 +560,7 @@ feature {NONE} -- AI Handlers
 							l_msg.append ("%N")
 						end
 						l_msg.append ("%NCreate these subtasks?")
-						tui.show_confirm ("Subtask Suggestions", l_msg, agent on_confirm_subtasks (?, l_subtasks, l_item.id))
+						tui.show_confirm ("Subtask Suggestions", l_msg, agent on_confirm_subtasks (?, l_subtasks, al_item.id))
 					end
 				end
 			else
@@ -573,10 +573,10 @@ feature {NONE} -- AI Handlers
 		local
 			l_id: INTEGER_64
 		do
-			if a_confirmed and attached l_repo as al_r then
+			if a_confirmed and attached repo as al_r then
 				across a_subtasks as s loop
 					s.set_parent_id (a_parent_id)
-					l_id := r.insert (s)
+					l_id := al_r.insert (s)
 				end
 				load_tasks
 				tui.show_message ("Created", "Created " + a_subtasks.count.out + " subtasks.")
@@ -591,14 +591,14 @@ feature {NONE} -- AI Handlers
 		do
 			if attached get_selected_task as al_item then
 				if al_item.is_waiting then
-					if attached ai_router as router and attached l_repo as al_r then
+					if attached ai_router as router and attached repo as al_r then
 						-- Find potential blockers (tasks in progress or pending)
-						l_blockers := r.find_in_progress
+						l_blockers := al_r.find_in_progress
 						if l_blockers.is_empty then
-							l_blockers := r.find_by_status ("pending")
+							l_blockers := al_r.find_by_status ("pending")
 						end
 
-						l_resolution := router.resolve_block (l_item, l_blockers, r.find_all)
+						l_resolution := router.resolve_block (al_item, l_blockers, al_r.find_all)
 						if attached l_resolution as al_res then
 							tui.show_message ("AI Block Resolution", al_res.full_description)
 						else
@@ -628,7 +628,7 @@ feature {NONE} -- AI Handlers
 				l_msg.append ("%N")
 				if attached ai_config.current_model as al_m then
 					l_msg.append ("Model: ")
-					l_msg.append_string_general (m)
+					l_msg.append_string_general (al_m)
 					l_msg.append ("%N")
 				end
 			else
@@ -676,7 +676,7 @@ feature {NONE} -- Dialog Handlers
 				l_desc := ""
 			end
 			if attached a_values.item ("priority") as al_v then
-				l_priority := extract_number (v, 3)
+				l_priority := extract_number (al_v, 3)
 			else
 				l_priority := 3
 			end
@@ -691,30 +691,30 @@ feature {NONE} -- Dialog Handlers
 				l_context := ""
 			end
 			if attached a_values.item ("energy") as al_v then
-				l_energy := extract_number (v, 2)
+				l_energy := extract_number (al_v, 2)
 			else
 				l_energy := 2
 			end
 
-			if attached l_repo as al_r then
+			if attached repo as al_r then
 				if editing_task_id > 0 then
 					-- Update existing task
 					if attached al_r.find_by_id (editing_task_id) as al_existing then
-						existing.set_title (l_title)
+						al_existing.set_title (l_title)
 						if l_desc.is_empty then
-							existing.set_description (Void)
+							al_existing.set_description (Void)
 						else
-							existing.set_description (l_desc)
+							al_existing.set_description (l_desc)
 						end
-						existing.set_priority (l_priority)
+						al_existing.set_priority (l_priority)
 						if l_due.is_empty then
-							existing.set_due_date (Void)
+							al_existing.set_due_date (Void)
 						else
-							existing.set_due_date (l_due)
+							al_existing.set_due_date (l_due)
 						end
-						existing.set_context (l_context)
-						existing.set_energy_level (l_energy)
-						l_ok := r.update (existing)
+						al_existing.set_context (l_context)
+						al_existing.set_energy_level (l_energy)
+						l_ok := al_r.update (al_existing)
 					end
 				else
 					-- Create new task
@@ -727,7 +727,7 @@ feature {NONE} -- Dialog Handlers
 					end
 					l_new_item.set_context (l_context)
 					l_new_item.set_energy_level (l_energy)
-					l_id := r.insert (l_new_item)
+					l_id := al_r.insert (l_new_item)
 				end
 				load_tasks
 			end
@@ -746,8 +746,8 @@ feature {NONE} -- Helpers
 		do
 			if attached tui.list_named ("task_list") as al_task_list then
 				if attached current_items as al_items then
-					if al_task_list.selected_index > 0 and al_task_list.selected_index <= l_items.count then
-						Result := l_items.i_th (al_task_list.selected_index)
+					if al_task_list.selected_index > 0 and al_task_list.selected_index <= al_items.count then
+						Result := al_items.i_th (al_task_list.selected_index)
 					end
 				end
 			end

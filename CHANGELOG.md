@@ -2,6 +2,14 @@
 
 simple_tui had no changelog or recorded version before this file; this entry is a patch-level change.
 
+## 2026-10-08 (patch, target-compile)
+
+### Fixed
+- `simple_tui` and `task_manager` targets compile again (45 and 77 errors). Damage from the February naming rename:
+  usages left un-renamed after `attached ... as al_x` (`task_ai_*`, `task_manager_app`), features `menu`/`item` wrongly
+  renamed `l_menu`/`l_item` in `TUI_QUICK`, `width` -> `l_width` and `line` -> `l_line` mismatches and a tuple label
+  `options` -> `l_options` in `TUI_INPUT_DIALOG`, features `db`/`repo` renamed `l_db`/`l_repo` in `TASK_MANAGER_APP`.
+
 ## 2026-10-08 (patch)
 
 ### Fixed

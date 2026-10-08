@@ -102,7 +102,7 @@ feature -- Status
 				Result.append_string_general (active_provider)
 				if attached current_model as al_m then
 					Result.append (" (")
-					Result.append_string_general (m)
+					Result.append_string_general (al_m)
 					Result.append (")")
 				end
 			end
@@ -235,7 +235,7 @@ feature -- Persistence
 		do
 			if attached config_path as al_p then
 				l_json := to_json
-				create l_file.make_create_read_write (p)
+				create l_file.make_create_read_write (al_p)
 				l_file.put_string (l_json)
 				l_file.close
 			end
@@ -248,7 +248,7 @@ feature -- Persistence
 			l_content: STRING_8
 		do
 			if attached config_path as al_p then
-				create l_file.make_with_name (p)
+				create l_file.make_with_name (al_p)
 				if l_file.exists and then l_file.is_readable then
 					l_file.open_read
 					l_file.read_stream (l_file.count)
@@ -314,25 +314,25 @@ feature -- JSON Serialization
 			create l_parser.make_with_string (a_json)
 			l_parser.parse_content
 			if l_parser.is_valid and then attached {JSON_OBJECT} l_parser.parsed_json_object as al_jo then
-				l_obj := jo
+				l_obj := al_jo
 				if attached {JSON_STRING} l_obj.item ("provider") as al_p then
 					if is_valid_provider (al_p.item) then
 						active_provider := al_p.item
 					end
 				end
 				if attached {JSON_OBJECT} l_obj.item ("api_keys") as al_keys then
-					l_keys := l_keys
-					across l_keys as k loop
+					l_keys := al_keys
+					across al_keys as k loop
 						if attached {JSON_STRING} k as al_v then
-							api_keys.force (v.item, @k.key.item)
+							api_keys.force (al_v.item, @k.key.item)
 						end
 					end
 				end
 				if attached {JSON_OBJECT} l_obj.item ("models") as al_mods then
-					l_mods := l_mods
-					across l_mods as m loop
+					l_mods := al_mods
+					across al_mods as m loop
 						if attached {JSON_STRING} m as al_v then
-							models.force (v.item, @m.key.item)
+							models.force (al_v.item, @m.key.item)
 						end
 					end
 				end

@@ -97,7 +97,7 @@ feature -- Widget Access
 			-- Get text field by name.
 		do
 			if attached {TUI_TEXT_FIELD} widget (a_name) as al_tf then
-				Result := l_tf
+				Result := al_tf
 			end
 		end
 
@@ -105,7 +105,7 @@ feature -- Widget Access
 			-- Get list by name.
 		do
 			if attached {TUI_LIST} widget (a_name) as al_l then
-				Result := l_l
+				Result := al_l
 			end
 		end
 
@@ -139,7 +139,7 @@ feature -- Application
 
 feature -- Menu Building
 
-	l_menu (a_title: READABLE_STRING_GENERAL): TUI_QUICK
+	menu (a_title: READABLE_STRING_GENERAL): TUI_QUICK
 			-- Add a menu to the menu bar.
 		local
 			l_menu: TUI_MENU
@@ -152,7 +152,7 @@ feature -- Menu Building
 			result_is_current: Result = Current
 		end
 
-	l_item (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): TUI_QUICK
+	item (a_label: READABLE_STRING_GENERAL; a_action: PROCEDURE): TUI_QUICK
 			-- Add item to current menu.
 		local
 			l_item: TUI_MENU_ITEM
@@ -220,10 +220,10 @@ feature -- Layout Building
 				container_stack.remove
 				container_stack.finish
 				if attached {TUI_VBOX} container_stack.item as al_v then
-					current_vbox := v
+					current_vbox := al_v
 					current_hbox := Void
 				elseif attached {TUI_HBOX} container_stack.item as al_h then
-					current_hbox := h
+					current_hbox := al_h
 					current_vbox := Void
 				end
 			end
@@ -354,7 +354,7 @@ feature -- Naming
 			-- Name the last created widget for later retrieval.
 		do
 			if attached last_widget as al_w then
-				named_widgets.force (w, a_name.to_string_32)
+				named_widgets.force (al_w, a_name.to_string_32)
 			end
 			Result := Current
 		ensure
