@@ -31,3 +31,8 @@ tui_demo.log
 exception_trace.log
 *.epr
 *.log
+
+
+# Local leftovers
+fix_tui_final.py
+tui_violations.txt
