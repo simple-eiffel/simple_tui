@@ -8,7 +8,7 @@ note
 		- Input event polling
 		- Output rendering
 
-		Implementations: TUI_BACKEND_WINDOWS (Win32), TUI_BACKEND_ANSI (Unix)
+		Implementations: TUI_BACKEND_WINDOWS (Win32), TUI_BACKEND_POSIX (macOS, Linux)
 	]"
 	author: "Larry Rix"
 	date: "$Date$"

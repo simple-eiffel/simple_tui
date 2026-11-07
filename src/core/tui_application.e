@@ -255,7 +255,7 @@ feature -- Lifecycle
 	initialize
 			-- Initialize terminal and prepare for running.
 		do
-			create {TUI_BACKEND_WINDOWS} backend.make
+			create {TUI_PLATFORM_BACKEND} backend.make
 			if attached backend as al_b then
 				al_b.initialize
 				create buffer.make (al_b.width, al_b.height)
