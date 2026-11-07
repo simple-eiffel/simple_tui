@@ -16,10 +16,21 @@
 		<library name="time" location="$ISE_LIBRARY/library/time/time.ecf"/>
 		<library name="simple_console" location="$SIMPLE_EIFFEL/simple_console/simple_console.ecf"/>
 		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
+		<external_include location="$(SIMPLE_EIFFEL)/simple_tui/Clib"/>
 		<cluster name="src" location=".\src\" recursive="true">
 			<file_rule>
 				<exclude>/apps$</exclude>
 			</file_rule>
+		</cluster>
+		<cluster name="platform_windows" location=".\platform\windows">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</cluster>
+		<cluster name="platform_posix" location=".\platform\posix">
+			<condition>
+				<platform excluded_value="windows"/>
+			</condition>
 		</cluster>
 	</target>
 	<target name="simple_tui_tests" extends="simple_tui">
@@ -52,7 +63,18 @@
 		<library name="simple_logger" location="$SIMPLE_EIFFEL/simple_logger/simple_logger.ecf"/>
 		<library name="simple_ai_client" location="$SIMPLE_EIFFEL/simple_ai_client/simple_ai_client.ecf"/>
 		<library name="json" location="$ISE_LIBRARY/contrib/library/text/parser/json/library/json.ecf"/>
+		<external_include location="$(SIMPLE_EIFFEL)/simple_tui/Clib"/>
 		<cluster name="src" location=".\src\" recursive="true"/>
+		<cluster name="platform_windows" location=".\platform\windows">
+			<condition>
+				<platform value="windows"/>
+			</condition>
+		</cluster>
+		<cluster name="platform_posix" location=".\platform\posix">
+			<condition>
+				<platform excluded_value="windows"/>
+			</condition>
+		</cluster>
 		<cluster name="todo_app_classes" location="$SIMPLE_EIFFEL/simple_sql/src/todo_app/" recursive="true"/>
 	</target>
 </system>

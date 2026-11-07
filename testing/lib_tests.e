@@ -992,13 +992,13 @@ feature -- Test Cases: TUI_EVENT
 			assert_integers_equal ("resize_h", 40, l_event.resize_height)
 		end
 
-feature -- Test Cases: TUI_BACKEND_WINDOWS
+feature -- Test Cases: TUI_PLATFORM_BACKEND
 
 	test_backend_output_buffer_type
 			-- Test that output buffer is STRING_8 (not STRING_32).
 			-- Bug: Using strlen() on STRING_32 gave wrong length.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- The buffer must be STRING_8 for WriteConsoleA to work
@@ -1009,7 +1009,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 	test_backend_utf8_encoding_ascii
 			-- Test UTF-8 encoding of ASCII characters.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			l_backend.test_append_char32 ('A')
@@ -1020,7 +1020,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 	test_backend_utf8_encoding_2byte
 			-- Test UTF-8 encoding of 2-byte characters (U+0080 to U+07FF).
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- U+00E9 = é (Latin small letter e with acute)
@@ -1034,7 +1034,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 	test_backend_utf8_encoding_3byte
 			-- Test UTF-8 encoding of 3-byte characters (U+0800 to U+FFFF).
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- U+4E2D = 中 (CJK character)
@@ -1049,7 +1049,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 	test_backend_utf8_encoding_box_drawing
 			-- Test UTF-8 encoding of box drawing characters.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- U+2588 = █ (Full block, commonly used in TUI)
@@ -1064,7 +1064,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 	test_backend_escape_sequence
 			-- Test that ANSI escape sequences go to wide buffer.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			l_backend.set_cursor_position (5, 10)
@@ -1078,7 +1078,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 			-- These were showing as 'â' when using UTF-8 + WriteConsoleA.
 			-- Fix: Use STRING_32 + WriteConsoleW for proper Unicode output.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- U+2554 = ╔ (BOX DRAWINGS DOUBLE DOWN AND RIGHT) - used in demo title
@@ -1093,7 +1093,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 			-- Verify output buffer uses UTF-16 for proper Windows console support.
 			-- UTF-8 via WriteConsoleA was showing 'â' for box drawing chars.
 		local
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 		do
 			create l_backend.make
 			-- The output buffer must be STRING_32 (UTF-16 ready) for WriteConsoleW
@@ -1126,7 +1126,7 @@ feature -- Test Cases: TUI_BACKEND_WINDOWS
 		local
 			l_label: TUI_LABEL
 			l_buffer: TUI_BUFFER
-			l_backend: TUI_BACKEND_WINDOWS
+			l_backend: TUI_PLATFORM_BACKEND
 			l_cell: TUI_CELL
 			l_converter: UTF_CONVERTER
 			l_utf16: SPECIAL [NATURAL_16]

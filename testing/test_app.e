@@ -18,6 +18,7 @@ feature {NONE} -- Initialization
 			failed := 0
 
 			run_lib_tests
+			run_input_parser_tests
 
 			print ("%N========================%N")
 			print ("Results: " + passed.out + " passed, " + failed.out + " failed%N")
@@ -30,6 +31,23 @@ feature {NONE} -- Initialization
 		end
 
 feature {NONE} -- Test Runners
+
+	run_input_parser_tests
+			-- Terminal input bytes into events.
+		do
+			create parser_tests
+			run_test (agent parser_tests.test_arrow_and_home_keys, "test_arrow_and_home_keys")
+			run_test (agent parser_tests.test_function_and_edit_keys, "test_function_and_edit_keys")
+			run_test (agent parser_tests.test_modifiers, "test_modifiers")
+			run_test (agent parser_tests.test_control_characters, "test_control_characters")
+			run_test (agent parser_tests.test_utf_8_text, "test_utf_8_text")
+			run_test (agent parser_tests.test_alt_key, "test_alt_key")
+			run_test (agent parser_tests.test_mouse_press_and_release, "test_mouse_press_and_release")
+			run_test (agent parser_tests.test_lone_escape_waits_then_settles, "test_lone_escape_waits_then_settles")
+			run_test (agent parser_tests.test_sequence_split_across_reads, "test_sequence_split_across_reads")
+			run_test (agent parser_tests.test_two_events_in_one_read, "test_two_events_in_one_read")
+			run_test (agent parser_tests.test_malformed_bytes_are_dropped, "test_malformed_bytes_are_dropped")
+		end
 
 	run_lib_tests
 		do
@@ -153,6 +171,7 @@ feature {NONE} -- Test Runners
 feature {NONE} -- Implementation
 
 	lib_tests: LIB_TESTS
+	parser_tests: TEST_INPUT_PARSER
 
 	passed: INTEGER
 	failed: INTEGER
